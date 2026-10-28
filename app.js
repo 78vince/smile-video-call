@@ -228,9 +228,15 @@ class SmileVideoCallApp {
         displayName: "長輩平板"
       },
       configOverwrite: {
+        // 全面關閉「加入會議」預覽確認頁面，實現真正一鍵直通
+        prejoinConfig: {
+          enabled: false
+        },
+        prejoinPageEnabled: false,
+        enableInsecureRoomNameWarning: false,
+        requireDisplayName: false,
         startWithAudioMuted: false,   // 自動開啟麥克風
         startWithVideoMuted: false,   // 自動開啟鏡頭
-        prejoinPageEnabled: false,    // 跳過預覽畫面，真正一鍵加入！
         disableDeepLinking: true,     // 禁止跳轉提示下載 App，直接在網頁跑
         enableWelcomePage: false,
         enableClosePage: false,
