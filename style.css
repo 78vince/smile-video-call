@@ -534,6 +534,106 @@ body {
 }
 
 /* ============================================================
+   角色切換相關樣式
+   ============================================================ */
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-role-badge {
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  color: var(--primary-color);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-role-badge:active {
+  background: #dbeafe;
+  transform: scale(0.96);
+}
+
+.role-selection-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.role-select-btn {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.role-select-btn:active, .role-select-btn.active {
+  background: #eff6ff;
+  border-color: var(--primary-color);
+  transform: scale(0.98);
+}
+
+.role-icon {
+  font-size: 2.2rem;
+}
+
+.role-text strong {
+  display: block;
+  font-size: 1.2rem;
+  color: var(--text-main);
+}
+
+.role-text small {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.url-share-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.url-share-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+
+.url-share-item strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: var(--text-main);
+}
+
+.url-share-item code {
+  display: block;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--primary-color);
+  word-break: break-all;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+/* ============================================================
    響應式設計（橫向 vs 直向平板）
    ============================================================ */
 @media (max-width: 768px) {

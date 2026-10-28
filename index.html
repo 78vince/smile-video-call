@@ -21,7 +21,13 @@
     <!-- 頂部時間與問候列 -->
     <header class="app-header">
       <div class="header-left">
-        <h1 id="app-title" class="title">微笑視訊</h1>
+        <div class="title-row">
+          <h1 id="app-title" class="title">阿笑的視訊機</h1>
+          <!-- 角色切換標籤 -->
+          <button id="btn-switch-role" class="btn-role-badge" title="切換家庭身分">
+            身分：<span id="current-role-name">阿笑</span> ▾
+          </button>
+        </div>
         <p id="app-subtitle" class="subtitle">點一下照片，馬上視訊聊聊天！</p>
       </div>
       <div class="header-right">
@@ -41,14 +47,57 @@
     <footer class="app-footer">
       <div class="status-indicator">
         <span class="status-dot"></span>
-        <span id="connection-status">平板已連線，隨時可撥打</span>
+        <span id="connection-status">連線正常，隨時可撥打</span>
       </div>
-      <!-- 右下角隱藏設定按鈕（需長按或點擊開啟） -->
+      <!-- 右下角隱藏設定按鈕 -->
       <button id="btn-open-settings" class="btn-settings-gear" title="家屬設定" aria-label="設定">
         ⚙️
       </button>
     </footer>
   </main>
+
+  <!-- 角色切換 Modal -->
+  <div id="role-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2>👤 選擇目前使用者身分</h2>
+        <button id="btn-close-role-modal" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="tab-intro">這台裝置由誰使用？系統會自動切換專屬視訊通話介面：</p>
+        <div class="role-selection-grid">
+          <button class="role-select-btn" data-role="axiao">
+            <span class="role-icon">👵</span>
+            <div class="role-text">
+              <strong>阿笑（長輩平板）</strong>
+              <small>撥打給 阿禮、阿龍、小君</small>
+            </div>
+          </button>
+          <button class="role-select-btn" data-role="ali">
+            <span class="role-icon">👦</span>
+            <div class="role-text">
+              <strong>阿禮</strong>
+              <small>一鍵直通【阿笑媽媽】</small>
+            </div>
+          </button>
+          <button class="role-select-btn" data-role="along">
+            <span class="role-icon">🧑</span>
+            <div class="role-text">
+              <strong>阿龍</strong>
+              <small>一鍵直通【阿笑媽媽】</small>
+            </div>
+          </button>
+          <button class="role-select-btn" data-role="xiaojun">
+            <span class="role-icon">👧</span>
+            <div class="role-text">
+              <strong>小君</strong>
+              <small>一鍵直通【阿笑奶奶】</small>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- 撥號中等待畫面 -->
   <div id="connecting-overlay" class="overlay hidden">
@@ -57,7 +106,7 @@
         <div class="pulse-ring"></div>
         <img id="connecting-avatar" class="connecting-avatar" src="" alt="通話對象">
       </div>
-      <h2 id="connecting-name" class="connecting-name">正在撥給 Vince...</h2>
+      <h2 id="connecting-name" class="connecting-name">正在撥號中...</h2>
       <p class="connecting-tip">正在為您開啟視訊鏡頭，請稍候</p>
       <button id="btn-cancel-call" class="btn-cancel-call">取消撥號</button>
     </div>
@@ -85,64 +134,65 @@
 
       <div class="modal-body">
         <div class="settings-tabs">
-          <button class="tab-btn active" data-tab="tab-contacts">👥 聯絡人管理</button>
-          <button class="tab-btn" data-tab="tab-notify">🔔 手機推播通知</button>
-          <button class="tab-btn" data-tab="tab-system">🛠️ 系統與除錯</button>
+          <button class="tab-btn active" data-tab="tab-notify">🔔 個別通知設定</button>
+          <button class="tab-btn" data-tab="tab-links">🔗 各身分專屬網址</button>
+          <button class="tab-btn" data-tab="tab-system">🛠️ 系統資訊</button>
         </div>
 
-        <!-- 分頁 1：聯絡人 -->
-        <div id="tab-contacts" class="tab-pane active">
-          <p class="tab-intro">在此修改平板上出現的家人姓名與照片。</p>
-          <div id="settings-contacts-list" class="settings-contacts-list"></div>
-          <button id="btn-add-contact" class="btn-secondary">+ 新增一位聯絡人</button>
-        </div>
-
-        <!-- 分頁 2：手機推播 -->
-        <div id="tab-notify" class="tab-pane">
-          <p class="tab-intro">當長輩在平板點擊通話時，自動通知您的手機。</p>
-          <div class="form-group">
-            <label>
-              <input type="checkbox" id="cfg-webhook-enable"> 啟用手機通知功能
-            </label>
-          </div>
-          <div class="form-group">
-            <label>通知通道：</label>
-            <select id="cfg-webhook-provider" class="form-control">
-              <option value="discord">Discord 頻道 Webhook（最簡單推薦）</option>
-              <option value="telegram">Telegram 機器人</option>
-              <option value="custom">自訂 HTTP POST Webhook</option>
-            </select>
-          </div>
+        <!-- 分頁 1：個別通知 -->
+        <div id="tab-notify" class="tab-pane active">
+          <p class="tab-intro">長輩阿笑撥號給不同家人時，自動通知到該家人的 Discord 頻道：</p>
           
-          <div id="group-discord" class="form-group">
-            <label>Discord Webhook URL：</label>
-            <input type="url" id="cfg-discord-url" class="form-control" placeholder="https://discord.com/api/webhooks/...">
+          <div class="form-group">
+            <label>👦 阿禮的 Discord Webhook：</label>
+            <input type="url" id="cfg-webhook-ali" class="form-control" placeholder="貼上阿禮的 Discord Webhook 網址">
+            <button class="btn-secondary btn-test-single" data-target="ali" style="margin-top: 6px;">🔔 測試阿禮通知</button>
           </div>
 
-          <div id="group-telegram" class="form-group hidden">
-            <label>Telegram Bot Token：</label>
-            <input type="text" id="cfg-tg-token" class="form-control" placeholder="123456789:ABCdefGhIjk-...">
-            <label style="margin-top:8px;">Telegram Chat ID：</label>
-            <input type="text" id="cfg-tg-chatid" class="form-control" placeholder="你的個人或群組 Chat ID">
+          <div class="form-group" style="margin-top: 16px;">
+            <label>🧑 阿龍的 Discord Webhook：</label>
+            <input type="url" id="cfg-webhook-along" class="form-control" placeholder="貼上阿龍的 Discord Webhook 網址（選填）">
+            <button class="btn-secondary btn-test-single" data-target="along" style="margin-top: 6px;">🔔 測試阿龍通知</button>
           </div>
 
-          <div id="group-custom" class="form-group hidden">
-            <label>自訂 Webhook URL (POST)：</label>
-            <input type="url" id="cfg-custom-url" class="form-control" placeholder="https://your-server.com/api/call-notify">
+          <div class="form-group" style="margin-top: 16px;">
+            <label>👧 小君的 Discord Webhook：</label>
+            <input type="url" id="cfg-webhook-xiaojun" class="form-control" placeholder="貼上小君的 Discord Webhook 網址（選填）">
+            <button class="btn-secondary btn-test-single" data-target="xiaojun" style="margin-top: 6px;">🔔 測試小君通知</button>
           </div>
+        </div>
 
-          <button id="btn-test-notification" class="btn-secondary">🔔 測試發送通知</button>
+        <!-- 分頁 2：專屬連結 -->
+        <div id="tab-links" class="tab-pane">
+          <p class="tab-intro">把專屬網址傳給各個家人，在手機打開即可一鍵撥通媽媽/奶奶：</p>
+          <div class="url-share-list">
+            <div class="url-share-item">
+              <strong>👵 阿笑（長輩平板）：</strong>
+              <code>https://78vince.github.io/smile-video-call/?u=axiao</code>
+            </div>
+            <div class="url-share-item">
+              <strong>👦 阿禮的手機：</strong>
+              <code>https://78vince.github.io/smile-video-call/?u=ali</code>
+            </div>
+            <div class="url-share-item">
+              <strong>🧑 阿龍的手機：</strong>
+              <code>https://78vince.github.io/smile-video-call/?u=along</code>
+            </div>
+            <div class="url-share-item">
+              <strong>👧 小君的手機：</strong>
+              <code>https://78vince.github.io/smile-video-call/?u=xiaojun</code>
+            </div>
+          </div>
         </div>
 
         <!-- 分頁 3：系統 -->
         <div id="tab-system" class="tab-pane">
           <div class="form-group">
-            <label>房間前綴代碼（避免與全世界撞名）：</label>
-            <input type="text" id="cfg-room-prefix" class="form-control">
+            <label>目前載入身分：<span id="sys-current-role">阿笑</span></label>
           </div>
           <div class="form-group">
-            <label>Jitsi 網域（預設使用 meet.jit.si）：</label>
-            <input type="text" id="cfg-jitsi-domain" class="form-control" value="meet.jit.si">
+            <label>Jitsi 視訊伺服器：</label>
+            <input type="text" id="cfg-jitsi-domain" class="form-control" value="meet.jit.si" readonly>
           </div>
           <div class="form-group">
             <button id="btn-test-sound" class="btn-secondary">🔊 測試撥號音效</button>
