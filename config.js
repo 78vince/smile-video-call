@@ -1,14 +1,19 @@
 /**
- * Smile Video Call (微笑視訊) - 多角色家庭配置檔
- * 
- * 核心架構：以阿笑（長輩）為中心，晚輩擁有專屬一鍵直通頁面與稱謂
+ * Smile Video Call (微笑視訊) - 多角色與即時通訊配置檔
  */
 const DEFAULT_CONFIG = {
   // 視訊伺服器
   jitsiDomain: "meet.jit.si",
   roomPrefix: "smile",
 
-  // 預設全局通知（若個人沒有設定，則使用此通知）
+  // 即時來電信號通道（利用 ntfy.sh 免費公共通道進行長輩平板來電監聽）
+  // 晚輩撥號時會發送信號到此通道，長輩平板收到後自動響鈴並倒數自動接聽
+  signalTopic: "smile-axiao-call-78vince",
+
+  // 來電自動接聽倒數秒數（0 代表立刻接聽，建議 5 秒讓長輩知道誰打來）
+  autoAnswerDelaySeconds: 5,
+
+  // 預設全局通知（支援 Discord Webhook 或 Google Apps Script LINE 轉發網址）
   defaultWebhookUrl: "https://discord.com/api/webhooks/1564922649514221598/9mfthoZpD4EIYrfmPIsGJpAo-cMND4xmo-lQ-lTsAAvcQp6I7aJeMj_PiBrlZ0FWEP3I",
 
   // 角色群組資料
@@ -27,7 +32,6 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-ali",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=ali&backgroundColor=b6e3f4",
           accentColor: "#2563eb",
-          // 阿禮專屬 Discord Webhook
           webhookUrl: "https://discord.com/api/webhooks/1564922649514221598/9mfthoZpD4EIYrfmPIsGJpAo-cMND4xmo-lQ-lTsAAvcQp6I7aJeMj_PiBrlZ0FWEP3I"
         },
         {
@@ -37,7 +41,6 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-along",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=along&backgroundColor=c084fc",
           accentColor: "#9333ea",
-          // 阿龍專屬 Webhook（可由阿龍自行填寫）
           webhookUrl: ""
         },
         {
@@ -47,7 +50,6 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-xiaojun",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=xiaojun&backgroundColor=ffd5dc",
           accentColor: "#db2777",
-          // 小君專屬 Webhook（可由小君自行填寫）
           webhookUrl: ""
         }
       ]

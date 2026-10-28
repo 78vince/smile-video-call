@@ -16,7 +16,7 @@
 </head>
 <body>
 
-  <!-- 主畫面：長輩專用大按鈕介面 -->
+  <!-- 主畫面：大按鈕介面 -->
   <main id="home-view" class="view active">
     <!-- 頂部時間與問候列 -->
     <header class="app-header">
@@ -30,7 +30,12 @@
         </div>
         <p id="app-subtitle" class="subtitle">點一下照片，馬上視訊聊聊天！</p>
       </div>
+
       <div class="header-right">
+        <!-- 重新載入按鈕（專門解決 PWA 應用難刷新問題） -->
+        <button id="btn-force-reload" class="btn-reload-badge" title="強制重新整理（清除快取並載入最新版）">
+          🔄 重新整理
+        </button>
         <div id="clock-time" class="clock-time">12:00</div>
         <div id="clock-date" class="clock-date">10月28日 星期三</div>
       </div>
@@ -47,7 +52,7 @@
     <footer class="app-footer">
       <div class="status-indicator">
         <span class="status-dot"></span>
-        <span id="connection-status">連線正常，隨時可撥打</span>
+        <span id="connection-status">連線正常，隨時可撥打與接收來電</span>
       </div>
       <!-- 右下角隱藏設定按鈕 -->
       <button id="btn-open-settings" class="btn-settings-gear" title="家屬設定" aria-label="設定">
@@ -70,7 +75,7 @@
             <span class="role-icon">👵</span>
             <div class="role-text">
               <strong>阿笑（長輩平板）</strong>
-              <small>撥打給 阿禮、阿龍、小君</small>
+              <small>撥打給 阿禮、阿龍、小君（支援自動接聽）</small>
             </div>
           </button>
           <button class="role-select-btn" data-role="ali">
@@ -99,7 +104,29 @@
     </div>
   </div>
 
-  <!-- 撥號中等待畫面 -->
+  <!-- 來電提示與自動接聽畫面（長輩端來電） -->
+  <div id="incoming-call-overlay" class="overlay hidden">
+    <div class="incoming-card">
+      <div class="incoming-animation">
+        <div class="pulse-ring-incoming"></div>
+        <img id="incoming-avatar" class="incoming-avatar" src="" alt="來電者">
+      </div>
+      <h2 id="incoming-title" class="incoming-title">👦 阿禮 來電中...</h2>
+      <div id="incoming-countdown-box" class="countdown-box">
+        <span id="incoming-countdown-num">5</span> 秒後自動接通
+      </div>
+      <div class="incoming-actions">
+        <button id="btn-answer-call" class="btn-answer-call">
+          📞 馬上接聽
+        </button>
+        <button id="btn-decline-call" class="btn-decline-call">
+          ✕ 稍後再聊
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 發起撥號中等待畫面（主動撥打） -->
   <div id="connecting-overlay" class="overlay hidden">
     <div class="connecting-card">
       <div class="ringing-animation">
@@ -134,31 +161,38 @@
 
       <div class="modal-body">
         <div class="settings-tabs">
-          <button class="tab-btn active" data-tab="tab-notify">🔔 個別通知設定</button>
+          <button class="tab-btn active" data-tab="tab-notify">🔔 個別通知（LINE/Discord）</button>
           <button class="tab-btn" data-tab="tab-links">🔗 各身分專屬網址</button>
           <button class="tab-btn" data-tab="tab-system">🛠️ 系統資訊</button>
         </div>
 
         <!-- 分頁 1：個別通知 -->
         <div id="tab-notify" class="tab-pane active">
-          <p class="tab-intro">長輩阿笑撥號給不同家人時，自動通知到該家人的 Discord 頻道：</p>
+          <p class="tab-intro">支援貼上 <strong>Discord Webhook 網址</strong> 或 <strong>LINE Google Apps Script (GAS) 網址</strong>：</p>
           
           <div class="form-group">
-            <label>👦 阿禮的 Discord Webhook：</label>
-            <input type="url" id="cfg-webhook-ali" class="form-control" placeholder="貼上阿禮的 Discord Webhook 網址">
+            <label>👦 阿禮的通知網址（Discord 或 LINE GAS）：</label>
+            <input type="url" id="cfg-webhook-ali" class="form-control" placeholder="https://discord.com/... 或 https://script.google.com/...">
             <button class="btn-secondary btn-test-single" data-target="ali" style="margin-top: 6px;">🔔 測試阿禮通知</button>
           </div>
 
           <div class="form-group" style="margin-top: 16px;">
-            <label>🧑 阿龍的 Discord Webhook：</label>
-            <input type="url" id="cfg-webhook-along" class="form-control" placeholder="貼上阿龍的 Discord Webhook 網址（選填）">
+            <label>🧑 阿龍的通知網址（Discord 或 LINE GAS）：</label>
+            <input type="url" id="cfg-webhook-along" class="form-control" placeholder="https://discord.com/... 或 https://script.google.com/...">
             <button class="btn-secondary btn-test-single" data-target="along" style="margin-top: 6px;">🔔 測試阿龍通知</button>
           </div>
 
           <div class="form-group" style="margin-top: 16px;">
-            <label>👧 小君的 Discord Webhook：</label>
-            <input type="url" id="cfg-webhook-xiaojun" class="form-control" placeholder="貼上小君的 Discord Webhook 網址（選填）">
+            <label>👧 小君的通知網址（Discord 或 LINE GAS）：</label>
+            <input type="url" id="cfg-webhook-xiaojun" class="form-control" placeholder="https://discord.com/... 或 https://script.google.com/...">
             <button class="btn-secondary btn-test-single" data-target="xiaojun" style="margin-top: 6px;">🔔 測試小君通知</button>
+          </div>
+
+          <div class="notice-box" style="margin-top: 20px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+            <strong style="color: #166534;">💬 想用 LINE 接收通知？</strong>
+            <p style="font-size: 0.9rem; color: #166534; margin-top: 4px;">
+              已在專案中建立 <code>google-apps-script-line.js</code>，只要將該腳本免費部署至 Google 雲端，即可將產生的網址貼在上方欄位！
+            </p>
           </div>
         </div>
 
@@ -189,6 +223,10 @@
         <div id="tab-system" class="tab-pane">
           <div class="form-group">
             <label>目前載入身分：<span id="sys-current-role">阿笑</span></label>
+          </div>
+          <div class="form-group">
+            <label>自動接聽倒數（秒）：</label>
+            <input type="number" id="cfg-auto-answer-seconds" class="form-control" value="5" min="1" max="30">
           </div>
           <div class="form-group">
             <label>Jitsi 視訊伺服器：</label>

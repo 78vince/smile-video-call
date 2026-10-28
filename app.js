@@ -1,6 +1,5 @@
 /**
- * Smile Video Call (微笑視訊) - 多角色核心邏輯
- * 支援 阿笑（長輩）與 阿禮、阿龍、小君（晚輩）四種專屬身分介面
+ * Smile Video Call (微笑視訊) - 多角色、即時通訊與自動接聽系統
  */
 
 class SmileVideoCallApp {
@@ -12,6 +11,9 @@ class SmileVideoCallApp {
     this.audioCtx = null;
     this.ringInterval = null;
     this.connectingTimeout = null;
+    this.eventSource = null;
+    this.incomingCountdownTimer = null;
+    this.currentIncomingPayload = null;
 
     this.dom = {
       appTitle: document.getElementById("app-title"),
@@ -29,12 +31,20 @@ class SmileVideoCallApp {
       btnCancelCall: document.getElementById("btn-cancel-call"),
       btnFloatingHangup: document.getElementById("btn-floating-hangup"),
       btnSwitchRole: document.getElementById("btn-switch-role"),
+      btnForceReload: document.getElementById("btn-force-reload"),
       roleModal: document.getElementById("role-modal"),
       btnCloseRoleModal: document.getElementById("btn-close-role-modal"),
       btnOpenSettings: document.getElementById("btn-open-settings"),
       settingsModal: document.getElementById("settings-modal"),
       btnCloseSettings: document.getElementById("btn-close-settings"),
-      btnSaveSettings: document.getElementById("btn-save-settings")
+      btnSaveSettings: document.getElementById("btn-save-settings"),
+      // 來電與自動接聽元件
+      incomingOverlay: document.getElementById("incoming-call-overlay"),
+      incomingAvatar: document.getElementById("incoming-avatar"),
+      incomingTitle: document.getElementById("incoming-title"),
+      incomingCountdownNum: document.getElementById("incoming-countdown-num"),
+      btnAnswerCall: document.getElementById("btn-answer-call"),
+      btnDeclineCall: document.getElementById("btn-decline-call")
     };
 
     this.init();
@@ -50,6 +60,7 @@ class SmileVideoCallApp {
     this.requestWakeLock();
     this.registerServiceWorker();
     this.requestWebNotificationPermission();
+    this.startIncomingCallListener();
   }
 
   // 偵測目前身分（優先順序：URL ?u=xxx > 本機快取 > 預設阿笑）
@@ -66,13 +77,12 @@ class SmileVideoCallApp {
       return savedRole;
     }
 
-    return "axiao"; // 預設為長輩阿笑
+    return "axiao";
   }
 
-  // 讀取設定
   loadConfig() {
     try {
-      const saved = localStorage.getItem("smile_call_config_v2");
+      const saved = localStorage.getItem("smile_call_config_v3");
       if (saved) {
         return JSON.parse(saved);
       }
@@ -84,23 +94,55 @@ class SmileVideoCallApp {
 
   saveConfig(newConfig) {
     this.config = newConfig;
-    localStorage.setItem("smile_call_config_v2", JSON.stringify(newConfig));
+    localStorage.setItem("smile_call_config_v3", JSON.stringify(newConfig));
     this.renderCurrentRoleView();
   }
 
-  // 切換身分
   switchRole(roleId) {
     if (!this.config.roles[roleId]) return;
     this.currentRole = roleId;
     localStorage.setItem("smile_call_current_role", roleId);
 
-    // 平滑更新 URL 參數，不刷新頁面
     const newUrl = new URL(window.location);
     newUrl.searchParams.set("u", roleId);
     window.history.replaceState({}, "", newUrl);
 
     this.renderCurrentRoleView();
     this.dom.roleModal.classList.add("hidden");
+    this.startIncomingCallListener();
+  }
+
+  // ==========================================
+  // 強制重新整理（專門解決 PWA 應用更新難的問題）
+  // ==========================================
+  async forceReload() {
+    this.dom.btnForceReload.textContent = "🔄 更新中...";
+    this.dom.btnForceReload.disabled = true;
+
+    try {
+      // 1. 註銷所有已註冊的 Service Worker
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+          await registration.unregister();
+        }
+      }
+
+      // 2. 清除所有瀏覽器快取儲存 (CacheStorage)
+      if ("caches" in window) {
+        const cacheNames = await caches.keys();
+        for (let name of cacheNames) {
+          await caches.delete(name);
+        }
+      }
+    } catch (e) {
+      console.warn("清除快取時略過錯誤:", e);
+    }
+
+    // 3. 強制帶時間戳重載，繞過任何代理伺服器快取
+    const reloadUrl = new URL(window.location.href);
+    reloadUrl.searchParams.set("_t", Date.now());
+    window.location.replace(reloadUrl.toString());
   }
 
   // ==========================================
@@ -141,7 +183,7 @@ class SmileVideoCallApp {
   playTapSound() {
     try {
       const ctx = this.getAudioContext();
-      const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 和弦
+      const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
       notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -168,7 +210,7 @@ class SmileVideoCallApp {
 
         osc1.frequency.value = 440;
         osc2.frequency.value = 480;
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
 
         osc1.connect(gain);
@@ -183,13 +225,142 @@ class SmileVideoCallApp {
     };
 
     playRing();
-    this.ringInterval = setInterval(playRing, 3000);
+    this.ringInterval = setInterval(playRing, 2800);
   }
 
   stopRingingSound() {
     if (this.ringInterval) {
       clearInterval(this.ringInterval);
       this.ringInterval = null;
+    }
+  }
+
+  // ==========================================
+  // 即時來電監聽（長輩平板端：支援自動接聽）
+  // ==========================================
+  startIncomingCallListener() {
+    // 關閉先前的監聽
+    if (this.eventSource) {
+      try { this.eventSource.close(); } catch (e) {}
+      this.eventSource = null;
+    }
+
+    // 只有長輩平板（axiao）需要常駐接收來電
+    if (this.currentRole !== "axiao") return;
+
+    const topic = this.config.signalTopic || "smile-axiao-call-78vince";
+    const sseUrl = `https://ntfy.sh/${topic}/sse`;
+
+    try {
+      this.eventSource = new EventSource(sseUrl);
+
+      this.eventSource.onmessage = (event) => {
+        try {
+          const raw = JSON.parse(event.data);
+          // ntfy 傳遞的 JSON 內容在 raw.message 中
+          if (!raw.message) return;
+          const payload = JSON.parse(raw.message);
+
+          if (payload.action === "call" && payload.target === "axiao") {
+            this.handleIncomingCall(payload);
+          } else if (payload.action === "cancel" && payload.target === "axiao") {
+            this.handleCancelIncomingCall();
+          }
+        } catch (err) {}
+      };
+
+      this.eventSource.onerror = () => {
+        // 斷線時每隔 5 秒自動重連
+        setTimeout(() => this.startIncomingCallListener(), 5000);
+      };
+    } catch (e) {
+      console.warn("無法啟動即時來電監聽:", e);
+    }
+  }
+
+  // 當晚輩打來時觸發（長輩平板畫面）
+  handleIncomingCall(payload) {
+    // 如果長輩已經在通話中，則忽略
+    if (this.currentCallApi) return;
+
+    this.currentIncomingPayload = payload;
+    this.dom.incomingAvatar.src = payload.avatarUrl || "https://api.dicebear.com/7.x/bottts/svg?seed=" + payload.callerId;
+    this.dom.incomingTitle.textContent = `👦 ${payload.callerName} 來電中...`;
+
+    // 顯示來電全螢幕覆蓋層並響鈴
+    this.dom.incomingOverlay.classList.remove("hidden");
+    this.startRingingSound();
+    this.requestWakeLock();
+
+    // 倒數自動接聽（預設 5 秒）
+    let secondsLeft = this.config.autoAnswerDelaySeconds || 5;
+    this.dom.incomingCountdownNum.textContent = secondsLeft;
+
+    if (this.incomingCountdownTimer) clearInterval(this.incomingCountdownTimer);
+
+    this.incomingCountdownTimer = setInterval(() => {
+      secondsLeft--;
+      this.dom.incomingCountdownNum.textContent = secondsLeft;
+
+      if (secondsLeft <= 0) {
+        clearInterval(this.incomingCountdownTimer);
+        this.incomingCountdownTimer = null;
+        // 自動接通！
+        this.answerIncomingCall();
+      }
+    }, 1000);
+  }
+
+  // 接聽來電
+  answerIncomingCall() {
+    if (this.incomingCountdownTimer) {
+      clearInterval(this.incomingCountdownTimer);
+      this.incomingCountdownTimer = null;
+    }
+    this.stopRingingSound();
+    this.dom.incomingOverlay.classList.add("hidden");
+
+    if (!this.currentIncomingPayload) return;
+
+    const payload = this.currentIncomingPayload;
+    this.currentIncomingPayload = null;
+
+    // 直接以該房間名稱連線視訊
+    this.joinConferenceRoom(payload.roomName, payload.callerName);
+  }
+
+  // 拒絕或取消來電
+  handleCancelIncomingCall() {
+    if (this.incomingCountdownTimer) {
+      clearInterval(this.incomingCountdownTimer);
+      this.incomingCountdownTimer = null;
+    }
+    this.stopRingingSound();
+    this.dom.incomingOverlay.classList.add("hidden");
+    this.currentIncomingPayload = null;
+  }
+
+  // 發送信號通知長輩平板來電
+  async sendIncomingSignalToSenior(roomName, myRoleData) {
+    const topic = this.config.signalTopic || "smile-axiao-call-78vince";
+    const signalUrl = `https://ntfy.sh/${topic}`;
+
+    const payload = {
+      action: "call",
+      callerId: myRoleData.id,
+      callerName: myRoleData.name,
+      target: "axiao",
+      roomName: roomName,
+      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${myRoleData.id}&backgroundColor=b6e3f4`
+    };
+
+    try {
+      await fetch(signalUrl, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.warn("發送即時呼叫信號略過錯誤:", e);
     }
   }
 
@@ -236,7 +407,7 @@ class SmileVideoCallApp {
     const roomName = contact.roomName;
     const roomUrl = `https://${this.config.jitsiDomain}/${roomName}`;
 
-    // 1. 立即切換到視訊容器（確保 iframe 具備 100% 寬高）
+    // 1. 切換至視訊主畫面
     this.dom.homeView.classList.add("hidden");
     this.dom.callView.classList.remove("hidden");
 
@@ -246,21 +417,31 @@ class SmileVideoCallApp {
     this.dom.connectingOverlay.classList.remove("hidden");
     this.startRingingSound();
 
-    // 3. 發送手機 Discord / Webhook 通知給對方
+    // 3. 如果晚輩撥打給阿笑媽媽，發送「即時信號」通知平板自動接聽！
+    if (contact.id === "axiao" || this.currentRole !== "axiao") {
+      this.sendIncomingSignalToSenior(roomName, myRoleData);
+    }
+
+    // 4. 發送手機 LINE / Discord Webhook 通知
     this.sendNotification(contact, myRoleData, roomUrl);
 
-    // 4. 保持螢幕常亮
+    // 5. 啟動視訊連線
+    this.joinConferenceRoom(roomName, contact.name);
+  }
+
+  // 進入 Jitsi 視訊會議
+  joinConferenceRoom(roomName, peerName) {
     this.requestWakeLock();
 
-    // 5. 清理舊實例
     if (this.currentCallApi) {
       try { this.currentCallApi.dispose(); } catch (e) {}
       this.currentCallApi = null;
     }
     this.dom.jitsiContainer.innerHTML = "";
+    this.dom.homeView.classList.add("hidden");
+    this.dom.callView.classList.remove("hidden");
 
-    // 6. 初始化 Jitsi Meet
-    const myDisplayName = myRoleData.name + (myRoleData.id === "axiao" ? " (長輩)" : "");
+    const myDisplayName = this.config.roles[this.currentRole]?.name || "家庭成員";
     const options = {
       roomName: roomName,
       width: "100%",
@@ -270,10 +451,7 @@ class SmileVideoCallApp {
         displayName: myDisplayName
       },
       configOverwrite: {
-        // 核心：關閉預覽確認頁，直通通話
-        prejoinConfig: {
-          enabled: false
-        },
+        prejoinConfig: { enabled: false },
         prejoinPageEnabled: false,
         enableInsecureRoomNameWarning: false,
         requireDisplayName: false,
@@ -289,14 +467,13 @@ class SmileVideoCallApp {
         TOOLBAR_BUTTONS: ["microphone", "camera", "hangup"],
         SHOW_JITSI_WATERMARK: false,
         SHOW_WATERMARK_FOR_GUESTS: false,
-        DEFAULT_REMOTE_DISPLAY_NAME: contact.name
+        DEFAULT_REMOTE_DISPLAY_NAME: peerName
       }
     };
 
     try {
       this.currentCallApi = new JitsiMeetExternalAPI(this.config.jitsiDomain, options);
 
-      // 3秒後隱藏遮罩，露出視訊鏡頭
       this.connectingTimeout = setTimeout(() => {
         this.stopRingingSound();
         this.dom.connectingOverlay.classList.add("hidden");
@@ -331,9 +508,7 @@ class SmileVideoCallApp {
     this.dom.connectingOverlay.classList.add("hidden");
 
     if (this.currentCallApi) {
-      try {
-        this.currentCallApi.dispose();
-      } catch (e) {}
+      try { this.currentCallApi.dispose(); } catch (e) {}
       this.currentCallApi = null;
     }
 
@@ -343,10 +518,9 @@ class SmileVideoCallApp {
   }
 
   // ==========================================
-  // 發送手機推播通知（支援個別 Webhook）
+  // 發送手機推播通知（同時支援 Discord 與 LINE GAS）
   // ==========================================
   async sendNotification(contact, callerRole, roomUrl) {
-    // 優先使用該聯絡人專屬的 Webhook，若無則使用全域 Webhook
     const webhookUrl = contact.webhookUrl || this.config.defaultWebhookUrl;
     if (!webhookUrl) return;
 
@@ -355,22 +529,33 @@ class SmileVideoCallApp {
     const msg = `📢 **【微笑視訊通知】**\n**${callerName}** 正在呼叫 **${targetName}**！\n👉 請點擊連結進入視訊：${roomUrl}`;
 
     try {
-      await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: msg
-        })
-      });
+      // 判斷是否為 Google Apps Script (LINE 中繼站)
+      if (webhookUrl.includes("script.google.com")) {
+        await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" }, // GAS 接收 text/plain 避免跨域重定向問題
+          body: JSON.stringify({
+            content: `📢【微笑視訊】${callerName} 正在呼叫 ${targetName}！\n👉 點此加入通話：${roomUrl}`,
+            caller: callerName,
+            target: targetName,
+            roomUrl: roomUrl
+          })
+        });
+      } else {
+        // 標準 Discord Webhook
+        await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: msg })
+        });
+      }
     } catch (err) {
-      console.warn("通知發送失敗:", err);
+      console.warn("通知發送略過:", err);
     }
 
-    // 同步發送瀏覽器本機通知（若有授權且分頁在背景）
     this.sendBrowserNotification(`${callerName} 正在撥打視訊`, `通話對象：${targetName}，點擊加入！`, roomUrl);
   }
 
-  // 瀏覽器通知
   requestWebNotificationPermission() {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
@@ -392,7 +577,6 @@ class SmileVideoCallApp {
     }
   }
 
-  // 螢幕鎖定
   async requestWakeLock() {
     if ("wakeLock" in navigator) {
       try {
@@ -404,7 +588,6 @@ class SmileVideoCallApp {
     }
   }
 
-  // PWA Service Worker
   registerServiceWorker() {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
@@ -417,8 +600,17 @@ class SmileVideoCallApp {
   // 事件綁定
   // ==========================================
   bindEvents() {
+    // 強制重新載入按鈕
+    this.dom.btnForceReload.addEventListener("click", () => this.forceReload());
+
+    // 來電按鈕
+    this.dom.btnAnswerCall.addEventListener("click", () => this.answerIncomingCall());
+    this.dom.btnDeclineCall.addEventListener("click", () => this.handleCancelIncomingCall());
+
+    // 取消撥號
     this.dom.btnCancelCall.addEventListener("click", () => this.endCall());
 
+    // 懸浮大掛斷鍵
     this.dom.btnFloatingHangup.addEventListener("click", () => {
       if (this.currentCallApi) {
         this.currentCallApi.executeCommand("hangup");
@@ -468,7 +660,7 @@ class SmileVideoCallApp {
         const input = document.getElementById(`cfg-webhook-${target}`);
         const url = input.value.trim();
         if (!url) {
-          alert(`請先貼上 ${target} 的 Discord Webhook 網址！`);
+          alert(`請先貼上 ${target} 的 Webhook / GAS 網址！`);
           return;
         }
 
@@ -476,19 +668,33 @@ class SmileVideoCallApp {
         btn.disabled = true;
 
         try {
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              content: `🔔【微笑視訊測試】這是一則發送給【${target}】的測試通知！連線完全正常。`
-            })
-          });
-          if (res.ok) {
-            alert(`✅ 成功發送測試通知給 ${target}！請查看 Discord。記得按儲存並套用！`);
-            btn.textContent = "✅ 發送成功";
+          if (url.includes("script.google.com")) {
+            // LINE GAS 測試
+            await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain" },
+              body: JSON.stringify({
+                content: `🔔【微笑視訊測試】發送給【${target}】的 LINE 測試通知！連線完全正常。`
+              })
+            });
+            alert(`✅ 已向 Google Apps Script 發送 LINE 測試通知！請檢查手機 LINE。記得按儲存！`);
+            btn.textContent = "✅ 已發送";
           } else {
-            alert("❌ 發送失敗，請確認網址正確");
-            btn.textContent = "❌ 失敗";
+            // Discord 測試
+            const res = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                content: `🔔【微笑視訊測試】發送給【${target}】的 Discord 測試通知！連線完全正常。`
+              })
+            });
+            if (res.ok) {
+              alert(`✅ 成功發送測試通知給 ${target}！請查看 Discord。記得按儲存！`);
+              btn.textContent = "✅ 發送成功";
+            } else {
+              alert("❌ 發送失敗，請確認網址正確");
+              btn.textContent = "❌ 失敗";
+            }
           }
         } catch (e) {
           alert("❌ 發送失敗: " + e.message);
@@ -516,7 +722,7 @@ class SmileVideoCallApp {
     // 恢復預設
     document.getElementById("btn-reset-default").addEventListener("click", () => {
       if (confirm("確定要重設為原廠預設設定嗎？")) {
-        localStorage.removeItem("smile_call_config_v2");
+        localStorage.removeItem("smile_call_config_v3");
         localStorage.removeItem("smile_call_current_role");
         this.config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
         this.currentRole = "axiao";
@@ -539,6 +745,7 @@ class SmileVideoCallApp {
     document.getElementById("cfg-webhook-ali").value = aliContact?.webhookUrl || "";
     document.getElementById("cfg-webhook-along").value = alongContact?.webhookUrl || "";
     document.getElementById("cfg-webhook-xiaojun").value = xiaojunContact?.webhookUrl || "";
+    document.getElementById("cfg-auto-answer-seconds").value = this.config.autoAnswerDelaySeconds || 5;
     document.getElementById("sys-current-role").textContent = this.config.roles[this.currentRole]?.name || "阿笑";
 
     this.dom.settingsModal.classList.remove("hidden");
@@ -552,8 +759,10 @@ class SmileVideoCallApp {
     const aliUrl = document.getElementById("cfg-webhook-ali").value.trim();
     const alongUrl = document.getElementById("cfg-webhook-along").value.trim();
     const xiaojunUrl = document.getElementById("cfg-webhook-xiaojun").value.trim();
+    const delay = parseInt(document.getElementById("cfg-auto-answer-seconds").value, 10) || 5;
 
-    // 更新阿笑撥號時的個別 webhook
+    this.config.autoAnswerDelaySeconds = delay;
+
     const axiaoContacts = this.config.roles.axiao.contacts;
     const cAli = axiaoContacts.find((c) => c.id === "ali");
     const cAlong = axiaoContacts.find((c) => c.id === "along");
@@ -563,14 +772,13 @@ class SmileVideoCallApp {
     if (cAlong) cAlong.webhookUrl = alongUrl;
     if (cXiaojun) cXiaojun.webhookUrl = xiaojunUrl;
 
-    // 晚輩撥給媽媽時也同步使用
     if (this.config.roles.ali.contacts[0]) this.config.roles.ali.contacts[0].webhookUrl = aliUrl;
     if (this.config.roles.along.contacts[0]) this.config.roles.along.contacts[0].webhookUrl = alongUrl;
     if (this.config.roles.xiaojun.contacts[0]) this.config.roles.xiaojun.contacts[0].webhookUrl = xiaojunUrl;
 
     this.saveConfig(this.config);
     this.closeSettingsModal();
-    alert("✅ 個別通知設定已儲存並套用！");
+    alert("✅ 設定已儲存並套用！");
   }
 }
 
