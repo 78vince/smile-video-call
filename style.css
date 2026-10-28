@@ -1,0 +1,561 @@
+/* ============================================================
+   Smile Video Call (微笑視訊) - 專為長輩設計的高對比大按鈕樣式
+   ============================================================ */
+
+:root {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg-color: #f1f5f9;
+  --card-bg: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --danger-color: #dc2626;
+  --success-color: #16a34a;
+  --radius-lg: 28px;
+  --radius-md: 16px;
+  --shadow-card: 0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  --shadow-active: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 視圖控制 */
+.view {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.view.hidden, .overlay.hidden, .modal.hidden, .form-group.hidden {
+  display: none !important;
+}
+
+/* ============================================================
+   主畫面 (Home View)
+   ============================================================ */
+#home-view {
+  padding: 24px 32px 16px;
+  justify-content: space-between;
+}
+
+/* 頂部時間與問候列 */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 16px 28px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.header-left .title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  letter-spacing: 1px;
+}
+
+.header-left .subtitle {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.header-right {
+  text-align: right;
+}
+
+.clock-time {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-date {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* 聯絡人容器 */
+.contacts-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* 長輩大按鈕卡片 */
+.contact-card {
+  background: var(--card-bg);
+  border: 4px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
+  outline: none;
+}
+
+.contact-card:active {
+  transform: scale(0.96);
+  box-shadow: var(--shadow-active);
+  background-color: #f8fafc;
+}
+
+.contact-avatar-wrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 16px;
+}
+
+.contact-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  background-color: #f1f5f9;
+}
+
+.badge-video-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--success-color);
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.contact-name {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.contact-action-hint {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  background: #eff6ff;
+  padding: 8px 24px;
+  border-radius: 999px;
+  margin-top: 6px;
+}
+
+/* 底部列 */
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--success-color);
+  box-shadow: 0 0 8px rgba(22, 163, 74, 0.6);
+}
+
+.btn-settings-gear {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  opacity: 0.35;
+  cursor: pointer;
+  padding: 10px;
+  transition: opacity 0.2s;
+}
+
+.btn-settings-gear:hover, .btn-settings-gear:active {
+  opacity: 1;
+}
+
+/* ============================================================
+   撥號等待畫面 (Overlay)
+   ============================================================ */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.connecting-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.ringing-animation {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 24px;
+}
+
+.connecting-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--primary-color);
+  position: relative;
+  z-index: 2;
+}
+
+.pulse-ring {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: pulse 1.8s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 0.2; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.connecting-name {
+  font-size: 2.2rem;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.connecting-tip {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.btn-cancel-call {
+  background: #f1f5f9;
+  border: 2px solid #cbd5e1;
+  color: var(--text-main);
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 14px 40px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* ============================================================
+   視訊通話畫面 (Call View)
+   ============================================================ */
+#call-view {
+  background: #000;
+  z-index: 500;
+}
+
+#jitsi-container {
+  width: 100%;
+  height: 100%;
+}
+
+#jitsi-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* 懸浮醒目大掛斷鍵（長輩必備防呆） */
+.btn-floating-hangup {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--danger-color);
+  color: white;
+  border: 3px solid white;
+  border-radius: 999px;
+  padding: 16px 32px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.5);
+  cursor: pointer;
+  z-index: 999;
+  transition: transform 0.15s ease;
+}
+
+.btn-floating-hangup:active {
+  transform: scale(0.92);
+}
+
+.hangup-icon {
+  font-size: 1.6rem;
+  transform: rotate(135deg);
+}
+
+/* ============================================================
+   家屬設定 Modal
+   ============================================================ */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 680px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 1.5rem;
+  color: var(--text-main);
+}
+
+.btn-close-modal {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.settings-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 14px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  background: white;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+.tab-intro {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 18px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+}
+
+.settings-contact-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.settings-contact-item input {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.btn-primary, .btn-secondary, .btn-danger {
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary { background: var(--primary-color); color: white; }
+.btn-secondary { background: #e2e8f0; color: var(--text-main); margin-right: 8px; }
+.btn-danger { background: var(--danger-color); color: white; }
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ============================================================
+   響應式設計（橫向 vs 直向平板）
+   ============================================================ */
+@media (max-width: 768px) {
+  #home-view {
+    padding: 16px;
+  }
+  .app-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 16px;
+  }
+  .header-right {
+    text-align: center;
+  }
+  .contacts-grid {
+    grid-template-columns: 1fr;
+  }
+  .contact-card {
+    padding: 18px;
+  }
+  .contact-avatar-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+  .contact-name {
+    font-size: 1.8rem;
+  }
+}

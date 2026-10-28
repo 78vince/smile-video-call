@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2563EB">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <title>Smile Video Call - 微笑視訊</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Jitsi Meet 外部控制 API -->
+  <script src="https://meet.jit.si/external_api.js"></script>
+</head>
+<body>
+
+  <!-- 主畫面：長輩專用大按鈕介面 -->
+  <main id="home-view" class="view active">
+    <!-- 頂部時間與問候列 -->
+    <header class="app-header">
+      <div class="header-left">
+        <h1 id="app-title" class="title">微笑視訊</h1>
+        <p id="app-subtitle" class="subtitle">點一下照片，馬上視訊聊聊天！</p>
+      </div>
+      <div class="header-right">
+        <div id="clock-time" class="clock-time">12:00</div>
+        <div id="clock-date" class="clock-date">10月28日 星期三</div>
+      </div>
+    </header>
+
+    <!-- 聯絡人九宮格清單 -->
+    <section class="contacts-container">
+      <div id="contacts-grid" class="contacts-grid">
+        <!-- 由 JavaScript 動態產生聯絡人卡片 -->
+      </div>
+    </section>
+
+    <!-- 底部狀態列 -->
+    <footer class="app-footer">
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span id="connection-status">平板已連線，隨時可撥打</span>
+      </div>
+      <!-- 右下角隱藏設定按鈕（需長按或點擊開啟） -->
+      <button id="btn-open-settings" class="btn-settings-gear" title="家屬設定" aria-label="設定">
+        ⚙️
+      </button>
+    </footer>
+  </main>
+
+  <!-- 撥號中等待畫面 -->
+  <div id="connecting-overlay" class="overlay hidden">
+    <div class="connecting-card">
+      <div class="ringing-animation">
+        <div class="pulse-ring"></div>
+        <img id="connecting-avatar" class="connecting-avatar" src="" alt="通話對象">
+      </div>
+      <h2 id="connecting-name" class="connecting-name">正在撥給 Vince...</h2>
+      <p class="connecting-tip">正在為您開啟視訊鏡頭，請稍候</p>
+      <button id="btn-cancel-call" class="btn-cancel-call">取消撥號</button>
+    </div>
+  </div>
+
+  <!-- 視訊畫面容器 -->
+  <section id="call-view" class="view hidden">
+    <!-- Jitsi Iframe 注入區 -->
+    <div id="jitsi-container"></div>
+    
+    <!-- 輔助退出按鈕（避免長輩找不到 Jitsi 內建的小掛斷鈕） -->
+    <button id="btn-floating-hangup" class="btn-floating-hangup" title="結束通話返回首頁">
+      <span class="hangup-icon">📞</span>
+      <span class="hangup-text">掛斷電話</span>
+    </button>
+  </section>
+
+  <!-- 家屬後台設定 Modal -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚙️ 家屬專屬設定</h2>
+        <button id="btn-close-settings" class="btn-close-modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="settings-tabs">
+          <button class="tab-btn active" data-tab="tab-contacts">👥 聯絡人管理</button>
+          <button class="tab-btn" data-tab="tab-notify">🔔 手機推播通知</button>
+          <button class="tab-btn" data-tab="tab-system">🛠️ 系統與除錯</button>
+        </div>
+
+        <!-- 分頁 1：聯絡人 -->
+        <div id="tab-contacts" class="tab-pane active">
+          <p class="tab-intro">在此修改平板上出現的家人姓名與照片。</p>
+          <div id="settings-contacts-list" class="settings-contacts-list"></div>
+          <button id="btn-add-contact" class="btn-secondary">+ 新增一位聯絡人</button>
+        </div>
+
+        <!-- 分頁 2：手機推播 -->
+        <div id="tab-notify" class="tab-pane">
+          <p class="tab-intro">當長輩在平板點擊通話時，自動通知您的手機。</p>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="cfg-webhook-enable"> 啟用手機通知功能
+            </label>
+          </div>
+          <div class="form-group">
+            <label>通知通道：</label>
+            <select id="cfg-webhook-provider" class="form-control">
+              <option value="discord">Discord 頻道 Webhook（最簡單推薦）</option>
+              <option value="telegram">Telegram 機器人</option>
+              <option value="custom">自訂 HTTP POST Webhook</option>
+            </select>
+          </div>
+          
+          <div id="group-discord" class="form-group">
+            <label>Discord Webhook URL：</label>
+            <input type="url" id="cfg-discord-url" class="form-control" placeholder="https://discord.com/api/webhooks/...">
+          </div>
+
+          <div id="group-telegram" class="form-group hidden">
+            <label>Telegram Bot Token：</label>
+            <input type="text" id="cfg-tg-token" class="form-control" placeholder="123456789:ABCdefGhIjk-...">
+            <label style="margin-top:8px;">Telegram Chat ID：</label>
+            <input type="text" id="cfg-tg-chatid" class="form-control" placeholder="你的個人或群組 Chat ID">
+          </div>
+
+          <div id="group-custom" class="form-group hidden">
+            <label>自訂 Webhook URL (POST)：</label>
+            <input type="url" id="cfg-custom-url" class="form-control" placeholder="https://your-server.com/api/call-notify">
+          </div>
+
+          <button id="btn-test-notification" class="btn-secondary">🔔 測試發送通知</button>
+        </div>
+
+        <!-- 分頁 3：系統 -->
+        <div id="tab-system" class="tab-pane">
+          <div class="form-group">
+            <label>房間前綴代碼（避免與全世界撞名）：</label>
+            <input type="text" id="cfg-room-prefix" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Jitsi 網域（預設使用 meet.jit.si）：</label>
+            <input type="text" id="cfg-jitsi-domain" class="form-control" value="meet.jit.si">
+          </div>
+          <div class="form-group">
+            <button id="btn-test-sound" class="btn-secondary">🔊 測試撥號音效</button>
+            <button id="btn-request-wakelock" class="btn-secondary">💡 鎖定螢幕不休眠</button>
+          </div>
+          <div class="form-group">
+            <button id="btn-reset-default" class="btn-danger">⚠️ 重設回出廠預設值</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-save-settings" class="btn-primary">儲存並套用</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 載入核心邏輯 -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "Smile Video Call - 微笑視訊",
+  "short_name": "微笑視訊",
+  "description": "長輩一鍵視訊通話 PWA",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F1F5F9",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
