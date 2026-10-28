@@ -57,8 +57,10 @@ body {
    主畫面 (Home View)
    ============================================================ */
 #home-view {
-  padding: 24px 32px 16px;
-  justify-content: space-between;
+  padding: 16px 24px 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* 頂部時間與問候列 */
@@ -67,22 +69,24 @@ body {
   justify-content: space-between;
   align-items: center;
   background: white;
-  padding: 16px 28px;
+  padding: 12px 24px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .header-left .title {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: var(--primary-color);
   letter-spacing: 1px;
 }
 
 .header-left .subtitle {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .header-right {
@@ -90,7 +94,7 @@ body {
 }
 
 .clock-time {
-  font-size: 2.6rem;
+  font-size: 2.2rem;
   font-weight: 800;
   color: var(--text-main);
   line-height: 1;
@@ -98,9 +102,9 @@ body {
 }
 
 .clock-date {
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* 聯絡人容器 */
@@ -109,16 +113,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px 0;
+  padding: 6px 0;
   overflow-y: auto;
 }
 
 .contacts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1100px;
 }
 
 /* 長輩大按鈕卡片 */
@@ -126,7 +130,7 @@ body {
   background: var(--card-bg);
   border: 4px solid #e2e8f0;
   border-radius: var(--radius-lg);
-  padding: 24px 20px;
+  padding: 16px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -144,9 +148,9 @@ body {
 
 .contact-avatar-wrapper {
   position: relative;
-  width: 150px;
-  height: 150px;
-  margin-bottom: 16px;
+  width: 110px;
+  height: 110px;
+  margin-bottom: 10px;
 }
 
 .contact-avatar {
@@ -154,8 +158,8 @@ body {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid white;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background-color: #f1f5f9;
 }
 
@@ -165,33 +169,33 @@ body {
   right: 0;
   background: var(--success-color);
   color: white;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  font-size: 1.1rem;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .contact-name {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: var(--text-main);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   text-align: center;
 }
 
 .contact-action-hint {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--primary-color);
   background: #eff6ff;
-  padding: 8px 24px;
+  padding: 6px 20px;
   border-radius: 999px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 /* 底部列 */

@@ -195,26 +195,30 @@ class SmileVideoCallApp {
     const fullRoomName = `${this.config.roomPrefix}-${contact.roomSuffix}`;
     const roomUrl = `https://${this.config.jitsiDomain}/${fullRoomName}`;
 
-    // 1. 顯示等待撥號畫面
+    // 1. 切換畫面：立即顯示視訊容器（讓 iframe 正常具備全螢幕尺寸與權限），首頁暫時隱藏
+    this.dom.homeView.classList.add("hidden");
+    this.dom.callView.classList.remove("hidden");
+
+    // 2. 顯示等待撥號畫面（浮於最上層）
     this.dom.connectingAvatar.src = contact.avatarUrl;
     this.dom.connectingName.textContent = `正在撥給 ${contact.name}...`;
     this.dom.connectingOverlay.classList.remove("hidden");
     this.startRingingSound();
 
-    // 2. 背景發送手機推播通知給家人
+    // 3. 背景發送手機推播通知給家人
     this.sendNotification(contact, roomUrl);
 
-    // 3. 確保螢幕保持開啟
+    // 4. 確保螢幕保持開啟
     this.requestWakeLock();
 
-    // 4. 清理上一次的通話實例
+    // 5. 清理上一次的通話實例
     if (this.currentCallApi) {
       this.currentCallApi.dispose();
       this.currentCallApi = null;
     }
     this.dom.jitsiContainer.innerHTML = "";
 
-    // 5. 初始化 Jitsi Meet 外部控制
+    // 6. 初始化 Jitsi Meet 外部控制
     const options = {
       roomName: fullRoomName,
       width: "100%",
@@ -234,7 +238,6 @@ class SmileVideoCallApp {
         notifications: []
       },
       interfaceConfigOverwrite: {
-        // 只保留最精簡的按鈕：麥克風、鏡頭、掛斷
         TOOLBAR_BUTTONS: ["microphone", "camera", "hangup"],
         SHOW_JITSI_WATERMARK: false,
         SHOW_WATERMARK_FOR_GUESTS: false,
@@ -245,12 +248,17 @@ class SmileVideoCallApp {
     try {
       this.currentCallApi = new JitsiMeetExternalAPI(this.config.jitsiDomain, options);
 
-      // 當進入視訊房間後，關閉撥號等待層，切換到視訊主視圖
-      this.currentCallApi.addEventListener("videoConferenceJoined", () => {
+      // 安全機制：3秒後強制隱藏撥號遮罩，避免瀏覽器權限彈窗被遮擋
+      this.connectingTimeout = setTimeout(() => {
         this.stopRingingSound();
         this.dom.connectingOverlay.classList.add("hidden");
-        this.dom.homeView.classList.add("hidden");
-        this.dom.callView.classList.remove("hidden");
+      }, 3000);
+
+      // 當進入視訊房間後，關閉撥號等待層
+      this.currentCallApi.addEventListener("videoConferenceJoined", () => {
+        if (this.connectingTimeout) clearTimeout(this.connectingTimeout);
+        this.stopRingingSound();
+        this.dom.connectingOverlay.classList.add("hidden");
       });
 
       // 通話掛斷或離開事件
@@ -269,6 +277,10 @@ class SmileVideoCallApp {
 
   // 結束通話
   endCall() {
+    if (this.connectingTimeout) {
+      clearTimeout(this.connectingTimeout);
+      this.connectingTimeout = null;
+    }
     this.stopRingingSound();
     this.dom.connectingOverlay.classList.add("hidden");
 
