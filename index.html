@@ -51,7 +51,7 @@
     <!-- 底部狀態列 -->
     <footer class="app-footer">
       <div class="status-indicator">
-        <span class="status-dot"></span>
+        <span id="status-dot" class="status-dot"></span>
         <span id="connection-status">連線正常，隨時可撥打與接收來電</span>
       </div>
       <!-- 右下角隱藏設定按鈕 -->
@@ -234,6 +234,7 @@
           </div>
           <div class="form-group">
             <button id="btn-test-sound" class="btn-secondary">🔊 測試撥號音效</button>
+            <button id="btn-test-incoming" class="btn-secondary" style="background:#dcfce7; color:#166534; border:1px solid #86efac;">🧪 模擬測試自動接聽來電</button>
             <button id="btn-request-wakelock" class="btn-secondary">💡 鎖定螢幕不休眠</button>
           </div>
           <div class="form-group">
