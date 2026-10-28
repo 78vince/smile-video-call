@@ -49,7 +49,12 @@ class SmileVideoCallApp {
     try {
       const saved = localStorage.getItem("smile_call_config");
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // 若原本儲存的設定缺少 Webhook，自動繼承 DEFAULT_CONFIG 的值
+        if (!parsed.webhook || !parsed.webhook.discordWebhookUrl) {
+          parsed.webhook = DEFAULT_CONFIG.webhook;
+        }
+        return parsed;
       }
     } catch (e) {
       console.warn("無法讀取本機設定，改用預設設定", e);
@@ -420,14 +425,68 @@ class SmileVideoCallApp {
       document.getElementById("group-custom").classList.toggle("hidden", val !== "custom");
     });
 
-    // 測試通知按鈕
+    // 測試通知按鈕（直接讀取目前畫面上填寫的網址進行即時測試）
     document.getElementById("btn-test-notification").addEventListener("click", async () => {
       const btn = document.getElementById("btn-test-notification");
+      const provider = document.getElementById("cfg-webhook-provider").value;
+      const discordUrl = document.getElementById("cfg-discord-url").value.trim();
+      const tgToken = document.getElementById("cfg-tg-token").value.trim();
+      const tgChatId = document.getElementById("cfg-tg-chatid").value.trim();
+      const customUrl = document.getElementById("cfg-custom-url").value.trim();
+
       btn.textContent = "發送中...";
       btn.disabled = true;
-      const testContact = { name: "測試對象" };
-      await this.sendNotification(testContact, `https://${this.config.jitsiDomain}/smile-test`);
-      btn.textContent = "✅ 已送出測試（請檢查手機）";
+
+      try {
+        if (provider === "discord") {
+          if (!discordUrl) {
+            alert("請先貼上 Discord Webhook URL！");
+            btn.textContent = "🔔 測試發送通知";
+            btn.disabled = false;
+            return;
+          }
+          const res = await fetch(discordUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: "🔔【微笑視訊測試】這是一則測試通知！如果看到這則訊息，表示 Discord Webhook 設定完全成功！\n👉 測試連結：https://" + (this.config.jitsiDomain || "meet.jit.si") + "/smile-test"
+            })
+          });
+          if (res.ok) {
+            btn.textContent = "✅ 發送成功！請看 Discord";
+            alert("✅ 發送成功！請查看您的 Discord 頻道是否出現訊息。\n\n⚠️ 提醒：請記得點擊右下角藍色的「儲存並套用」按鈕儲存設定！");
+          } else {
+            const err = await res.text();
+            alert("❌ 發送失敗，Discord 回傳：" + err);
+            btn.textContent = "❌ 發送失敗";
+          }
+        } else if (provider === "telegram") {
+          const res = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: tgChatId,
+              text: "🔔【微笑視訊測試】Telegram 連線成功！"
+            })
+          });
+          if (res.ok) {
+            alert("✅ 發送成功！請查看 Telegram。記得按「儲存並套用」！");
+          } else {
+            alert("❌ Telegram 發送失敗");
+          }
+        } else if (provider === "custom") {
+          await fetch(customUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ event: "test_notification" })
+          });
+          alert("✅ 已送出自訂 POST 請求！");
+        }
+      } catch (err) {
+        alert("❌ 測試發送失敗：" + err.message);
+        btn.textContent = "❌ 發送失敗";
+      }
+
       setTimeout(() => {
         btn.textContent = "🔔 測試發送通知";
         btn.disabled = false;

@@ -45,12 +45,12 @@ const DEFAULT_CONFIG = {
 
   // 外部通知設定（長輩點擊時，自動發送訊息到晚輩手機）
   webhook: {
-    enabled: false,
+    enabled: true,
     // 支援: 'telegram' | 'discord' | 'custom'
     provider: "discord",
     
-    // Discord Webhook 網址範例: https://discord.com/api/webhooks/xxxx/yyyy
-    discordWebhookUrl: "",
+    // Discord Webhook 網址
+    discordWebhookUrl: "https://discord.com/api/webhooks/1564922649514221598/9mfthoZpD4EIYrfmPIsGJpAo-cMND4xmo-lQ-lTsAAvcQp6I7aJeMj_PiBrlZ0FWEP3I",
 
     // Telegram Bot 設定 (需建立 Bot 與取得 Chat ID)
     telegramBotToken: "",
