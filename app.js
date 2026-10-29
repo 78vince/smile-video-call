@@ -977,6 +977,14 @@ class SmileVideoCallApp {
 }
 
 // 啟動應用
-window.addEventListener("DOMContentLoaded", () => {
-  window.app = new SmileVideoCallApp();
-});
+function bootstrapApp() {
+  if (!window.app) {
+    window.app = new SmileVideoCallApp();
+  }
+}
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", bootstrapApp);
+} else {
+  bootstrapApp();
+}

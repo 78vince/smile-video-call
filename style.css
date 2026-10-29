@@ -57,9 +57,12 @@ body {
    主畫面 (Home View)
    ============================================================ */
 #home-view {
-  padding: 16px 24px 12px;
+  padding: 14px 20px max(14px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
@@ -69,32 +72,41 @@ body {
   justify-content: space-between;
   align-items: center;
   background: white;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   flex-shrink: 0;
 }
 
 .header-left .title {
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   font-weight: 800;
   color: var(--primary-color);
   letter-spacing: 1px;
 }
 
 .header-left .subtitle {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-muted);
   margin-top: 2px;
 }
 
 .header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   text-align: right;
 }
 
+.clock-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
 .clock-time {
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 800;
   color: var(--text-main);
   line-height: 1;
@@ -102,27 +114,29 @@ body {
 }
 
 .clock-date {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
   margin-top: 2px;
 }
 
 /* 聯絡人容器 */
 .contacts-container {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 0;
+  flex-direction: column;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 0;
 }
 
 .contacts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
   width: 100%;
   max-width: 1100px;
+  margin: auto;
 }
 
 /* 長輩大按鈕卡片 */
@@ -198,42 +212,59 @@ body {
   margin-top: 4px;
 }
 
-/* 底部列 */
+/* 底部列（常駐底端，絕不被擠出畫面） */
 .app-footer {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 8px 16px;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  margin-top: 8px;
+  z-index: 10;
 }
 
 .status-indicator {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 1rem;
+  font-weight: 600;
   color: var(--text-muted);
 }
 
 .status-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--success-color);
   box-shadow: 0 0 8px rgba(22, 163, 74, 0.6);
+  flex-shrink: 0;
 }
 
 .btn-settings-gear {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  opacity: 0.35;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
+  opacity: 0.75;
   cursor: pointer;
-  padding: 10px;
-  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .btn-settings-gear:hover, .btn-settings-gear:active {
   opacity: 1;
+  background: #e2e8f0;
+  transform: scale(1.05);
 }
 
 /* ============================================================
@@ -637,7 +668,7 @@ body {
   background: #f1f5f9;
   border: 1.5px solid #cbd5e1;
   color: var(--text-main);
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
   font-size: 0.95rem;
   font-weight: 700;
@@ -645,8 +676,10 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 0;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-reload-badge:active {
@@ -766,32 +799,125 @@ body {
 }
 
 /* ============================================================
-   響應式設計（橫向 vs 直向平板）
+   響應式設計（平板與手機優化）
    ============================================================ */
 @media (max-width: 768px) {
   #home-view {
-    padding: 16px;
+    padding: 10px 14px max(10px, env(safe-area-inset-bottom));
   }
+  .app-header {
+    padding: 8px 16px;
+    margin-bottom: 8px;
+  }
+  .header-left .title {
+    font-size: 1.5rem;
+  }
+  .header-left .subtitle {
+    font-size: 0.95rem;
+  }
+  .clock-time {
+    font-size: 1.7rem;
+  }
+  .clock-date {
+    font-size: 0.9rem;
+  }
+  .contacts-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .contact-card {
+    padding: 12px 10px;
+  }
+  .contact-avatar-wrapper {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 6px;
+  }
+  .contact-name {
+    font-size: 1.5rem;
+  }
+  .contact-action-hint {
+    font-size: 0.95rem;
+    padding: 4px 14px;
+  }
+  .app-footer {
+    padding: 8px 14px;
+    margin-top: 6px;
+  }
+  .status-indicator {
+    font-size: 0.9rem;
+  }
+}
+
+/* 極矮螢幕（如平板或手機橫向模式）高度優化 */
+@media (max-height: 550px) {
+  #home-view {
+    padding: 8px 14px max(8px, env(safe-area-inset-bottom));
+  }
+  .app-header {
+    padding: 6px 14px;
+    margin-bottom: 6px;
+  }
+  .header-left .title {
+    font-size: 1.35rem;
+  }
+  .header-left .subtitle {
+    display: none; /* 橫向空間有限時隱藏副標題，保留最大視訊卡片空間 */
+  }
+  .clock-time {
+    font-size: 1.5rem;
+  }
+  .clock-date {
+    display: none;
+  }
+  .contacts-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .contact-card {
+    padding: 8px 10px;
+  }
+  .contact-avatar-wrapper {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 4px;
+  }
+  .contact-name {
+    font-size: 1.35rem;
+  }
+  .contact-action-hint {
+    font-size: 0.85rem;
+    padding: 3px 10px;
+  }
+  .app-footer {
+    padding: 6px 12px;
+    margin-top: 4px;
+  }
+  .btn-settings-gear {
+    width: 34px;
+    height: 34px;
+    font-size: 1.1rem;
+  }
+}
+
+/* 直立窄螢幕手機 */
+@media (max-width: 480px) {
   .app-header {
     flex-direction: column;
     text-align: center;
-    gap: 10px;
-    padding: 16px;
+    gap: 8px;
+    padding: 10px;
+  }
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .header-right {
-    text-align: center;
+    justify-content: center;
+    width: 100%;
   }
   .contacts-grid {
     grid-template-columns: 1fr;
-  }
-  .contact-card {
-    padding: 18px;
-  }
-  .contact-avatar-wrapper {
-    width: 120px;
-    height: 120px;
-  }
-  .contact-name {
-    font-size: 1.8rem;
   }
 }
