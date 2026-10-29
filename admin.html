@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>後台管理控制台 - 微笑視訊</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    /* 頂部導航 */
+    .admin-navbar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    .nav-brand span.badge {
+      font-size: 0.75rem;
+      background: #eff6ff;
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #bfdbfe;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: white;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-danger {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--danger);
+    }
+    .btn-danger:hover {
+      background: #fee2e2;
+    }
+
+    /* 內容容器 */
+    .admin-container {
+      max-width: 960px;
+      margin: 24px auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* 卡片模組 */
+    .admin-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #1e293b;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* 表單元件 */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #f8fafc;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* 專屬網址清單 */
+    .url-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .url-table th, .url-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+
+    .url-table th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .url-code {
+      font-family: monospace;
+      background: #f1f5f9;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      word-break: break-all;
+    }
+
+    /* 相簿縮圖網格 */
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .album-thumb {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    /* 狀態提示 Box */
+    .alert-box {
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      margin-bottom: 16px;
+    }
+    .alert-success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+    .alert-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+
+    /* 動作按鈕群 */
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* Toast 通知 */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #0f172a;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 999;
+      pointer-events: none;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部導航 -->
+  <header class="admin-navbar">
+    <div class="nav-brand">
+      🛠️ 微笑視訊 <span class="badge">內部管理控制台</span>
+    </div>
+    <div class="nav-actions">
+      <a href="./index.html" class="btn btn-secondary" title="返回視訊首頁">👵 返回通話首頁</a>
+      <button id="btn-save-all" class="btn btn-primary">💾 儲存並套用所有設定</button>
+    </div>
+  </header>
+
+  <main class="admin-container">
+
+    <div class="alert-box alert-info">
+      <strong>🔒 此為內部專屬管理頁面</strong>：未在通話主畫面上公開，長輩平板端與晚輩手機端已隱藏齒輪設定，專注於零阻力一鍵通話。
+    </div>
+
+    <!-- 區塊 1：家庭 LINE 群組與 Webhook 通知設定 -->
+    <section class="admin-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">🔔 LINE 家庭群組與通知中繼站</h2>
+          <p class="card-desc">長輩在平板點擊撥號時，自動透過 Google Apps Script (GAS) 推播通知至家人的 LINE 群組。</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>全局預設 Webhook 網址（Google Apps Script 中繼站）：</label>
+        <div class="input-row">
+          <input type="url" id="cfg-default-webhook" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+          <button id="btn-test-default-webhook" class="btn btn-secondary" style="white-space: nowrap;">🔔 測試群組推播</button>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 18px;">
+        <label>👦 阿禮的個別 Webhook 覆寫（留空則自動套用上方全局設定）：</label>
+        <div class="input-row">
+          <input type="url" id="cfg-webhook-ali" class="form-control" placeholder="留空套用預設">
+          <button class="btn btn-secondary btn-test-single" data-target="ali" style="white-space: nowrap;">測試阿禮</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>🧑 阿龍的個別 Webhook 覆寫：</label>
+        <div class="input-row">
+          <input type="url" id="cfg-webhook-along" class="form-control" placeholder="留空套用預設">
+          <button class="btn btn-secondary btn-test-single" data-target="along" style="white-space: nowrap;">測試阿龍</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>👧 小君的個別 Webhook 覆寫：</label>
+        <div class="input-row">
+          <input type="url" id="cfg-webhook-xiaojun" class="form-control" placeholder="留空套用預設">
+          <button class="btn btn-secondary btn-test-single" data-target="xiaojun" style="white-space: nowrap;">測試小君</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊 2：視訊伺服器與來電參數 -->
+    <section class="admin-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">⚙️ 通話伺服器與自動接聽參數</h2>
+          <p class="card-desc">Jitsi Meet 免登入伺服器與 ntfy.sh 即時公共通話通道配置。</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+        <div class="form-group">
+          <label>Jitsi 視訊伺服器 Domain：</label>
+          <input type="text" id="cfg-jitsi-domain" class="form-control" value="jitsi.riot.im">
+        </div>
+
+        <div class="form-group">
+          <label>ntfy.sh 即時來電通道 Topic：</label>
+          <input type="text" id="cfg-signal-topic" class="form-control" value="smile-axiao-call-78vince">
+        </div>
+
+        <div class="form-group">
+          <label>長輩平板來電自動接聽倒數（秒）：</label>
+          <input type="number" id="cfg-auto-answer-seconds" class="form-control" value="5" min="1" max="30">
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊 3：Google 相簿雲端同步管理 -->
+    <section class="admin-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">🖼️ Google 相簿雲端自動同步</h2>
+          <p class="card-desc">長輩平板專屬相簿輪播，只要在 Google 相簿新增照片，平板端自動即時載入。</p>
+        </div>
+        <button id="btn-sync-photos-now" class="btn btn-secondary">🔄 立即向雲端同步相片</button>
+      </div>
+
+      <div class="form-group">
+        <label>公開 Google 相簿網址：</label>
+        <div class="input-row">
+          <input type="url" id="cfg-album-url" class="form-control" readonly value="https://photos.app.goo.gl/aFTRxKidVotBq1eXA">
+          <a href="https://photos.app.goo.gl/aFTRxKidVotBq1eXA" target="_blank" rel="noopener" class="btn btn-secondary" style="white-space: nowrap;">開啟相簿 ↗</a>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <label>目前載入的相片列表（共 <span id="photo-count">0</span> 張）：</label>
+        <div id="album-preview-grid" class="album-grid"></div>
+      </div>
+    </section>
+
+    <!-- 區塊 4：家庭專屬直通網址清單 -->
+    <section class="admin-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">🔗 家庭專屬身分直通網址</h2>
+          <p class="card-desc">將專屬連結傳給家人，在手機打開加入主畫面即可一鍵撥通。</p>
+        </div>
+      </div>
+
+      <table class="url-table">
+        <thead>
+          <tr>
+            <th>身分</th>
+            <th>角色說明</th>
+            <th>直通網址</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>👵 <strong>阿笑</strong></td>
+            <td>客廳長輩平板（6格按鈕、相簿、防呆微光時鐘）</td>
+            <td><code class="url-code" id="url-axiao"></code></td>
+            <td>
+              <button class="btn btn-secondary btn-copy" data-target="url-axiao">複製</button>
+              <a id="link-axiao" href="#" target="_blank" class="btn btn-secondary">開啟</a>
+            </td>
+          </tr>
+          <tr>
+            <td>👦 <strong>阿禮</strong></td>
+            <td>大兒子手機（置中單一聯絡人，直通媽媽）</td>
+            <td><code class="url-code" id="url-ali"></code></td>
+            <td>
+              <button class="btn btn-secondary btn-copy" data-target="url-ali">複製</button>
+              <a id="link-ali" href="#" target="_blank" class="btn btn-secondary">開啟</a>
+            </td>
+          </tr>
+          <tr>
+            <td>🧑 <strong>阿龍</strong></td>
+            <td>二兒子手機（置中單一聯絡人，直通媽媽）</td>
+            <td><code class="url-code" id="url-along"></code></td>
+            <td>
+              <button class="btn btn-secondary btn-copy" data-target="url-along">複製</button>
+              <a id="link-along" href="#" target="_blank" class="btn btn-secondary">開啟</a>
+            </td>
+          </tr>
+          <tr>
+            <td>👧 <strong>小君</strong></td>
+            <td>孫女手機（置中單一聯絡人，直通奶奶）</td>
+            <td><code class="url-code" id="url-xiaojun"></code></td>
+            <td>
+              <button class="btn btn-secondary btn-copy" data-target="url-xiaojun">複製</button>
+              <a id="link-xiaojun" href="#" target="_blank" class="btn btn-secondary">開啟</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 區塊 5：工程除錯與驗證工具箱 -->
+    <section class="admin-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">🧪 工程驗證與除錯工具箱</h2>
+          <p class="card-desc">供工程師與管理者驗證音效、來電信號、防休眠與微光防烙印狀態。</p>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button id="btn-test-sound" class="btn btn-secondary">🔊 測試撥號等待音</button>
+        <button id="btn-test-incoming" class="btn btn-secondary" style="background:#f0fdf4; color:#166534; border-color:#86efac;">📞 模擬晚輩撥打給阿笑平板</button>
+        <button id="btn-test-wakelock" class="btn btn-secondary">💡 檢查 Screen WakeLock 防休眠</button>
+      </div>
+    </section>
+
+    <!-- 區塊 6：危險操作區 -->
+    <section class="admin-card" style="border-color: #fecaca; background: #fffaf0;">
+      <div class="card-header" style="border-bottom-color: #fed7aa;">
+        <div>
+          <h2 class="card-title" style="color: #9a3412;">⚠️ 危險操作區</h2>
+          <p class="card-desc">清除瀏覽器快取設定並恢復原廠配置。</p>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <span style="font-size: 0.9rem; color: #9a3412;">
+          若長輩平板發生未知異常，可點擊重設回出廠配置（不會影響雲端 Google 相簿與 LINE 群組）：
+        </span>
+        <button id="btn-reset-factory" class="btn btn-danger">⚠️ 重設為原廠預設值</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast"></div>
+
+  <script>
+    // 管理控制台邏輯
+    const STORAGE_KEY = "smile_call_config_v8";
+    const ALBUM_CACHE_KEY = "smile_call_cached_album_photos";
+
+    let currentConfig = loadAdminConfig();
+
+    function loadAdminConfig() {
+      let cfg = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          cfg = Object.assign(cfg, parsed);
+        }
+      } catch (e) {
+        console.warn("無法讀取快取設定，採用預設值", e);
+      }
+
+      // 讀取相簿快取
+      try {
+        const cachedPhotos = localStorage.getItem(ALBUM_CACHE_KEY);
+        if (cachedPhotos) {
+          const parsedPhotos = JSON.parse(cachedPhotos);
+          if (Array.isArray(parsedPhotos) && parsedPhotos.length > 0) {
+            cfg.albumPhotos = parsedPhotos;
+          }
+        }
+      } catch (_) {}
+
+      return cfg;
+    }
+
+    function saveAdminConfig(newConfig) {
+      currentConfig = newConfig;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newConfig));
+      showToast("✅ 所有設定已成功儲存並生效！");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    // 初始化表單資料
+    function initForm() {
+      const baseUrl = window.location.origin + window.location.pathname.replace("admin.html", "");
+
+      // 1. Webhook
+      document.getElementById("cfg-default-webhook").value = currentConfig.defaultWebhookUrl || "";
+
+      const axiaoContacts = currentConfig.roles.axiao.contacts;
+      const cAli = axiaoContacts.find(c => c.id === "ali");
+      const cAlong = axiaoContacts.find(c => c.id === "along");
+      const cXiaojun = axiaoContacts.find(c => c.id === "xiaojun");
+
+      document.getElementById("cfg-webhook-ali").value = cAli?.webhookUrl || "";
+      document.getElementById("cfg-webhook-along").value = cAlong?.webhookUrl || "";
+      document.getElementById("cfg-webhook-xiaojun").value = cXiaojun?.webhookUrl || "";
+
+      // 2. 參數
+      document.getElementById("cfg-jitsi-domain").value = currentConfig.jitsiDomain || "jitsi.riot.im";
+      document.getElementById("cfg-signal-topic").value = currentConfig.signalTopic || "smile-axiao-call-78vince";
+      document.getElementById("cfg-auto-answer-seconds").value = currentConfig.autoAnswerDelaySeconds || 5;
+
+      // 3. 網址清單
+      const roles = ["axiao", "ali", "along", "xiaojun"];
+      roles.forEach(roleId => {
+        const fullUrl = `${baseUrl}?u=${roleId}`;
+        const codeEl = document.getElementById(`url-${roleId}`);
+        const linkEl = document.getElementById(`link-${roleId}`);
+        if (codeEl) codeEl.textContent = fullUrl;
+        if (linkEl) linkEl.href = fullUrl;
+      });
+
+      // 4. 相簿照片預覽
+      renderAlbumPreview();
+    }
+
+    function renderAlbumPreview() {
+      const photos = currentConfig.albumPhotos || [];
+      document.getElementById("photo-count").textContent = photos.length;
+      const grid = document.getElementById("album-preview-grid");
+      grid.innerHTML = "";
+      photos.forEach((p, idx) => {
+        const img = document.createElement("img");
+        img.className = "album-thumb";
+        img.src = p.url.replace("=w1600", "=w300");
+        img.alt = `相片 ${idx + 1}`;
+        img.title = `第 ${idx + 1} 張相片`;
+        grid.appendChild(img);
+      });
+    }
+
+    // 儲存表單
+    document.getElementById("btn-save-all").addEventListener("click", () => {
+      const defaultWebhook = document.getElementById("cfg-default-webhook").value.trim();
+      const aliWebhook = document.getElementById("cfg-webhook-ali").value.trim() || defaultWebhook;
+      const alongWebhook = document.getElementById("cfg-webhook-along").value.trim() || defaultWebhook;
+      const xiaojunWebhook = document.getElementById("cfg-webhook-xiaojun").value.trim() || defaultWebhook;
+
+      currentConfig.defaultWebhookUrl = defaultWebhook;
+      currentConfig.jitsiDomain = document.getElementById("cfg-jitsi-domain").value.trim() || "jitsi.riot.im";
+      currentConfig.signalTopic = document.getElementById("cfg-signal-topic").value.trim() || "smile-axiao-call-78vince";
+      currentConfig.autoAnswerDelaySeconds = parseInt(document.getElementById("cfg-auto-answer-seconds").value, 10) || 5;
+
+      const axiaoContacts = currentConfig.roles.axiao.contacts;
+      const cAli = axiaoContacts.find(c => c.id === "ali");
+      const cAlong = axiaoContacts.find(c => c.id === "along");
+      const cXiaojun = axiaoContacts.find(c => c.id === "xiaojun");
+
+      if (cAli) cAli.webhookUrl = aliWebhook;
+      if (cAlong) cAlong.webhookUrl = alongWebhook;
+      if (cXiaojun) cXiaojun.webhookUrl = xiaojunWebhook;
+
+      if (currentConfig.roles.ali.contacts[0]) currentConfig.roles.ali.contacts[0].webhookUrl = aliWebhook;
+      if (currentConfig.roles.along.contacts[0]) currentConfig.roles.along.contacts[0].webhookUrl = alongWebhook;
+      if (currentConfig.roles.xiaojun.contacts[0]) currentConfig.roles.xiaojun.contacts[0].webhookUrl = xiaojunWebhook;
+
+      saveAdminConfig(currentConfig);
+    });
+
+    // 複製按鈕
+    document.querySelectorAll(".btn-copy").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-target");
+        const text = document.getElementById(targetId)?.textContent;
+        if (text) {
+          navigator.clipboard.writeText(text).then(() => {
+            showToast("📋 已複製專屬網址至剪貼簿！");
+          });
+        }
+      });
+    });
+
+    // 測試全局 Webhook
+    document.getElementById("btn-test-default-webhook").addEventListener("click", async () => {
+      const url = document.getElementById("cfg-default-webhook").value.trim();
+      if (!url) {
+        alert("請先輸入 Webhook 網址！");
+        return;
+      }
+      showToast("🚀 正在發送測試通知至家庭群組...");
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caller: "後台測試員",
+            target: "全體家人",
+            content: "📢【微笑視訊後台測試】這是一則來自管理控制台的測試推播！",
+            callUrl: window.location.origin + window.location.pathname.replace("admin.html", "")
+          })
+        });
+        showToast("✅ 測試推播已發送！請檢查 LINE 群組。");
+      } catch (err) {
+        alert("發送失敗，請檢查網址或網路：" + err);
+      }
+    });
+
+    // 手動同步相片
+    document.getElementById("btn-sync-photos-now").addEventListener("click", async () => {
+      const webhookUrl = document.getElementById("cfg-default-webhook").value.trim();
+      if (!webhookUrl || !webhookUrl.includes("script.google.com")) {
+        alert("請先設定正確的 Google Apps Script Webhook 網址！");
+        return;
+      }
+      showToast("🔄 正在向 Google 雲端中繼抓取最新相簿...");
+      try {
+        const syncUrl = `${webhookUrl}${webhookUrl.includes("?") ? "&" : "?"}action=photos`;
+        const res = await fetch(syncUrl);
+        const data = await res.json();
+        if (data && data.status === "success" && Array.isArray(data.photos) && data.photos.length > 0) {
+          currentConfig.albumPhotos = data.photos;
+          localStorage.setItem(ALBUM_CACHE_KEY, JSON.stringify(data.photos));
+          renderAlbumPreview();
+          showToast(`🎉 成功同步！最新抓取到 ${data.photos.length} 張相片！`);
+        } else {
+          alert("抓取失敗或相簿為空：" + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert("同步出錯：" + err);
+      }
+    });
+
+    // 音效測試 (Web Audio API)
+    document.getElementById("btn-test-sound").addEventListener("click", () => {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.8);
+      showToast("🔊 已播放撥號測試音！");
+    });
+
+    // 模擬來電
+    document.getElementById("btn-test-incoming").addEventListener("click", async () => {
+      const topic = document.getElementById("cfg-signal-topic").value.trim() || "smile-axiao-call-78vince";
+      const payload = {
+        action: "incoming_call",
+        caller: "ali",
+        callerName: "阿禮（後台模擬撥號）",
+        target: "axiao",
+        roomName: "smile-axiao-ali",
+        callType: "video",
+        avatarUrl: "https://api.dicebear.com/7.x/bottts/png?seed=ali&backgroundColor=b6e3f4"
+      };
+
+      showToast("📞 正在發送模擬來電至長輩平板...");
+      try {
+        await fetch(`https://ntfy.sh/${topic}`, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        showToast("✅ 已發送模擬呼叫！若阿笑平板開啟中將立即響鈴。");
+      } catch (e) {
+        alert("發送失敗：" + e);
+      }
+    });
+
+    // WakeLock 測試
+    document.getElementById("btn-test-wakelock").addEventListener("click", async () => {
+      if ("wakeLock" in navigator) {
+        try {
+          const lock = await navigator.wakeLock.request("screen");
+          showToast("💡 成功取得螢幕常亮鎖定 (Screen Wake Lock)！");
+          setTimeout(() => lock.release(), 5000);
+        } catch (err) {
+          alert("無法鎖定螢幕：" + err.message);
+        }
+      } else {
+        alert("此瀏覽器不支援 Screen WakeLock API");
+      }
+    });
+
+    // 重設出廠
+    document.getElementById("btn-reset-factory").addEventListener("click", () => {
+      if (confirm("⚠️ 確定要清除所有本機修改並重設為原廠預設值嗎？\n此動作無法復原。")) {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(ALBUM_CACHE_KEY);
+        currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        initForm();
+        showToast("🔄 已成功恢復原廠預設設定！");
+      }
+    });
+
+    // 啟動
+    initForm();
+  </script>
+</body>
+</html>

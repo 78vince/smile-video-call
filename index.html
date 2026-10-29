@@ -8,6 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/apple-touch-icon-512.png">
   <title>Smile Video Call - 微笑視訊</title>
   <link rel="stylesheet" href="style.css">
   
@@ -56,8 +60,8 @@
         <span id="status-dot" class="status-dot"></span>
         <span id="connection-status">連線正常，隨時可撥打與接收來電</span>
       </div>
-      <!-- 右下角隱藏設定按鈕 -->
-      <button id="btn-open-settings" class="btn-settings-gear" title="家屬設定" aria-label="設定">
+      <!-- 右下角管理員設定按鈕（預設隱藏，避免長輩誤觸） -->
+      <button id="btn-open-settings" class="btn-settings-gear" title="家屬設定" aria-label="設定" style="display: none;">
         ⚙️
       </button>
     </footer>

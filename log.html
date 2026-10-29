@@ -725,9 +725,9 @@
 
         <!-- 階段 11 -->
         <div class="timeline-item">
-          <div class="timeline-dot success"></div>
+          <div class="timeline-dot"></div>
           <div class="timeline-header-row">
-            <span class="timeline-phase highlight">Phase 11</span>
+            <span class="timeline-phase">Phase 11</span>
             <span class="timeline-time">2026-10-29 15:45 ~ 16:00</span>
           </div>
           <div class="timeline-title">晚輩介面極簡純淨化（僅長輩端保留家庭相簿）</div>
@@ -742,6 +742,29 @@
             <span class="tag">僅長輩相簿</span>
             <span class="tag">單一卡片置中</span>
             <span class="tag">防呆過濾</span>
+          </div>
+        </div>
+
+        <!-- 階段 12 -->
+        <div class="timeline-item">
+          <div class="timeline-dot success"></div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase highlight">Phase 12</span>
+            <span class="timeline-time">2026-10-29 16:25 ~ 16:45</span>
+          </div>
+          <div class="timeline-title">滿版藍底「笑」字 Icon 重製、手機狀態列安全避讓、獨立不公開管理後台 (admin.html)</div>
+          <div class="timeline-desc">
+            <strong>1. 滿版藍底「笑」字 Icon 重繪</strong>：徹底解決 iOS / Android 原先圖示透明邊緣引發的四角黑邊問題。採用 100% 滿版品牌藍 <code>#2563EB</code> 填底，鐫刻白色 PingFang 粗體「笑」字，微調光學視覺重心，生成 192、512 及 iOS 專屬 <code>apple-touch-icon</code>。<br>
+            <strong>2. 手機端頂部安全高度避讓</strong>：引入 <code>max(52px, env(safe-area-inset-top, 52px))</code>，下移問候卡片，徹底解決 iPhone 動態島、瀏海、頂部時間（如 3:26）與 Wi-Fi/電池圖示遮擋標題與按鈕的問題。<br>
+            <strong>3. 獨立非公開管理控制台 (admin.html)</strong>：全面檢視並移出所有不適合長輩與一般使用者的進階設定；主畫面預設完全隱藏 ⚙️ 齒輪按鈕，長輩介面達到 100% 零干擾；提供隱密進入方式（連點標題 5 次或 <code>?admin=1</code>）。<br>
+            <strong>4. 快取版本更新</strong>：升級 Service Worker 快取至 <code>smile-call-v19</code>。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">滿版笑字Icon</span>
+            <span class="tag">去黑角</span>
+            <span class="tag">手機動態島避讓</span>
+            <span class="tag">獨立admin.html</span>
+            <span class="tag">零干擾長輩UI</span>
           </div>
         </div>
 

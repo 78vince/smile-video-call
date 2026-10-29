@@ -1348,13 +1348,39 @@ class SmileVideoCallApp {
       });
     });
 
-    // 家屬後台設定 Modal
-    this.dom.btnOpenSettings.addEventListener("click", () => {
-      this.openSettingsModal();
-    });
-    this.dom.btnCloseSettings.addEventListener("click", () => {
-      this.closeSettingsModal();
-    });
+    // 隱藏管理後台進入點（連點頂部標題 5 次即可開啟 admin.html 控制台）
+    let titleClicks = 0;
+    let titleTimer = null;
+    if (this.dom.appTitle) {
+      this.dom.appTitle.style.cursor = "pointer";
+      this.dom.appTitle.addEventListener("click", () => {
+        titleClicks++;
+        clearTimeout(titleTimer);
+        titleTimer = setTimeout(() => { titleClicks = 0; }, 2000);
+        if (titleClicks >= 5) {
+          window.location.href = "admin.html";
+        }
+      });
+    }
+
+    // 若網址帶有 ?admin=1，顯示管理齒輪按鈕
+    if (window.location.search.includes("admin=1")) {
+      if (this.dom.btnOpenSettings) {
+        this.dom.btnOpenSettings.style.display = "inline-flex";
+      }
+    }
+
+    // 家屬後台獨立頁面導向
+    if (this.dom.btnOpenSettings) {
+      this.dom.btnOpenSettings.addEventListener("click", () => {
+        window.location.href = "admin.html";
+      });
+    }
+    if (this.dom.btnCloseSettings) {
+      this.dom.btnCloseSettings.addEventListener("click", () => {
+        this.closeSettingsModal();
+      });
+    }
     this.dom.settingsModal.addEventListener("click", (e) => {
       if (e.target === this.dom.settingsModal) this.closeSettingsModal();
     });

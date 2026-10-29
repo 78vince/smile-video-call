@@ -63,7 +63,7 @@ body {
   height: 100%;
   height: var(--app-height, 100%);
   max-height: var(--app-height, 100%);
-  padding: 8px 16px max(8px, env(safe-area-inset-bottom));
+  padding: max(16px, env(safe-area-inset-top, 16px)) 16px max(10px, env(safe-area-inset-bottom, 10px));
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -1331,13 +1331,27 @@ body {
   }
 }
 
+/* 直立窄螢幕手機與 iPhone 動態島 / 瀏海高度避讓 */
+@media (max-width: 640px) {
+  #home-view {
+    padding: max(52px, env(safe-area-inset-top, 52px)) 14px max(14px, env(safe-area-inset-bottom, 14px));
+  }
+  .app-header {
+    margin-bottom: 12px;
+  }
+}
+
 /* 直立窄螢幕手機 */
 @media (max-width: 480px) {
+  #home-view {
+    padding: max(54px, env(safe-area-inset-top, 54px)) 12px max(14px, env(safe-area-inset-bottom, 14px));
+  }
   .app-header {
     flex-direction: column;
     text-align: center;
     gap: 8px;
     padding: 10px;
+    margin-bottom: 14px;
   }
   .header-left {
     display: flex;
@@ -1351,6 +1365,12 @@ body {
   .contacts-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+  }
+  .contacts-grid.single-contact {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: auto !important;
   }
   .contact-avatar-wrapper,
   .card-blank-circle,

@@ -1,13 +1,15 @@
-const CACHE_NAME = "smile-call-v18";
+const CACHE_NAME = "smile-call-v19";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
+  "./admin.html",
   "./style.css",
   "./app.js",
   "./config.js",
   "./manifest.json",
   "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "./icons/icon-512.png",
+  "./icons/apple-touch-icon.png"
 ];
 
 // 安裝並快取靜態檔案
