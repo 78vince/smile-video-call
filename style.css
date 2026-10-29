@@ -137,13 +137,21 @@ body {
 
 .contacts-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px 18px;
+  grid-template-columns: repeat(4, 1fr);
+  row-gap: clamp(28px, 5.5vh, 48px);
+  column-gap: clamp(14px, 2.5vw, 28px);
   width: 100%;
-  max-width: 960px;
+  max-width: 1100px;
   margin: auto;
   align-items: center;
   justify-items: center;
+}
+
+/* 四欄排列時，第二列的家庭相簿與微光模式自動置中（置於第 2、3 欄） */
+@media (min-width: 641px) {
+  .contacts-grid:not(.single-contact) .contact-card.card-album:nth-child(5) {
+    grid-column-start: 2;
+  }
 }
 
 /* 晚輩手機介面單一聯絡人（置中且加大，大方優雅） */
@@ -1322,8 +1330,9 @@ body {
     font-size: 0.9rem;
   }
   .contacts-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: clamp(24px, 4.5vh, 40px);
+    column-gap: 14px;
   }
   .contact-card {
     padding: 6px 4px;
@@ -1377,8 +1386,9 @@ body {
     display: none;
   }
   .contacts-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px 14px;
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 18px;
+    column-gap: 12px;
   }
   .contact-card {
     padding: 4px 2px;
@@ -1420,6 +1430,11 @@ body {
   }
   .app-header {
     margin-bottom: 12px;
+  }
+  .contacts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 20px;
+    column-gap: 14px;
   }
 }
 
