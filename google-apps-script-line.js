@@ -4,7 +4,8 @@
  * 💡 特色功能：
  * 1. 【自動抓取群組 ID】：只要把機器人拉進家庭群組，機器人就會自動鎖定群組 ID 並打招呼，完全免去手動查 ID 的繁瑣步驟！
  * 2. 【雙向支援】：同時處理 LINE Webhook（自動綁定群組）與微笑視訊通知（推播訊息到群組）。
- * 3. 【診斷頁面】：直接用瀏覽器開啟此 Web App 網址，即可看見目前是否已成功綁定群組。
+ * 3. 【多模式支援】：支援群組 (Group)、多人聊天室 (Room)、個人私訊 (User)。
+ * 4. 【診斷頁面】：直接用瀏覽器開啟此 Web App 網址，即可看見目前是否已成功綁定群組。
  */
 
 // ==========================================
@@ -29,31 +30,25 @@ function doPost(e) {
     const body = JSON.parse(e.postData.contents);
 
     // -------------------------------------------------------------
-    // 情境 A：來自 LINE 官方伺服器的事件（機器人加入群組或收到訊息）
+    // 情境 A：來自 LINE 官方伺服器的事件（機器人加入群組、聊天室或收到訊息）
     // -------------------------------------------------------------
     if (body.events && Array.isArray(body.events)) {
       for (const event of body.events) {
-        // 當機器人加入群組 (join) 或在群組收到訊息時，自動擷取並記住 groupId
-        if (event.source && event.source.type === "group") {
-          const groupId = event.source.groupId;
+        const source = event.source;
+        if (source) {
+          // 支援 群組 (groupId)、多人聊天室 (roomId) 或個人私訊 (userId)
+          const targetId = source.groupId || source.roomId || source.userId;
           
-          // 將 Group ID 自動儲存至雲端腳本屬性中（持久保存）
-          PropertiesService.getScriptProperties().setProperty("ACTIVE_GROUP_ID", groupId);
-          
-          // 如果是剛被加入群組，或是有人在群組輸入「微笑視訊」或「測試」
-          if (event.type === "join") {
-            replyLineMessage(event.replyToken, 
-              "🎉【微笑視訊】已成功連線到本家庭群組！\n" +
-              "✅ 群組 ID 已自動記錄完畢。\n" +
-              "👵 之後長輩在平板點擊撥號時，我就會在這裡發送即時視訊通知囉！"
-            );
-          } else if (event.type === "message" && event.message && event.message.text) {
-            const text = event.message.text.trim();
-            if (text === "查ID" || text === "微笑視訊" || text === "測試") {
+          if (targetId) {
+            // 將 ID 自動儲存至雲端腳本屬性中（持久保存）
+            PropertiesService.getScriptProperties().setProperty("ACTIVE_GROUP_ID", targetId);
+            
+            // 無論是剛被加入，或是有人在聊天室傳訊息 / @標註機器人
+            if (event.replyToken && (event.type === "join" || event.type === "message")) {
               replyLineMessage(event.replyToken, 
-                "📱【微笑視訊 LINE 轉發服務正常】\n" +
-                "• 綁定群組 ID：" + groupId + "\n" +
-                "• 狀態：隨時可接收長輩平板的通話呼叫！"
+                "🎉【微笑視訊】已成功連線並綁定此聊天室！\n" +
+                "• 綁定 ID：" + targetId + "\n" +
+                "👵 之後長輩在平板點擊撥號時，我就會在這裡發送即時視訊通知囉！"
               );
             }
           }
@@ -69,7 +64,7 @@ function doPost(e) {
     if (!targetGroupId) {
       return responseJson({ 
         status: "error", 
-        message: "尚未綁定家庭群組！請先將 LINE 機器人邀請加入家庭群組。" 
+        message: "尚未綁定家庭群組！請先將 LINE 機器人邀請加入家庭群組並發送任意一句話。" 
       });
     }
 
@@ -106,7 +101,7 @@ function doGet(e) {
 
   let html = "<div style='font-family:sans-serif; max-width:600px; margin:40px auto; padding:24px; border:2px solid #16a34a; border-radius:16px;'>";
   html += "<h2 style='color:#16a34a; margin-top:0;'>✅ 微笑視訊 LINE 轉發中繼站運作中</h2>";
-  html += "<p><strong>• LINE Access Token：</strong> " + (tokenSet ? "🟢 已設定" : "🔴 尚未設定（請填入代碼第 15 行）") + "</p>";
+  html += "<p><strong>• LINE Access Token：</strong> " + (tokenSet ? "🟢 已設定" : "🔴 尚未設定（請填入代碼第 16 行）") + "</p>";
   html += "<p><strong>• 目前綁定群組 ID：</strong> " + (currentGroupId ? "🟢 <code>" + currentGroupId + "</code>" : "🟡 尚未綁定（請將機器人邀請加入家庭群組）") + "</p>";
   html += "<hr style='border:none; border-top:1px solid #e2e8f0; margin:20px 0;'>";
   html += "<p style='color:#64748b;'>💡 只要將機器人拉進家庭群組並在群組發送任意一句話，此處就會自動顯示群組 ID！</p>";
