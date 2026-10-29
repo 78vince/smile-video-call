@@ -90,16 +90,16 @@ const DEFAULT_CONFIG = {
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
         },
         {
-          id: "screensaver",
-          type: "screensaver",
-          name: "微光模式",
-          coverUrl: COVER_SCREENSAVER
-        },
-        {
           id: "album",
           type: "album",
           name: "家庭相簿",
           coverUrl: COVER_ALBUM
+        },
+        {
+          id: "screensaver",
+          type: "screensaver",
+          name: "微光模式",
+          coverUrl: COVER_SCREENSAVER
         }
       ]
     },

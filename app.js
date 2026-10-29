@@ -888,7 +888,7 @@ class SmileVideoCallApp {
         return;
       }
 
-      // 2. 微光模式功能卡片 (Slot 5)
+      // 2. 微光模式功能卡片 (Slot 6)
       if (contact.type === "screensaver") {
         const scCard = document.createElement("div");
         scCard.className = "contact-card card-screensaver";
@@ -897,13 +897,7 @@ class SmileVideoCallApp {
             <img class="card-screensaver-cover-img" src="${contact.coverUrl || './avatars/screensaver-cover.png'}" alt="微光模式封面">
           </div>
           <div class="contact-name">${contact.name || "微光模式"}</div>
-          <div class="contact-actions-row">
-            <button class="btn-call-action btn-action-screensaver" title="進入微光模式" aria-label="進入微光模式">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-            </button>
-          </div>
+          <div class="card-action-spacer"></div>
         `;
 
         scCard.addEventListener("click", () => {
@@ -916,7 +910,7 @@ class SmileVideoCallApp {
         return;
       }
 
-      // 3. 家庭相簿卡片 (Slot 6)
+      // 3. 家庭相簿卡片 (Slot 5)
       if (contact.type === "album") {
         const albumCard = document.createElement("div");
         albumCard.className = "contact-card card-album";
@@ -925,15 +919,7 @@ class SmileVideoCallApp {
             <img class="card-album-cover-img" src="${contact.coverUrl || this.config.albumPhotos[0]?.url}" alt="家庭相簿封面">
           </div>
           <div class="contact-name">${contact.name || "家庭相簿"}</div>
-          <div class="contact-actions-row">
-            <button class="btn-call-action btn-action-album" title="開啟家庭相簿" aria-label="開啟家庭相簿">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-              </svg>
-            </button>
-          </div>
+          <div class="card-action-spacer"></div>
         `;
 
         albumCard.addEventListener("click", () => {

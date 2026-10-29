@@ -308,6 +308,13 @@ body {
   height: 40px;
 }
 
+/* 隱藏佔位器：保持家庭相簿與微光模式卡片高度與聯絡人按鈕列完全一致 */
+.card-action-spacer {
+  height: clamp(38px, 5.5vh, 46px);
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* 微光模式卡片（Slot 5） */
 .contact-card.card-screensaver {
   cursor: pointer;
@@ -1332,9 +1339,12 @@ body {
   .contact-name {
     font-size: 1.5rem;
   }
+  .btn-call-action,
+  .card-action-spacer {
+    height: 44px;
+  }
   .btn-call-action {
     width: 44px;
-    height: 44px;
   }
   .app-footer {
     padding: 8px 14px;
@@ -1385,9 +1395,12 @@ body {
     font-size: 1.35rem;
     margin-bottom: 4px;
   }
+  .btn-call-action,
+  .card-action-spacer {
+    height: 42px;
+  }
   .btn-call-action {
     width: 42px;
-    height: 42px;
   }
   .app-footer {
     padding: 6px 12px;
@@ -1451,8 +1464,11 @@ body {
   .contact-name {
     font-size: 1.35rem;
   }
+  .btn-call-action,
+  .card-action-spacer {
+    height: 42px;
+  }
   .btn-call-action {
     width: 42px;
-    height: 42px;
   }
 }
