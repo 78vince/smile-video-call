@@ -876,15 +876,21 @@ class SmileVideoCallApp {
 
         try {
           if (url.includes("script.google.com")) {
-            await fetch(url, {
+            const res = await fetch(url, {
               method: "POST",
               headers: { "Content-Type": "text/plain" },
               body: JSON.stringify({
                 content: `🔔【微笑視訊測試】發送給【${target}】的 LINE 測試通知！連線完全正常。`
               })
             });
-            alert(`✅ 已向 Google Apps Script 發送 LINE 測試通知！請檢查手機 LINE。記得按儲存！`);
-            btn.textContent = "✅ 已發送";
+            const data = await res.json().catch(() => null);
+            if (data && data.status === "error") {
+              alert(`⚠️ LINE 轉發回報：\n${data.message || data.error}\n\n💡 請在家庭 LINE 群組中輸入：@阿笑的視訊機 測試\n讓機器人完成群組綁定！`);
+              btn.textContent = "⚠️ 尚未綁定群組";
+            } else {
+              alert(`✅ 已向 Google Apps Script 發送 LINE 測試通知！請檢查手機 LINE 群組。記得按儲存！`);
+              btn.textContent = "✅ 已發送";
+            }
           } else {
             const res = await fetch(url, {
               method: "POST",
