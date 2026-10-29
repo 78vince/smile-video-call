@@ -93,9 +93,45 @@ function doPost(e) {
 
 
 // ==========================================
-// 3. 瀏覽器診斷頁面 (doGet)
+// 3. 接收 GET 請求 (doGet) - 支援 Google 相簿自動同步與診斷頁面
 // ==========================================
 function doGet(e) {
+  // -------------------------------------------------------------
+  // 情境 A：請求同步 Google 相簿最新相片清單 (?action=photos)
+  // -------------------------------------------------------------
+  if (e && e.parameter && (e.parameter.action === "photos" || e.parameter.action === "album")) {
+    try {
+      const albumUrl = e.parameter.url || "https://photos.app.goo.gl/aFTRxKidVotBq1eXA";
+      const html = UrlFetchApp.fetch(albumUrl, { followRedirects: true, muteHttpExceptions: true }).getContentText();
+      
+      // 比對所有 Google Photos 靜態圖片網址 (lh3.googleusercontent.com/pw/...)
+      const matches = html.match(/https:\/\/lh3\.googleusercontent\.com\/pw\/[a-zA-Z0-9_\-]+/g) || [];
+      const seen = new Set();
+      const photos = [];
+      
+      for (const m of matches) {
+        if (!seen.has(m)) {
+          seen.add(m);
+          photos.push({ url: m + "=w1600" });
+        }
+      }
+      
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        count: photos.length,
+        photos: photos
+      })).setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        error: err.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 情境 B：瀏覽器直接開啟 - 診斷與狀態頁面
+  // -------------------------------------------------------------
   const currentGroupId = getTargetGroupId();
   const tokenSet = LINE_ACCESS_TOKEN && !LINE_ACCESS_TOKEN.includes("請在此貼上");
 
@@ -103,6 +139,7 @@ function doGet(e) {
   html += "<h2 style='color:#16a34a; margin-top:0;'>✅ 微笑視訊 LINE 轉發中繼站運作中</h2>";
   html += "<p><strong>• LINE Access Token：</strong> " + (tokenSet ? "🟢 已設定" : "🔴 尚未設定（請填入代碼第 16 行）") + "</p>";
   html += "<p><strong>• 目前綁定群組 ID：</strong> " + (currentGroupId ? "🟢 <code>" + currentGroupId + "</code>" : "🟡 尚未綁定（請將機器人邀請加入家庭群組）") + "</p>";
+  html += "<p><strong>• Google 相簿雲端自動同步：</strong> 🟢 支援 (<code>?action=photos</code>)</p>";
   html += "<hr style='border:none; border-top:1px solid #e2e8f0; margin:20px 0;'>";
   html += "<p style='color:#64748b;'>💡 只要將機器人拉進家庭群組並在群組發送任意一句話，此處就會自動顯示群組 ID！</p>";
   html += "</div>";

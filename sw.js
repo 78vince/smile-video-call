@@ -1,4 +1,4 @@
-const CACHE_NAME = "smile-call-v16";
+const CACHE_NAME = "smile-call-v17";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -40,12 +40,14 @@ self.addEventListener("activate", (event) => {
 
 // 優先使用快取，無快取則走網路 (Cache First with Network Fallback)
 self.addEventListener("fetch", (event) => {
-  // Jitsi、信號傳遞與 Webhook 相關即時請求直接走網路
+  // Jitsi、信號傳遞、GAS 雲端相簿中繼與 Webhook 相關即時請求直接走網路
   if (
     event.request.url.includes("meet.jit.si") ||
     event.request.url.includes("jitsi.riot.im") ||
     event.request.url.includes("ntfy.sh") ||
     event.request.url.includes("discord.com") ||
+    event.request.url.includes("script.google.com") ||
+    event.request.url.includes("googleusercontent.com") ||
     event.request.url.includes("api.telegram.org")
   ) {
     return;

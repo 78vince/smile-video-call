@@ -680,9 +680,9 @@
 
         <!-- 階段 9 -->
         <div class="timeline-item">
-          <div class="timeline-dot success"></div>
+          <div class="timeline-dot"></div>
           <div class="timeline-header-row">
-            <span class="timeline-phase highlight">Phase 9</span>
+            <span class="timeline-phase">Phase 9</span>
             <span class="timeline-time">2026-10-29 15:00 ~ 15:30</span>
           </div>
           <div class="timeline-title">相簿極簡全螢幕化、平板動態可視高度鎖定、語音通話頭像化、即時信號通道解析修復</div>
@@ -698,6 +698,28 @@
             <span class="tag">平板可視高度鎖定</span>
             <span class="tag">語音大頭貼</span>
             <span class="tag">信號通道修復</span>
+          </div>
+        </div>
+
+        <!-- 階段 10 -->
+        <div class="timeline-item">
+          <div class="timeline-dot success"></div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase highlight">Phase 10</span>
+            <span class="timeline-time">2026-10-29 15:30 ~ 15:50</span>
+          </div>
+          <div class="timeline-title">Google 相簿雲端中繼自動同步 (GAS Proxy) 與動態載入</div>
+          <div class="timeline-desc">
+            <strong>1. 雲端中繼自動同步</strong>：突破前端跨域限制，在 Google Apps Script (GAS) 部署 <code>?action=photos</code> 雲端解析器，自動讀取 Google 相簿最新上傳之相片。<br>
+            <strong>2. 平板端雙時機自動載入</strong>：App 啟動時與每次長輩點開相簿時，平板端自動向雲端同步最新相片，即時更新輪播清單與底端指示點數量。<br>
+            <strong>3. 韌性雙層快取</strong>：最新相片自動寫入本地快取，離線或網路不穩時無縫平滑回退，保證長輩操作 100% 順暢不黑屏。<br>
+            <strong>4. 即時同步第 4 張相片</strong>：已即時載入使用者剛剛在 Google 相簿新增之第 4 張相片，快取升級至 <code>smile-call-v17</code>。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">Google 相簿自動同步</span>
+            <span class="tag">GAS 雲端中繼</span>
+            <span class="tag">免手動更新</span>
+            <span class="tag">雙層離線快取</span>
           </div>
         </div>
 

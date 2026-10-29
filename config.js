@@ -33,6 +33,9 @@ const DEFAULT_CONFIG = {
       url: "https://lh3.googleusercontent.com/pw/AP1GczOkwFIvU2l6tIb1KjO33Bg9e-noxioqSXRJ5R3RN819hXW_XZPE6BykrTM4wtg4gTJgsL60nUle4fyx8MxdT9t4jLDS9kXKXmcpRNxX_HXH9OgatZVt=w1600"
     },
     {
+      url: "https://lh3.googleusercontent.com/pw/AP1GczOtrc07rvp8We2MU-k_qVXFhfLXqAL6uXikVueiZk4xZI9ezD84quxegPfrTdYw_IBJHjRSULSF1OfVgOmsSV4B5vnWPSXzH_2ZDPNgESItBm5LSQ=w1600"
+    },
+    {
       url: "https://lh3.googleusercontent.com/pw/AP1GczPm5rpW1IiOhrEylCnX_4xya4S8H7p_0tEpI7MPZNxuk0nL6ZAXEqfkQr9kbqkLp25rTw1m6zI6Gc0hvof0NFZENBM-U9EjNNY-TAamW9FeXc6zjAlO=w1600"
     }
   ],

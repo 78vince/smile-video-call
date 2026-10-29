@@ -107,6 +107,7 @@ class SmileVideoCallApp {
     this.requestWebNotificationPermission();
     this.startIncomingCallListener();
     this.checkAutoJoin();
+    this.syncAlbumPhotosFromCloud(); // 雲端自動同步 Google 相簿最新相片
   }
 
   // 動態適配平板可視高度（徹底解決平板重新整理後網址列/工具列將底欄擠出螢幕外的問題）
@@ -157,6 +158,7 @@ class SmileVideoCallApp {
 
   // 讀取設定檔
   loadConfig() {
+    let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
     try {
       const saved = localStorage.getItem("smile_call_config_v8");
       if (saved) {
@@ -170,12 +172,28 @@ class SmileVideoCallApp {
         if (!parsed.roles?.axiao?.contacts || parsed.roles.axiao.contacts.length < 6) {
           parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
         }
-        return parsed;
+        // 若儲存的相片數量少於預設設定，優先升級為預設相片
+        if (!parsed.albumPhotos || parsed.albumPhotos.length < DEFAULT_CONFIG.albumPhotos.length) {
+          parsed.albumPhotos = DEFAULT_CONFIG.albumPhotos;
+        }
+        config = parsed;
       }
     } catch (e) {
       console.warn("無法讀取本機設定，改用預設設定", e);
     }
-    return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+
+    // 優先讀取雲端快取最新相片清單
+    try {
+      const cached = localStorage.getItem("smile_call_cached_album_photos");
+      if (cached) {
+        const cachedPhotos = JSON.parse(cached);
+        if (Array.isArray(cachedPhotos) && cachedPhotos.length >= DEFAULT_CONFIG.albumPhotos.length) {
+          config.albumPhotos = cachedPhotos;
+        }
+      }
+    } catch (_) {}
+
+    return config;
   }
 
   saveConfig(newConfig) {
@@ -399,6 +417,7 @@ class SmileVideoCallApp {
     this.startAlbumAutoplay();
     this.requestWakeLock(); // 相簿輪播時維持不休眠功能
     this.startAlbumTenMinuteTimer(); // 10 分鐘後自動返回主畫面並進入微光模式
+    this.syncAlbumPhotosFromCloud(); // 開啟相簿時自動檢查雲端是否有新上傳相片
   }
 
   // 10 分鐘自動休眠進入微光模式計時器
@@ -483,6 +502,48 @@ class SmileVideoCallApp {
     if (this.albumAutoplayTimer) {
       clearInterval(this.albumAutoplayTimer);
       this.albumAutoplayTimer = null;
+    }
+  }
+
+  // ==========================================
+  // Google 相簿雲端中繼自動同步
+  // ==========================================
+  async syncAlbumPhotosFromCloud() {
+    const webhookUrl = this.config.defaultWebhookUrl;
+    if (!webhookUrl || !webhookUrl.includes("script.google.com")) return;
+
+    try {
+      const syncUrl = `${webhookUrl}${webhookUrl.includes("?") ? "&" : "?"}action=photos`;
+      const res = await fetch(syncUrl, { method: "GET" });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.status === "success" && Array.isArray(data.photos) && data.photos.length > 0) {
+        console.log("成功從 Google 相簿雲端中繼同步最新相片:", data.photos.length, "張");
+        this.config.albumPhotos = data.photos;
+
+        // 若相簿封面也在，同步更新主畫面封面
+        if (this.config.roles && this.config.roles.axiao) {
+          const albumSlot = this.config.roles.axiao.contacts.find((c) => c.type === "album");
+          if (albumSlot && data.photos[0]) {
+            albumSlot.coverUrl = data.photos[0].url.replace("=w1600", "=w600");
+          }
+        }
+
+        // 儲存至本地快取
+        try {
+          localStorage.setItem("smile_call_cached_album_photos", JSON.stringify(data.photos));
+        } catch (_) {}
+
+        // 若目前相簿正在展示中，即時重新計算與渲染指示點
+        if (this.dom.albumModal && !this.dom.albumModal.classList.contains("hidden")) {
+          if (this.currentAlbumIndex >= data.photos.length) {
+            this.currentAlbumIndex = 0;
+          }
+          this.renderAlbumPhoto();
+        }
+      }
+    } catch (err) {
+      console.warn("Google 相簿雲端同步略過（使用本機快取）:", err);
     }
   }
 
