@@ -1,4 +1,4 @@
-const CACHE_NAME = "smile-call-v20";
+const CACHE_NAME = "smile-call-v21";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -13,7 +13,8 @@ const ASSETS_TO_CACHE = [
   "./avatars/ali.png",
   "./avatars/along.png",
   "./avatars/pengjun.png",
-  "./avatars/album-cover.png"
+  "./avatars/album-cover.png",
+  "./avatars/screensaver-cover.png"
 ];
 
 // 安裝並快取靜態檔案

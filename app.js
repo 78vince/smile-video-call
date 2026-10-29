@@ -49,6 +49,7 @@ class SmileVideoCallApp {
       btnFloatingHangup: document.getElementById("btn-floating-hangup"),
       btnSwitchRole: document.getElementById("btn-switch-role"),
       btnForceReload: document.getElementById("btn-force-reload"),
+      btnHomeScreensaver: document.getElementById("btn-home-screensaver"),
       roleModal: document.getElementById("role-modal"),
       btnCloseRoleModal: document.getElementById("btn-close-role-modal"),
       btnOpenSettings: document.getElementById("btn-open-settings"),
@@ -857,9 +858,9 @@ class SmileVideoCallApp {
 
     this.dom.contactsGrid.innerHTML = "";
 
-    // 過濾卡片：只有長輩（阿笑）才顯示相簿與空白槽，其他晚輩角色僅顯示通話聯絡人
+    // 過濾卡片：只有長輩（阿笑）才顯示相簿、微光模式與空白槽，其他晚輩角色僅顯示通話聯絡人
     const activeContacts = roleData.contacts.filter((c) => {
-      if (this.currentRole !== "axiao" && (c.type === "album" || c.type === "blank")) {
+      if (this.currentRole !== "axiao" && (c.type === "album" || c.type === "blank" || c.type === "screensaver")) {
         return false;
       }
       return true;
@@ -873,7 +874,7 @@ class SmileVideoCallApp {
 
     // 依序產生功能卡片
     activeContacts.forEach((contact) => {
-      // 1. 空白預留槽 (Slot 4 & 5)
+      // 1. 空白預留槽 (Slot 4)
       if (contact.type === "blank") {
         const blankCard = document.createElement("div");
         blankCard.className = "contact-card card-blank";
@@ -886,7 +887,35 @@ class SmileVideoCallApp {
         return;
       }
 
-      // 2. 家庭相簿卡片 (Slot 6)
+      // 2. 微光模式功能卡片 (Slot 5)
+      if (contact.type === "screensaver") {
+        const scCard = document.createElement("div");
+        scCard.className = "contact-card card-screensaver";
+        scCard.innerHTML = `
+          <div class="card-screensaver-cover-wrapper" title="點擊進入微光模式">
+            <img class="card-screensaver-cover-img" src="${contact.coverUrl || './avatars/screensaver-cover.png'}" alt="微光模式封面">
+          </div>
+          <div class="contact-name">${contact.name || "微光模式"}</div>
+          <div class="contact-actions-row">
+            <button class="btn-call-action btn-action-screensaver" title="進入微光模式" aria-label="進入微光模式">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+
+        scCard.addEventListener("click", () => {
+          if (Date.now() < this.justWokeUpUntil) return;
+          this.playTapSound();
+          this.enterScreensaver();
+        });
+
+        this.dom.contactsGrid.appendChild(scCard);
+        return;
+      }
+
+      // 3. 家庭相簿卡片 (Slot 6)
       if (contact.type === "album") {
         const albumCard = document.createElement("div");
         albumCard.className = "contact-card card-album";
@@ -1305,6 +1334,15 @@ class SmileVideoCallApp {
       this.playTapSound();
       this.handleCancelIncomingCall();
     });
+
+    // 頂部導航列：一鍵進入微光模式
+    if (this.dom.btnHomeScreensaver) {
+      this.dom.btnHomeScreensaver.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.playTapSound();
+        this.enterScreensaver();
+      });
+    }
 
     // 強制重新整理（清除快取並載入最新版）
     this.dom.btnForceReload.addEventListener("click", async () => {

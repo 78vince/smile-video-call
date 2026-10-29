@@ -9,6 +9,7 @@ const AVATAR_ALI = "./avatars/ali.png";
 const AVATAR_ALONG = "./avatars/along.png";
 const AVATAR_PENGJUN = "./avatars/pengjun.png";
 const COVER_ALBUM = "./avatars/album-cover.png";
+const COVER_SCREENSAVER = "./avatars/screensaver-cover.png";
 
 const DEFAULT_CONFIG = {
   // 視訊伺服器（使用開源免登入、免主持人驗證的公開伺服器）
@@ -84,9 +85,10 @@ const DEFAULT_CONFIG = {
           name: "預留位置"
         },
         {
-          id: "blank-2",
-          type: "blank",
-          name: "預留位置"
+          id: "screensaver",
+          type: "screensaver",
+          name: "微光模式",
+          coverUrl: COVER_SCREENSAVER
         },
         {
           id: "album",

@@ -308,6 +308,46 @@ body {
   height: 40px;
 }
 
+/* 微光模式卡片（Slot 5） */
+.contact-card.card-screensaver {
+  cursor: pointer;
+}
+
+.card-screensaver-cover-wrapper {
+  position: relative;
+  width: clamp(75px, 14.5vh, 125px);
+  height: clamp(75px, 14.5vh, 125px);
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 4px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+  box-shadow: none;
+}
+
+.card-screensaver-cover-wrapper:active {
+  transform: scale(0.95);
+}
+
+.card-screensaver-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.btn-action-screensaver {
+  background-color: #1e1b4b;
+  color: #fde047;
+}
+
+.btn-action-screensaver:hover {
+  background-color: #312e81;
+}
+
 /* 相簿卡片（Slot 6） */
 .contact-card.card-album {
   cursor: pointer;
@@ -806,6 +846,33 @@ body {
   -webkit-user-select: all;
 }
 
+.btn-screensaver-badge {
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  color: var(--text-main);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-screensaver-badge:hover {
+  background: #e2e8f0;
+}
+
+.btn-screensaver-badge:active {
+  background: #cbd5e1;
+  transform: scale(0.96);
+}
+
 .btn-reload-badge {
   background: #f1f5f9;
   border: 1.5px solid #cbd5e1;
@@ -1256,7 +1323,8 @@ body {
   }
   .contact-avatar-wrapper,
   .card-blank-circle,
-  .card-album-cover-wrapper {
+  .card-album-cover-wrapper,
+  .card-screensaver-cover-wrapper {
     width: 110px;
     height: 110px;
     margin-bottom: 6px;
@@ -1307,7 +1375,8 @@ body {
   }
   .contact-avatar-wrapper,
   .card-blank-circle,
-  .card-album-cover-wrapper {
+  .card-album-cover-wrapper,
+  .card-screensaver-cover-wrapper {
     width: 90px;
     height: 90px;
     margin-bottom: 4px;
@@ -1374,7 +1443,8 @@ body {
   }
   .contact-avatar-wrapper,
   .card-blank-circle,
-  .card-album-cover-wrapper {
+  .card-album-cover-wrapper,
+  .card-screensaver-cover-wrapper {
     width: 100px;
     height: 100px;
   }
