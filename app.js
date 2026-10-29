@@ -115,6 +115,17 @@ class SmileVideoCallApp {
         if (!parsed.jitsiDomain || parsed.jitsiDomain === "meet.jit.si") {
           parsed.jitsiDomain = "jitsi.riot.im";
         }
+        // 若儲存的仍為舊 Discord 網址，自動升級為全家統一的 LINE 家庭群組 Webhook
+        if (parsed.defaultWebhookUrl && parsed.defaultWebhookUrl.includes("discord.com")) {
+          parsed.defaultWebhookUrl = DEFAULT_CONFIG.defaultWebhookUrl;
+        }
+        if (parsed.roles?.axiao?.contacts) {
+          parsed.roles.axiao.contacts.forEach((c) => {
+            if (!c.webhookUrl || c.webhookUrl.includes("discord.com")) {
+              c.webhookUrl = DEFAULT_CONFIG.defaultWebhookUrl;
+            }
+          });
+        }
         return parsed;
       }
     } catch (e) {
@@ -936,9 +947,9 @@ class SmileVideoCallApp {
     const alongContact = axiaoContacts.find((c) => c.id === "along");
     const xiaojunContact = axiaoContacts.find((c) => c.id === "xiaojun");
 
-    document.getElementById("cfg-webhook-ali").value = aliContact?.webhookUrl || "";
-    document.getElementById("cfg-webhook-along").value = alongContact?.webhookUrl || "";
-    document.getElementById("cfg-webhook-xiaojun").value = xiaojunContact?.webhookUrl || "";
+    document.getElementById("cfg-webhook-ali").value = aliContact?.webhookUrl || this.config.defaultWebhookUrl || "";
+    document.getElementById("cfg-webhook-along").value = alongContact?.webhookUrl || this.config.defaultWebhookUrl || "";
+    document.getElementById("cfg-webhook-xiaojun").value = xiaojunContact?.webhookUrl || this.config.defaultWebhookUrl || "";
     document.getElementById("cfg-auto-answer-seconds").value = this.config.autoAnswerDelaySeconds || 5;
     document.getElementById("sys-current-role").textContent = this.config.roles[this.currentRole]?.name || "阿笑";
 
