@@ -1,6 +1,8 @@
 /**
  * Smile Video Call (微笑視訊) - 多角色與即時通訊配置檔
  */
+const LINE_FAMILY_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwFd5_E2nJ14Dmf6ZNuqTgaxWrVtJRNeQLL8wPcYyaEC3ZGa8X9Xs8j_gMfDeO-V9ZZAQ/exec";
+
 const DEFAULT_CONFIG = {
   // 視訊伺服器（使用開源免登入、免主持人驗證的公開伺服器）
   jitsiDomain: "jitsi.riot.im",
@@ -13,8 +15,8 @@ const DEFAULT_CONFIG = {
   // 來電自動接聽倒數秒數（0 代表立刻接聽，建議 5 秒讓長輩知道誰打來）
   autoAnswerDelaySeconds: 5,
 
-  // 預設全局通知（支援 Discord Webhook 或 Google Apps Script LINE 轉發網址）
-  defaultWebhookUrl: "https://discord.com/api/webhooks/1564922649514221598/9mfthoZpD4EIYrfmPIsGJpAo-cMND4xmo-lQ-lTsAAvcQp6I7aJeMj_PiBrlZ0FWEP3I",
+  // 預設全局通知（統一採用 Google Apps Script LINE 家庭群組轉發中繼站）
+  defaultWebhookUrl: LINE_FAMILY_WEBHOOK_URL,
 
   // 角色群組資料
   roles: {
@@ -32,7 +34,7 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-ali",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=ali&backgroundColor=b6e3f4",
           accentColor: "#2563eb",
-          webhookUrl: "https://discord.com/api/webhooks/1564922649514221598/9mfthoZpD4EIYrfmPIsGJpAo-cMND4xmo-lQ-lTsAAvcQp6I7aJeMj_PiBrlZ0FWEP3I"
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
         },
         {
           id: "along",
@@ -41,7 +43,7 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-along",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=along&backgroundColor=c084fc",
           accentColor: "#9333ea",
-          webhookUrl: ""
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
         },
         {
           id: "xiaojun",
@@ -50,7 +52,7 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-xiaojun",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=xiaojun&backgroundColor=ffd5dc",
           accentColor: "#db2777",
-          webhookUrl: ""
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
         }
       ]
     },
@@ -69,7 +71,7 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-ali",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=axiao&backgroundColor=fef08a",
           accentColor: "#f59e0b",
-          webhookUrl: "https://discord.com/api/webhooks/1564922649514221598/9mfthoZpD4EIYrfmPIsGJpAo-cMND4xmo-lQ-lTsAAvcQp6I7aJeMj_PiBrlZ0FWEP3I"
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
         }
       ]
     },
@@ -88,7 +90,7 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-along",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=axiao&backgroundColor=fef08a",
           accentColor: "#f59e0b",
-          webhookUrl: ""
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
         }
       ]
     },
@@ -107,7 +109,7 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-xiaojun",
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=axiao&backgroundColor=fef08a",
           accentColor: "#f59e0b",
-          webhookUrl: ""
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
         }
       ]
     }

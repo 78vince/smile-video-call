@@ -109,7 +109,7 @@ class SmileVideoCallApp {
 
   loadConfig() {
     try {
-      const saved = localStorage.getItem("smile_call_config_v5");
+      const saved = localStorage.getItem("smile_call_config_v6");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (!parsed.jitsiDomain || parsed.jitsiDomain === "meet.jit.si") {
@@ -125,7 +125,7 @@ class SmileVideoCallApp {
 
   saveConfig(newConfig) {
     this.config = newConfig;
-    localStorage.setItem("smile_call_config_v5", JSON.stringify(newConfig));
+    localStorage.setItem("smile_call_config_v6", JSON.stringify(newConfig));
     this.renderCurrentRoleView();
   }
 
