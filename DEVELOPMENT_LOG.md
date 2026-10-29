@@ -226,6 +226,23 @@ flowchart TD
 - **無縫微光防觸發機制**：微光狀態下保持 800ms 防呆冷卻，喚醒時絕不誤觸底層通話或功能按鈕。
 - **快取升級**：Service Worker 快取版本升至 `smile-call-v21`，包含新月深藍圖標 `avatars/screensaver-cover.png` 快取。
 
+### 階段 15：新增晚輩成員「宜靜」（排在芃君前面，客廳六宮格功能全數到位）
+- **時間**：`2026-10-29 18:10 ~ 18:25`
+- **新增家庭角色「宜靜」**：
+  - 角色識別碼為 `yijing`，直通網址升級為 `https://78vince.github.io/smile-video-call/?u=yijing`。
+  - 晚輩單一專屬介面：打開手機即顯示長輩「阿笑媽媽」大頭照，一鍵直通，乾淨無冗餘干擾。
+- **專屬頭像高畫質光學置中處理**：
+  - 採用使用者提供之富婆墨鏡、紅蝴蝶結、皮草披肩與純紅背景插畫。
+  - 剔除外圍邊框黑線與右上角關閉標記，以面部與蝴蝶結為光學中心進行高解析度裁切，導出 512x512 圓形大頭貼 (`avatars/yijing.png`)。
+- **長輩端首頁六宮格完美對齊（無預留空白槽）**：
+  - 將宜靜排在芃君前面，長輩客廳平板 6 個位置全數成為高頻實用功能卡：
+    - **第一排**：👦 阿禮 ｜ 🧑 阿龍 ｜ 👩 宜靜
+    - **第二排**：👧 芃君 ｜ 🌙 微光模式 ｜ 🖼️ 家庭相簿
+- **管理後台與 PWA 快取同步**：
+  - `admin.html` 增設宜靜專屬 Webhook 欄位與測試按鈕、直通網址一鍵複製。
+  - 身分切換 Modal 支援快速切換宜靜。
+  - Service Worker 快取升級至 `smile-call-v22`。
+
 ---
 
 ## 四、關鍵技術規格一覽表
@@ -259,6 +276,8 @@ flowchart TD
   `https://78vince.github.io/smile-video-call/?u=ali`
 - 🧑 **阿龍的手機**：  
   `https://78vince.github.io/smile-video-call/?u=along`
+- 👩 **宜靜的手機**：  
+  `https://78vince.github.io/smile-video-call/?u=yijing`
 - 👧 **芃君的手機**：  
   `https://78vince.github.io/smile-video-call/?u=pengjun`（相容 `?u=xiaojun`）
 

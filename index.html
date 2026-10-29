@@ -123,7 +123,7 @@
             <span class="role-icon">👵</span>
             <div class="role-text">
               <strong>阿笑（長輩平板）</strong>
-              <small>撥打給 阿禮、阿龍、小君（支援自動接聽）</small>
+              <small>撥打給 阿禮、阿龍、宜靜、芃君（支援自動接聽）</small>
             </div>
           </button>
           <button class="role-select-btn" data-role="ali">
@@ -137,6 +137,13 @@
             <span class="role-icon">🧑</span>
             <div class="role-text">
               <strong>阿龍</strong>
+              <small>一鍵直通【阿笑媽媽】</small>
+            </div>
+          </button>
+          <button class="role-select-btn" data-role="yijing">
+            <span class="role-icon">👩</span>
+            <div class="role-text">
+              <strong>宜靜</strong>
               <small>一鍵直通【阿笑媽媽】</small>
             </div>
           </button>
@@ -253,6 +260,12 @@
           </div>
 
           <div class="form-group" style="margin-top: 16px;">
+            <label>👩 宜靜的通知網址（Discord 或 LINE GAS）：</label>
+            <input type="url" id="cfg-webhook-yijing" class="form-control" placeholder="https://discord.com/... 或 https://script.google.com/...">
+            <button class="btn-secondary btn-test-single" data-target="yijing" style="margin-top: 6px;">🔔 測試宜靜通知</button>
+          </div>
+
+          <div class="form-group" style="margin-top: 16px;">
             <label>👧 芃君的通知網址（Discord 或 LINE GAS）：</label>
             <input type="url" id="cfg-webhook-pengjun" class="form-control" placeholder="https://discord.com/... 或 https://script.google.com/...">
             <button class="btn-secondary btn-test-single" data-target="pengjun" style="margin-top: 6px;">🔔 測試芃君通知</button>
@@ -281,6 +294,10 @@
             <div class="url-share-item">
               <strong>🧑 阿龍的手機：</strong>
               <code>https://78vince.github.io/smile-video-call/?u=along</code>
+            </div>
+            <div class="url-share-item">
+              <strong>👩 宜靜的手機：</strong>
+              <code>https://78vince.github.io/smile-video-call/?u=yijing</code>
             </div>
             <div class="url-share-item">
               <strong>👧 芃君的手機：</strong>

@@ -7,6 +7,7 @@ const LINE_FAMILY_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwFd5_E
 const AVATAR_AXIAO = "https://api.dicebear.com/7.x/bottts/png?seed=axiao&backgroundColor=fef08a";
 const AVATAR_ALI = "./avatars/ali.png";
 const AVATAR_ALONG = "./avatars/along.png";
+const AVATAR_YIJING = "./avatars/yijing.png";
 const AVATAR_PENGJUN = "./avatars/pengjun.png";
 const COVER_ALBUM = "./avatars/album-cover.png";
 const COVER_SCREENSAVER = "./avatars/screensaver-cover.png";
@@ -44,7 +45,7 @@ const DEFAULT_CONFIG = {
 
   // 角色群組資料
   roles: {
-    // 1. 阿笑（長輩平板）- 預設 6 個功能槽：3 人物、2 空白、1 相簿（放最後）
+    // 1. 阿笑（長輩平板）- 預設 6 個功能槽：4 位晚輩、微光模式、家庭相簿
     axiao: {
       id: "axiao",
       name: "阿笑",
@@ -71,6 +72,15 @@ const DEFAULT_CONFIG = {
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
         },
         {
+          id: "yijing",
+          name: "宜靜",
+          relation: "晚輩",
+          roomName: "smile-axiao-yijing",
+          avatarUrl: AVATAR_YIJING,
+          accentColor: "#e11d48",
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
+        },
+        {
           id: "pengjun",
           name: "芃君",
           relation: "孫女",
@@ -78,11 +88,6 @@ const DEFAULT_CONFIG = {
           avatarUrl: AVATAR_PENGJUN,
           accentColor: "#db2777",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
-        },
-        {
-          id: "blank-1",
-          type: "blank",
-          name: "預留位置"
         },
         {
           id: "screensaver",
@@ -139,7 +144,27 @@ const DEFAULT_CONFIG = {
       ]
     },
 
-    // 4. 芃君（晚輩頁面，稱呼奶奶）
+    // 4. 宜靜（晚輩頁面）
+    yijing: {
+      id: "yijing",
+      name: "宜靜",
+      avatarUrl: AVATAR_YIJING,
+      appTitle: "宜靜的家庭通話",
+      welcomeSubtitle: "點擊大頭貼，立即連線阿笑媽媽",
+      contacts: [
+        {
+          id: "axiao",
+          name: "阿笑媽媽",
+          relation: "媽媽",
+          roomName: "smile-axiao-yijing",
+          avatarUrl: AVATAR_AXIAO,
+          accentColor: "#f59e0b",
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
+        }
+      ]
+    },
+
+    // 5. 芃君（晚輩頁面，稱呼奶奶）
     pengjun: {
       id: "pengjun",
       name: "芃君",

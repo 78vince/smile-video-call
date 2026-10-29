@@ -1,4 +1,4 @@
-const CACHE_NAME = "smile-call-v21";
+const CACHE_NAME = "smile-call-v22";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -12,6 +12,7 @@ const ASSETS_TO_CACHE = [
   "./icons/apple-touch-icon.png",
   "./avatars/ali.png",
   "./avatars/along.png",
+  "./avatars/yijing.png",
   "./avatars/pengjun.png",
   "./avatars/album-cover.png",
   "./avatars/screensaver-cover.png"

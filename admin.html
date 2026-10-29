@@ -341,6 +341,14 @@
       </div>
 
       <div class="form-group">
+        <label>👩 宜靜的個別 Webhook 覆寫：</label>
+        <div class="input-row">
+          <input type="url" id="cfg-webhook-yijing" class="form-control" placeholder="留空套用預設">
+          <button class="btn btn-secondary btn-test-single" data-target="yijing" style="white-space: nowrap;">測試宜靜</button>
+        </div>
+      </div>
+
+      <div class="form-group">
         <label>👧 芃君的個別 Webhook 覆寫：</label>
         <div class="input-row">
           <input type="url" id="cfg-webhook-pengjun" class="form-control" placeholder="留空套用預設">
@@ -444,6 +452,15 @@
             <td>
               <button class="btn btn-secondary btn-copy" data-target="url-along">複製</button>
               <a id="link-along" href="#" target="_blank" class="btn btn-secondary">開啟</a>
+            </td>
+          </tr>
+          <tr>
+            <td>👩 <strong>宜靜</strong></td>
+            <td>晚輩手機（置中單一聯絡人，直通媽媽）</td>
+            <td><code class="url-code" id="url-yijing"></code></td>
+            <td>
+              <button class="btn btn-secondary btn-copy" data-target="url-yijing">複製</button>
+              <a id="link-yijing" href="#" target="_blank" class="btn btn-secondary">開啟</a>
             </td>
           </tr>
           <tr>
@@ -552,10 +569,12 @@
       const axiaoContacts = currentConfig.roles.axiao.contacts;
       const cAli = axiaoContacts.find(c => c.id === "ali");
       const cAlong = axiaoContacts.find(c => c.id === "along");
+      const cYijing = axiaoContacts.find(c => c.id === "yijing");
       const cPengjun = axiaoContacts.find(c => c.id === "pengjun" || c.id === "xiaojun");
 
       document.getElementById("cfg-webhook-ali").value = cAli?.webhookUrl || "";
       document.getElementById("cfg-webhook-along").value = cAlong?.webhookUrl || "";
+      document.getElementById("cfg-webhook-yijing").value = cYijing?.webhookUrl || "";
       document.getElementById("cfg-webhook-pengjun").value = cPengjun?.webhookUrl || "";
 
       // 2. 參數
@@ -564,7 +583,7 @@
       document.getElementById("cfg-auto-answer-seconds").value = currentConfig.autoAnswerDelaySeconds || 5;
 
       // 3. 網址清單
-      const roles = ["axiao", "ali", "along", "pengjun"];
+      const roles = ["axiao", "ali", "along", "yijing", "pengjun"];
       roles.forEach(roleId => {
         const fullUrl = `${baseUrl}?u=${roleId}`;
         const codeEl = document.getElementById(`url-${roleId}`);
@@ -597,6 +616,7 @@
       const defaultWebhook = document.getElementById("cfg-default-webhook").value.trim();
       const aliWebhook = document.getElementById("cfg-webhook-ali").value.trim() || defaultWebhook;
       const alongWebhook = document.getElementById("cfg-webhook-along").value.trim() || defaultWebhook;
+      const yijingWebhook = document.getElementById("cfg-webhook-yijing").value.trim() || defaultWebhook;
       const pengjunWebhook = document.getElementById("cfg-webhook-pengjun").value.trim() || defaultWebhook;
 
       currentConfig.defaultWebhookUrl = defaultWebhook;
@@ -607,14 +627,17 @@
       const axiaoContacts = currentConfig.roles.axiao.contacts;
       const cAli = axiaoContacts.find(c => c.id === "ali");
       const cAlong = axiaoContacts.find(c => c.id === "along");
+      const cYijing = axiaoContacts.find(c => c.id === "yijing");
       const cPengjun = axiaoContacts.find(c => c.id === "pengjun" || c.id === "xiaojun");
 
       if (cAli) cAli.webhookUrl = aliWebhook;
       if (cAlong) cAlong.webhookUrl = alongWebhook;
+      if (cYijing) cYijing.webhookUrl = yijingWebhook;
       if (cPengjun) cPengjun.webhookUrl = pengjunWebhook;
 
       if (currentConfig.roles.ali?.contacts[0]) currentConfig.roles.ali.contacts[0].webhookUrl = aliWebhook;
       if (currentConfig.roles.along?.contacts[0]) currentConfig.roles.along.contacts[0].webhookUrl = alongWebhook;
+      if (currentConfig.roles.yijing?.contacts[0]) currentConfig.roles.yijing.contacts[0].webhookUrl = yijingWebhook;
       if (currentConfig.roles.pengjun?.contacts[0]) currentConfig.roles.pengjun.contacts[0].webhookUrl = pengjunWebhook;
       if (currentConfig.roles.xiaojun?.contacts[0]) currentConfig.roles.xiaojun.contacts[0].webhookUrl = pengjunWebhook;
 

@@ -145,14 +145,14 @@ class SmileVideoCallApp {
     const params = new URLSearchParams(window.location.search);
     let urlRole = params.get("u");
     if (urlRole === "xiaojun") urlRole = "pengjun";
-    if (urlRole && ["axiao", "ali", "along", "pengjun"].includes(urlRole)) {
+    if (urlRole && ["axiao", "ali", "along", "yijing", "pengjun"].includes(urlRole)) {
       localStorage.setItem("smile_call_current_role", urlRole);
       return urlRole;
     }
 
     let savedRole = localStorage.getItem("smile_call_current_role");
     if (savedRole === "xiaojun") savedRole = "pengjun";
-    if (savedRole && ["axiao", "ali", "along", "pengjun"].includes(savedRole)) {
+    if (savedRole && ["axiao", "ali", "along", "yijing", "pengjun"].includes(savedRole)) {
       return savedRole;
     }
 
@@ -175,10 +175,11 @@ class SmileVideoCallApp {
         if (!parsed.roles?.axiao?.contacts || parsed.roles.axiao.contacts.length < 6) {
           parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
         }
-        // 確保最新真人頭貼、名稱（阿禮、阿龍、芃君）與相簿封面更新為最新設定
+        // 確保最新真人頭貼、名稱（阿禮、阿龍、宜靜、芃君）與相簿封面更新為最新設定
         parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
         parsed.roles.ali = DEFAULT_CONFIG.roles.ali;
         parsed.roles.along = DEFAULT_CONFIG.roles.along;
+        parsed.roles.yijing = DEFAULT_CONFIG.roles.yijing;
         parsed.roles.pengjun = DEFAULT_CONFIG.roles.pengjun;
         parsed.roles.xiaojun = DEFAULT_CONFIG.roles.pengjun;
         // 若儲存的相片數量少於預設設定，優先升級為預設相片
