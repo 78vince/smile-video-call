@@ -8,6 +8,8 @@ class SmileVideoCallApp {
     this.currentRole = this.detectRole();
     this.currentCallApi = null;
     this.currentRoomName = null;
+    this.isCallActive = false;
+    this.currentCallPeerName = null;
     this.wakeLock = null;
     this.audioCtx = null;
     this.ringInterval = null;
@@ -48,7 +50,11 @@ class SmileVideoCallApp {
       incomingCountdownNum: document.getElementById("incoming-countdown-num"),
       btnAnswerCall: document.getElementById("btn-answer-call"),
       btnDeclineCall: document.getElementById("btn-decline-call"),
-      btnTestIncoming: document.getElementById("btn-test-incoming")
+      btnTestIncoming: document.getElementById("btn-test-incoming"),
+      // 通話中提示元件
+      busyOverlay: document.getElementById("busy-overlay"),
+      busyDesc: document.getElementById("busy-desc"),
+      btnCloseBusy: document.getElementById("btn-close-busy")
     };
 
     this.init();
@@ -265,8 +271,23 @@ class SmileVideoCallApp {
     }
   }
 
+  // 廣播通訊信號 (ntfy.sh)
+  async broadcastSignal(payload) {
+    const topic = this.config.signalTopic || "smile-axiao-call-78vince";
+    const signalUrl = `https://ntfy.sh/${topic}`;
+    try {
+      await fetch(signalUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.warn("廣播信號略過:", e);
+    }
+  }
+
   // ==========================================
-  // 即時來電監聽（長輩平板端：支援自動接聽）
+  // 即時來電與信號監聽（雙向支援：自動接聽、忙線提示、遠端同步掛斷）
   // ==========================================
   startIncomingCallListener() {
     if (this.eventSource) {
@@ -274,19 +295,11 @@ class SmileVideoCallApp {
       this.eventSource = null;
     }
 
-    if (this.currentRole !== "axiao") {
-      if (this.dom.connectionStatus) {
-        this.dom.connectionStatus.textContent = `身分：${this.config.roles[this.currentRole]?.name}（隨時可撥打媽媽）`;
-        this.dom.statusDot.style.backgroundColor = "#2563eb";
-      }
-      return;
-    }
-
     const topic = this.config.signalTopic || "smile-axiao-call-78vince";
     const sseUrl = `https://ntfy.sh/${topic}/sse`;
 
     if (this.dom.connectionStatus) {
-      this.dom.connectionStatus.textContent = "自動接聽通道連線中...";
+      this.dom.connectionStatus.textContent = "即時通道連線中...";
       this.dom.statusDot.style.backgroundColor = "#eab308";
     }
 
@@ -295,8 +308,13 @@ class SmileVideoCallApp {
 
       this.eventSource.onopen = () => {
         if (this.dom.connectionStatus) {
-          this.dom.connectionStatus.textContent = "● 平板自動接聽已就緒（阿笑）";
-          this.dom.statusDot.style.backgroundColor = "#16a34a";
+          if (this.currentRole === "axiao") {
+            this.dom.connectionStatus.textContent = "● 平板自動接聽已就緒（阿笑）";
+            this.dom.statusDot.style.backgroundColor = "#16a34a";
+          } else {
+            this.dom.connectionStatus.textContent = `身分：${this.config.roles[this.currentRole]?.name}（隨時可撥打媽媽）`;
+            this.dom.statusDot.style.backgroundColor = "#2563eb";
+          }
         }
       };
 
@@ -306,9 +324,33 @@ class SmileVideoCallApp {
           if (!raw.message) return;
           const payload = JSON.parse(raw.message);
 
+          // 1. 來電呼叫處理 (call)
           if (payload.action === "call" && (payload.target === "axiao" || payload.target === this.currentRole)) {
+            // 核心防護：若長輩已在通話中且有新來電，不中斷通話，回覆「通話中/忙線中」信號！
+            if (this.isCallActive && this.currentRoomName !== payload.roomName) {
+              console.log("長輩正在通話中，回覆忙線信號給:", payload.callerId);
+              this.broadcastSignal({
+                action: "busy",
+                target: payload.callerId,
+                busyWith: this.currentCallPeerName || "家人"
+              });
+              return;
+            }
             this.handleIncomingCall(payload);
-          } else if (payload.action === "cancel") {
+          }
+          // 2. 接收忙線信號 (busy) -> 晚輩端顯示「長輩通話中」提示
+          else if (payload.action === "busy" && payload.target === this.currentRole) {
+            this.handleBusyLine(payload);
+          }
+          // 3. 遠端同步掛斷 (remote_hangup) -> 晚輩掛斷時，連同長輩端自動退出房間回首頁！
+          else if (payload.action === "remote_hangup") {
+            if (this.isCallActive && this.currentRoomName === payload.roomName) {
+              console.log("收到遠端掛斷信號，同步結束通話返回首頁");
+              this.hangupCall(true); // true = 不重複廣播
+            }
+          }
+          // 4. 取消撥號
+          else if (payload.action === "cancel") {
             this.handleCancelIncomingCall();
           }
         } catch (err) {}
@@ -316,14 +358,24 @@ class SmileVideoCallApp {
 
       this.eventSource.onerror = () => {
         if (this.dom.connectionStatus) {
-          this.dom.connectionStatus.textContent = "自動接聽斷線，重新連線中...";
+          this.dom.connectionStatus.textContent = "通道斷線，重新連線中...";
           this.dom.statusDot.style.backgroundColor = "#eab308";
         }
         setTimeout(() => this.startIncomingCallListener(), 4000);
       };
     } catch (e) {
-      console.warn("無法啟動即時來電監聽:", e);
+      console.warn("無法啟動即時信號監聽:", e);
     }
+  }
+
+  // 處理對方忙線中提示（晚輩介面）
+  handleBusyLine(payload) {
+    this.endCall();
+    this.stopRingingSound();
+
+    const busyPeer = payload.busyWith ? `【${payload.busyWith}】` : "其他家人";
+    this.dom.busyDesc.textContent = `阿笑媽媽目前正在與 ${busyPeer} 視訊通話中，請稍候再撥！`;
+    this.dom.busyOverlay.classList.remove("hidden");
   }
 
   // 當晚輩打來時觸發（長輩平板畫面）
@@ -490,6 +542,8 @@ class SmileVideoCallApp {
   joinConferenceRoom(roomName, peerName) {
     this.requestWakeLock();
     this.currentRoomName = roomName;
+    this.isCallActive = true;
+    this.currentCallPeerName = peerName;
 
     // 若有未清理乾淨的舊連線，先通知伺服器離線，消滅「幽靈媽媽分身」
     if (this.currentCallApi) {
@@ -546,6 +600,24 @@ class SmileVideoCallApp {
         this.dom.connectingOverlay.classList.add("hidden");
       });
 
+      // 核心需求 2：對方離開房間時，自己也自動退出房間回到首頁！
+      this.currentCallApi.addEventListener("participantLeft", (event) => {
+        console.log("偵測到對方離開房間:", event);
+        setTimeout(() => {
+          if (this.currentCallApi) {
+            try {
+              const count = this.currentCallApi.getNumberOfParticipants();
+              if (count <= 1) {
+                console.log("房間只剩一人，自動同步結束通話回到首頁");
+                this.endCall();
+              }
+            } catch (e) {
+              this.endCall();
+            }
+          }
+        }, 500);
+      });
+
       // 當伺服器確認已離開房間時
       this.currentCallApi.addEventListener("videoConferenceLeft", () => {
         this.endCall();
@@ -560,17 +632,27 @@ class SmileVideoCallApp {
     }
   }
 
-  // 掛斷電話（優雅掛斷：先送出 hangup 封包，等伺服器確認後再清空 DOM，徹底消滅幽靈分身）
-  hangupCall() {
+  // 掛斷電話（優雅掛斷並廣播遠端同步掛斷，讓對方也自動回首頁）
+  hangupCall(skipBroadcast = false) {
+    if (!skipBroadcast && this.currentRoomName) {
+      // 廣播給另一端同步結束通話
+      this.broadcastSignal({
+        action: "remote_hangup",
+        callerId: this.currentRole,
+        target: this.currentRole === "axiao" ? "junior" : "axiao",
+        roomName: this.currentRoomName
+      });
+    }
+
     if (this.currentCallApi) {
       try {
         this.currentCallApi.executeCommand("hangup");
       } catch (e) {}
 
-      // 保險：延遲 600ms 確保封包傳遞完成後清理 DOM
+      // 延遲 500ms 確保封包傳遞完成後清理 DOM，徹底消滅幽靈分身
       setTimeout(() => {
         this.endCall();
-      }, 600);
+      }, 500);
     } else {
       this.endCall();
     }
@@ -578,6 +660,8 @@ class SmileVideoCallApp {
 
   // 結束通話畫面清理
   endCall() {
+    this.isCallActive = false;
+    this.currentCallPeerName = null;
     this.currentRoomName = null;
     if (this.connectingTimeout) {
       clearTimeout(this.connectingTimeout);
@@ -687,6 +771,13 @@ class SmileVideoCallApp {
     // 來電手動接聽 / 拒絕
     this.dom.btnAnswerCall.addEventListener("click", () => this.answerIncomingCall());
     this.dom.btnDeclineCall.addEventListener("click", () => this.handleCancelIncomingCall());
+
+    // 關閉通話中 (忙線) 提示彈窗
+    if (this.dom.btnCloseBusy) {
+      this.dom.btnCloseBusy.addEventListener("click", () => {
+        this.dom.busyOverlay.classList.add("hidden");
+      });
+    }
 
     // 取消撥號
     this.dom.btnCancelCall.addEventListener("click", () => this.hangupCall());

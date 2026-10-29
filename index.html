@@ -139,6 +139,18 @@
     </div>
   </div>
 
+  <!-- 通話中提示畫面 (對方正在忙線) -->
+  <div id="busy-overlay" class="overlay hidden">
+    <div class="connecting-card" style="border: 4px solid #f59e0b; max-width: 440px;">
+      <div style="font-size: 3.5rem; margin-bottom: 12px;">⏳</div>
+      <h2 style="font-size: 2rem; color: #1f2937; margin-bottom: 8px;">長輩正在通話中</h2>
+      <p id="busy-desc" style="font-size: 1.25rem; color: #64748b; margin-bottom: 24px; line-height: 1.5;">
+        阿笑媽媽目前正在與其他家人通話中，請稍候再撥！
+      </p>
+      <button id="btn-close-busy" class="btn-primary" style="padding: 14px 40px; font-size: 1.2rem; border-radius: 999px;">我知道了</button>
+    </div>
+  </div>
+
   <!-- 視訊畫面容器 -->
   <section id="call-view" class="view hidden">
     <!-- Jitsi Iframe 注入區 -->
