@@ -2,8 +2,8 @@
  * Smile Video Call (微笑視訊) - 多角色與即時通訊配置檔
  */
 const DEFAULT_CONFIG = {
-  // 視訊伺服器
-  jitsiDomain: "meet.jit.si",
+  // 視訊伺服器（使用開源免登入、免主持人驗證的公開伺服器）
+  jitsiDomain: "jitsi.riot.im",
   roomPrefix: "smile",
 
   // 即時來電信號通道（利用 ntfy.sh 免費公共通道進行長輩平板來電監聽）

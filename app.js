@@ -7,6 +7,7 @@ class SmileVideoCallApp {
     this.config = this.loadConfig();
     this.currentRole = this.detectRole();
     this.currentCallApi = null;
+    this.currentRoomName = null;
     this.wakeLock = null;
     this.audioCtx = null;
     this.ringInterval = null;
@@ -64,6 +65,23 @@ class SmileVideoCallApp {
     this.registerServiceWorker();
     this.requestWebNotificationPermission();
     this.startIncomingCallListener();
+    this.checkAutoJoin();
+  }
+
+  // 檢查 URL 是否帶有直接加入參數 (例如點擊通知訊息)
+  checkAutoJoin() {
+    const params = new URLSearchParams(window.location.search);
+    const joinTarget = params.get("join");
+    if (joinTarget) {
+      const roleData = this.config.roles[this.currentRole] || this.config.roles.axiao;
+      const targetContact = roleData.contacts.find((c) => c.id === joinTarget || c.name.includes(joinTarget));
+      if (targetContact) {
+        console.log("偵測到快速連線參數，自動進入房間:", targetContact.roomName);
+        setTimeout(() => {
+          this.joinConferenceRoom(targetContact.roomName, targetContact.name);
+        }, 500);
+      }
+    }
   }
 
   // 偵測目前身分（優先順序：URL ?u=xxx > 本機快取 > 預設阿笑）
@@ -85,9 +103,13 @@ class SmileVideoCallApp {
 
   loadConfig() {
     try {
-      const saved = localStorage.getItem("smile_call_config_v4");
+      const saved = localStorage.getItem("smile_call_config_v5");
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (!parsed.jitsiDomain || parsed.jitsiDomain === "meet.jit.si") {
+          parsed.jitsiDomain = "jitsi.riot.im";
+        }
+        return parsed;
       }
     } catch (e) {
       console.warn("無法讀取本機設定，改用預設設定", e);
@@ -97,7 +119,7 @@ class SmileVideoCallApp {
 
   saveConfig(newConfig) {
     this.config = newConfig;
-    localStorage.setItem("smile_call_config_v4", JSON.stringify(newConfig));
+    localStorage.setItem("smile_call_config_v5", JSON.stringify(newConfig));
     this.renderCurrentRoleView();
   }
 
@@ -306,7 +328,13 @@ class SmileVideoCallApp {
 
   // 當晚輩打來時觸發（長輩平板畫面）
   handleIncomingCall(payload) {
-    // 若長輩正在舊通話中，先優雅掛斷舊連線，避免出現雙重分身
+    // 關鍵防呆：若長輩已經在該通話房間中等待，表示長輩早就已經開好鏡頭在等了，絕對不要打斷長輩或重複響鈴！
+    if (this.currentCallApi && this.currentRoomName === payload.roomName) {
+      console.log("長輩已在通話房間中等待，忽略重複呼叫信號");
+      return;
+    }
+
+    // 若長輩正在其他房間，先優雅掛斷舊連線，避免出現雙重分身
     if (this.currentCallApi) {
       try { this.currentCallApi.executeCommand("hangup"); } catch (e) {}
       try { this.currentCallApi.dispose(); } catch (e) {}
@@ -461,6 +489,7 @@ class SmileVideoCallApp {
   // 進入 Jitsi 視訊會議
   joinConferenceRoom(roomName, peerName) {
     this.requestWakeLock();
+    this.currentRoomName = roomName;
 
     // 若有未清理乾淨的舊連線，先通知伺服器離線，消滅「幽靈媽媽分身」
     if (this.currentCallApi) {
@@ -549,6 +578,7 @@ class SmileVideoCallApp {
 
   // 結束通話畫面清理
   endCall() {
+    this.currentRoomName = null;
     if (this.connectingTimeout) {
       clearTimeout(this.connectingTimeout);
       this.connectingTimeout = null;
@@ -575,7 +605,11 @@ class SmileVideoCallApp {
 
     const callerName = callerRole.name;
     const targetName = contact.name;
-    const msg = `📢 **【微笑視訊通知】**\n**${callerName}** 正在呼叫 **${targetName}**！\n👉 請點擊連結進入視訊：${roomUrl}`;
+    // 智慧一鍵直通連結：晚輩點開直接連線，無須在網頁手動再撥打
+    const webJoinUrl = `https://78vince.github.io/smile-video-call/?u=${contact.id}&join=${callerRole.id}`;
+    const directRoomUrl = `https://${this.config.jitsiDomain}/${contact.roomName}`;
+
+    const msg = `📢 **【微笑視訊通知】**\n**${callerName}** 正在呼叫 **${targetName}**！\n👉 **點此立即加入：** ${webJoinUrl}\n（直接開鏡頭連線，免按鈕）\n備用連結：${directRoomUrl}`;
 
     try {
       if (webhookUrl.includes("script.google.com")) {
@@ -583,10 +617,10 @@ class SmileVideoCallApp {
           method: "POST",
           headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({
-            content: `📢【微笑視訊】${callerName} 正在呼叫 ${targetName}！\n👉 點此加入通話：${roomUrl}`,
+            content: `📢【微笑視訊】${callerName} 正在呼叫 ${targetName}！\n👉 點此立即加入：${webJoinUrl}`,
             caller: callerName,
             target: targetName,
-            roomUrl: roomUrl
+            roomUrl: webJoinUrl
           })
         });
       } else {
@@ -600,7 +634,7 @@ class SmileVideoCallApp {
       console.warn("通知發送略過:", err);
     }
 
-    this.sendBrowserNotification(`${callerName} 正在撥打視訊`, `通話對象：${targetName}，點擊加入！`, roomUrl);
+    this.sendBrowserNotification(`${callerName} 正在撥打視訊`, `通話對象：${targetName}，點擊加入！`, webJoinUrl);
   }
 
   requestWebNotificationPermission() {

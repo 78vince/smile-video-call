@@ -11,8 +11,8 @@
   <title>Smile Video Call - 微笑視訊</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Jitsi Meet 外部控制 API -->
-  <script src="https://meet.jit.si/external_api.js"></script>
+  <!-- Jitsi Meet 外部控制 API（免登入伺服器） -->
+  <script src="https://jitsi.riot.im/external_api.js"></script>
 </head>
 <body>
 
@@ -229,8 +229,8 @@
             <input type="number" id="cfg-auto-answer-seconds" class="form-control" value="5" min="1" max="30">
           </div>
           <div class="form-group">
-            <label>Jitsi 視訊伺服器：</label>
-            <input type="text" id="cfg-jitsi-domain" class="form-control" value="meet.jit.si" readonly>
+            <label>Jitsi 視訊伺服器（免登入、免主持人驗證）：</label>
+            <input type="text" id="cfg-jitsi-domain" class="form-control" value="jitsi.riot.im" readonly>
           </div>
           <div class="form-group">
             <button id="btn-test-sound" class="btn-secondary">🔊 測試撥號音效</button>
