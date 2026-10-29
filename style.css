@@ -132,39 +132,46 @@ body {
 
 .contacts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 24px;
   width: 100%;
-  max-width: 1100px;
+  max-width: 960px;
   margin: auto;
+  align-items: center;
+  justify-items: center;
 }
 
-/* 長輩大按鈕卡片 */
+/* 長輩使用者卡片（無外匡、無底色、無陰影） */
 .contact-card {
-  background: var(--card-bg);
-  border: 4px solid #e2e8f0;
-  border-radius: var(--radius-lg);
-  padding: 16px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: var(--shadow-card);
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
+  justify-content: center;
+  box-shadow: none;
   outline: none;
+  width: 100%;
+  max-width: 260px;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.contact-card:active {
-  transform: scale(0.96);
-  box-shadow: var(--shadow-active);
-  background-color: #f8fafc;
-}
-
+/* 大頭貼容器（加大尺寸、無外匡、無陰影） */
 .contact-avatar-wrapper {
   position: relative;
-  width: 110px;
-  height: 110px;
-  margin-bottom: 10px;
+  width: 148px;
+  height: 148px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.contact-avatar-wrapper:active {
+  transform: scale(0.95);
 }
 
 .contact-avatar {
@@ -172,44 +179,140 @@ body {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+  box-shadow: none;
   background-color: #f1f5f9;
+  display: block;
 }
 
-.badge-video-icon {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: var(--success-color);
-  color: white;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+/* 使用者姓名 */
+.contact-name {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* 名字下方的功能按鈕橫列（視訊與只通話雙按鈕） */
+.contact-actions-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  border: 2px solid white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  gap: 16px;
 }
 
-.contact-name {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 4px;
-  text-align: center;
+/* 單色圖示通話按鈕 */
+.btn-call-action {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.contact-action-hint {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--primary-color);
+.btn-call-action:active {
+  transform: scale(0.92);
+}
+
+/* 視訊通話按鈕（藍色基底 + 單色鏡頭 SVG） */
+.btn-call-video {
+  background-color: #2563eb;
+}
+
+.btn-call-video:hover {
+  background-color: #1d4ed8;
+}
+
+/* 語音通話按鈕（綠色基底 + 單色電話 SVG） */
+.btn-call-audio {
+  background-color: #059669;
+}
+
+.btn-call-audio:hover {
+  background-color: #047857;
+}
+
+/* 空白佔位卡片（Slot 4 & 5） */
+.contact-card.card-blank {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.card-blank-circle {
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  border: 2.5px dashed #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  color: #94a3b8;
+  font-size: 2rem;
+}
+
+.card-blank-name-placeholder {
+  height: 28px;
+  margin-bottom: 8px;
+}
+
+.card-blank-actions-placeholder {
+  height: 52px;
+}
+
+/* 相簿卡片（Slot 6） */
+.contact-card.card-album {
+  cursor: pointer;
+}
+
+.card-album-cover-wrapper {
+  position: relative;
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 8px;
   background: #eff6ff;
-  padding: 6px 20px;
-  border-radius: 999px;
-  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+  box-shadow: none;
+}
+
+.card-album-cover-wrapper:active {
+  transform: scale(0.95);
+}
+
+.card-album-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-album-icon-fallback {
+  width: 64px;
+  height: 64px;
+  color: #3b82f6;
+}
+
+.btn-action-album {
+  background-color: #4f46e5;
+}
+
+.btn-action-album:hover {
+  background-color: #4338ca;
 }
 
 /* 底部列（常駐底端，絕不被擠出畫面） */
@@ -799,58 +902,291 @@ body {
 }
 
 /* ============================================================
-   長輩防烙印微光待機時鐘 (Ambient Screensaver Mode)
+   長輩防烙印微光待機時鐘遮罩 (Screensaver & 防呆喚醒)
    ============================================================ */
-body.screensaver-mode {
-  background-color: #000000 !important;
-}
-
-body.screensaver-mode .app-header {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-body.screensaver-mode .header-left,
-body.screensaver-mode .btn-reload-badge,
-body.screensaver-mode .contacts-container,
-body.screensaver-mode .app-footer {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 0.8s ease;
-}
-
-body.screensaver-mode .header-right {
+.screensaver-overlay {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  transition: all 0.8s ease;
+  inset: 0;
+  z-index: 99999;
+  background-color: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+
+.screensaver-overlay.hidden {
+  display: none !important;
+  opacity: 0;
   pointer-events: none;
 }
 
-body.screensaver-mode .clock-box {
+.screensaver-content {
+  text-align: center;
+  animation: floatScreensaver 45s ease-in-out infinite alternate;
+}
+
+.screensaver-time {
+  font-size: clamp(4.5rem, 15vw, 8.5rem);
+  font-weight: 800;
+  color: #475569;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.screensaver-date {
+  font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+  font-weight: 600;
+  color: #334155;
+  margin-top: 14px;
+}
+
+.screensaver-hint {
+  margin-top: 40px;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  color: #1e293b;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.screensaver-pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #334155;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes floatScreensaver {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(16px, -14px); }
+  100% { transform: translate(-16px, 14px); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50% { opacity: 0.9; transform: scale(1.2); }
+}
+
+/* ============================================================
+   家庭相簿輪播 Modal (Google Photos 嵌入與滑動上下張)
+   ============================================================ */
+.album-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+}
+
+.album-modal.hidden {
+  display: none !important;
+}
+
+.album-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.album-header {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 10;
+}
+
+.album-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.album-title {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.album-counter {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+.album-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-album-google {
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-flex;
   align-items: center;
 }
 
-body.screensaver-mode .clock-time {
-  font-size: 5rem;
-  color: #64748b;
-  letter-spacing: 2px;
-  animation: floatClock 30s ease-in-out infinite alternate;
+.btn-album-google:hover {
+  background: rgba(59, 130, 246, 0.3);
+  color: #ffffff;
 }
 
-body.screensaver-mode .clock-date {
-  font-size: 1.3rem;
-  color: #475569;
-  margin-top: 8px;
+.btn-album-control {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-@keyframes floatClock {
-  0% { transform: translate(0, 0); }
-  50% { transform: translate(12px, -12px); }
-  100% { transform: translate(-12px, 12px); }
+.btn-album-control:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.btn-album-close {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-album-close:hover {
+  background: #dc2626;
+}
+
+/* 相簿舞台（圖片展示與翻頁箭頭） */
+.album-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.album-arrow-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.15s ease, background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.album-arrow-btn:active {
+  transform: scale(0.92);
+}
+
+.album-arrow-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+  border-color: #38bdf8;
+}
+
+.album-photo-container {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.album-current-img {
+  max-width: 92%;
+  max-height: calc(100vh - 200px);
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.album-caption {
+  color: #cbd5e1;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 12px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 16px;
+  border-radius: 999px;
+}
+
+/* 相簿底部指示圓點 */
+.album-dots {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px 20px;
+}
+
+.album-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.album-dot.active {
+  width: 32px;
+  border-radius: 999px;
+  background: #38bdf8;
 }
 
 /* ============================================================
@@ -877,23 +1213,25 @@ body.screensaver-mode .clock-date {
     font-size: 0.9rem;
   }
   .contacts-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
   }
   .contact-card {
-    padding: 12px 10px;
+    padding: 6px 4px;
   }
-  .contact-avatar-wrapper {
-    width: 90px;
-    height: 90px;
+  .contact-avatar-wrapper,
+  .card-blank-circle,
+  .card-album-cover-wrapper {
+    width: 110px;
+    height: 110px;
     margin-bottom: 6px;
   }
   .contact-name {
     font-size: 1.5rem;
   }
-  .contact-action-hint {
-    font-size: 0.95rem;
-    padding: 4px 14px;
+  .btn-call-action {
+    width: 44px;
+    height: 44px;
   }
   .app-footer {
     padding: 8px 14px;
@@ -904,20 +1242,20 @@ body.screensaver-mode .clock-date {
   }
 }
 
-/* 極矮螢幕（如平板或手機橫向模式）高度優化 */
+/* 極矮螢幕（如平板橫向模式）高度優化 */
 @media (max-height: 550px) {
   #home-view {
-    padding: 8px 14px max(8px, env(safe-area-inset-bottom));
+    padding: 6px 14px max(6px, env(safe-area-inset-bottom));
   }
   .app-header {
-    padding: 6px 14px;
-    margin-bottom: 6px;
+    padding: 4px 14px;
+    margin-bottom: 4px;
   }
   .header-left .title {
     font-size: 1.35rem;
   }
   .header-left .subtitle {
-    display: none; /* 橫向空間有限時隱藏副標題，保留最大視訊卡片空間 */
+    display: none;
   }
   .clock-time {
     font-size: 1.5rem;
@@ -927,22 +1265,25 @@ body.screensaver-mode .clock-date {
   }
   .contacts-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    gap: 8px 14px;
   }
   .contact-card {
-    padding: 8px 10px;
+    padding: 4px 2px;
   }
-  .contact-avatar-wrapper {
-    width: 76px;
-    height: 76px;
+  .contact-avatar-wrapper,
+  .card-blank-circle,
+  .card-album-cover-wrapper {
+    width: 90px;
+    height: 90px;
     margin-bottom: 4px;
   }
   .contact-name {
     font-size: 1.35rem;
+    margin-bottom: 4px;
   }
-  .contact-action-hint {
-    font-size: 0.85rem;
-    padding: 3px 10px;
+  .btn-call-action {
+    width: 42px;
+    height: 42px;
   }
   .app-footer {
     padding: 6px 12px;
@@ -973,6 +1314,20 @@ body.screensaver-mode .clock-date {
     width: 100%;
   }
   .contacts-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .contact-avatar-wrapper,
+  .card-blank-circle,
+  .card-album-cover-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+  .contact-name {
+    font-size: 1.35rem;
+  }
+  .btn-call-action {
+    width: 42px;
+    height: 42px;
   }
 }

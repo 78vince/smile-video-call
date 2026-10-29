@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#2563EB">
-  <title>微笑視訊 (Smile Video Call) - 系統開發歷程與技術報告</title>
+  <title>微笑視訊 (Smile Video Call) - 系統開發歷程與技術報告 (本地專屬)</title>
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <style>
     :root {
@@ -36,7 +36,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto;
     }
 
@@ -67,6 +67,19 @@
     .btn-back:hover {
       background: #eff6ff;
       border-color: var(--primary);
+    }
+
+    .local-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-size: 0.85rem;
+      font-weight: 700;
     }
 
     /* 英雄區 */
@@ -101,16 +114,17 @@
 
     .hero-subtitle {
       font-size: 1.15rem;
-      opacity: 0.9;
-      max-width: 650px;
+      opacity: 0.92;
+      max-width: 700px;
       margin: 0 auto 24px;
+      line-height: 1.5;
     }
 
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       gap: 12px;
-      max-width: 700px;
+      max-width: 760px;
       margin: 0 auto;
     }
 
@@ -153,6 +167,88 @@
       margin-bottom: 18px;
       border-bottom: 2px solid #f1f5f9;
       padding-bottom: 10px;
+    }
+
+    /* 對比欄位 */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .compare-col {
+      padding: 18px;
+      border-radius: 12px;
+      border: 1.5px solid transparent;
+    }
+
+    .compare-bad {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .compare-bad h4 {
+      color: var(--danger);
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .compare-good {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .compare-good h4 {
+      color: var(--success);
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .compare-list {
+      list-style-type: none;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    /* 架構圖區塊 */
+    .arch-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .arch-card {
+      background: white;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .arch-card-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .arch-card-desc {
+      font-size: 0.88rem;
+      color: #475569;
+      line-height: 1.5;
     }
 
     /* 時間軸 */
@@ -199,15 +295,37 @@
       box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
     }
 
+    .timeline-header-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
     .timeline-phase {
       display: inline-block;
       font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--primary);
       background: #eff6ff;
       padding: 3px 10px;
       border-radius: 999px;
-      margin-bottom: 6px;
+    }
+
+    .timeline-phase.highlight {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .timeline-time {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-variant-numeric: tabular-nums;
     }
 
     .timeline-title {
@@ -239,57 +357,18 @@
       color: #475569;
     }
 
-    /* 架構圖區塊 */
-    .arch-box {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 14px;
-      padding: 16px;
-      margin-top: 14px;
-    }
-
-    .arch-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-top: 10px;
-    }
-
-    .arch-card {
-      background: white;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 14px;
-    }
-
-    .arch-card-title {
-      font-weight: 800;
-      font-size: 1rem;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .arch-card-desc {
-      font-size: 0.88rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    /* 角色專屬連結表格 */
+    /* 表格 */
     .role-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+      font-size: 0.92rem;
     }
 
     .role-table th, .role-table td {
-      padding: 12px 14px;
+      padding: 10px 12px;
       text-align: left;
       border-bottom: 1px solid var(--border);
-      font-size: 0.95rem;
     }
 
     .role-table th {
@@ -298,68 +377,15 @@
       color: var(--text);
     }
 
-    .role-table code {
-      background: #f1f5f9;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      color: var(--primary-dark);
-      font-family: monospace;
-      word-break: break-all;
-    }
-
     .btn-visit {
       display: inline-block;
-      padding: 4px 12px;
-      background: var(--primary);
-      color: white;
+      padding: 4px 10px;
+      background: #eff6ff;
+      color: var(--primary);
+      border-radius: 6px;
       text-decoration: none;
-      border-radius: 999px;
-      font-size: 0.85rem;
       font-weight: 700;
-      white-space: nowrap;
-    }
-
-    /* 對比表 */
-    .compare-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 10px;
-    }
-
-    .compare-col {
-      padding: 16px;
-      border-radius: 12px;
-      border: 1.5px solid;
-    }
-
-    .compare-bad {
-      background: #fef2f2;
-      border-color: #fecaca;
-    }
-
-    .compare-bad h4 {
-      color: var(--danger);
-      margin-bottom: 8px;
-      font-weight: 800;
-    }
-
-    .compare-good {
-      background: #f0fdf4;
-      border-color: #bbf7d0;
-    }
-
-    .compare-good h4 {
-      color: var(--success);
-      margin-bottom: 8px;
-      font-weight: 800;
-    }
-
-    .compare-list {
-      list-style-type: none;
-      font-size: 0.9rem;
-      line-height: 1.7;
+      font-size: 0.85rem;
     }
 
     .footer {
@@ -388,14 +414,14 @@
     <!-- 導航列 -->
     <header class="top-nav">
       <a href="./" class="btn-back">← 返回視訊大按鈕主畫面</a>
-      <span style="font-size: 0.9rem; color: var(--muted); font-weight: 600;">阿笑家庭專屬視訊系統</span>
+      <span class="local-badge">🔒 本地專屬技術紀錄（不上線）</span>
     </header>
 
     <!-- 英雄區塊 -->
     <section class="hero-card">
       <div class="hero-badge">🌟 全端系統開發實錄</div>
       <h1 class="hero-title">Smile Video Call 微笑視訊</h1>
-      <p class="hero-subtitle">專為高齡長輩量身設計的「零操作門檻、大按鈕、自動接聽、家庭 LINE 群組即時推播」視訊通話 PWA</p>
+      <p class="hero-subtitle">專為高齡長輩量身設計的「零操作門檻、微光待機時鐘防呆喚醒、家庭相簿輪播、Jitsi 視訊/純語音雙模式、家庭 LINE 群組即時推播」完整系統</p>
       
       <div class="stats-grid">
         <div class="stat-box">
@@ -404,7 +430,7 @@
         </div>
         <div class="stat-box">
           <div class="stat-num">1 鍵</div>
-          <div class="stat-label">直通視訊連線</div>
+          <div class="stat-label">視訊/語音直通</div>
         </div>
         <div class="stat-box">
           <div class="stat-num">5 秒</div>
@@ -412,6 +438,10 @@
         </div>
         <div class="stat-box">
           <div class="stat-num">100%</div>
+          <div class="stat-label">喚醒防誤觸撥號</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">全家</div>
           <div class="stat-label">LINE 群組即時推播</div>
         </div>
       </div>
@@ -433,16 +463,18 @@
             <li>• 來電時滑動解鎖不靈敏，長輩常常手忙腳亂</li>
             <li>• 開會軟體動輒要求「主辦人 / 會議主持人登入」</li>
             <li>• 長輩不知道誰打來，也沒有自動接通機制</li>
+            <li>• 平板待機休眠後黑屏，長輩誤以為故障</li>
           </ul>
         </div>
         <div class="compare-col compare-good">
           <h4>✅ 微笑視訊的核心解答</h4>
           <ul class="compare-list">
-            <li>• <strong>超大照片與姓名</strong>：一眼看懂，點照片立即通話</li>
-            <li>• <strong>永遠常亮不休眠</strong>：透過 WakeLock 鎖定螢幕</li>
+            <li>• <strong>超大照片與姓名</strong>：一眼看懂，加大無框設計</li>
+            <li>• <strong>微光時鐘防呆喚醒</strong>：防烙印、插電常亮、碰觸喚醒不誤撥</li>
             <li>• <strong>5 秒自動接通</strong>：晚輩撥號，長輩端完全免按鍵自動開鏡頭</li>
             <li>• <strong>免主持人開源伺服器</strong>：徹底消除登入認證卡點</li>
-            <li>• <strong>家庭 LINE 群組聯防</strong>：一撥號全家同步叮咚提醒</li>
+            <li>• <strong>家庭相簿輪播</strong>：平時是一台溫馨的家庭數位相框</li>
+            <li>• <strong>家庭 LINE 群組聯防</strong>：一撥號全家同步收到直通通知</li>
           </ul>
         </div>
       </div>
@@ -452,7 +484,7 @@
     <section class="section-card">
       <h2 class="section-title">🏗️ 系統整體架構與運作原理</h2>
       <p style="color: var(--muted); margin-bottom: 12px;">
-        系統由三個關鍵骨幹緊密咬合，實現毫秒級信號傳遞與無障礙視訊通話：
+        系統由四個關鍵骨幹緊密咬合，實現毫秒級信號傳遞與無障礙視訊通話：
       </p>
 
       <div class="arch-box">
@@ -461,7 +493,7 @@
             <div class="arch-card-title">📹 開源視訊引擎</div>
             <div class="arch-card-desc">
               <strong>Jitsi Meet (jitsi.riot.im)</strong><br>
-              開源社群維護的公開伺服器。免登入、無 Google/GitHub 主持人身分限制，進入房間瞬間啟用視訊與麥克風。
+              開源社群維護的公開伺服器。免登入、無 Google/GitHub 主持人身分限制，進入房間瞬間啟用視訊與麥克風。支援視訊與純語音雙模式。
             </div>
           </div>
           <div class="arch-card">
@@ -478,20 +510,30 @@
               零伺服器成本的雲端 Webhook。自動學習家庭群組 ID，並調用 LINE Messaging API 將通話一鍵直通連結推播至家庭群組。
             </div>
           </div>
+          <div class="arch-card">
+            <div class="arch-card-title">🖼️ 家庭相簿與微光防烙印</div>
+            <div class="arch-card-desc">
+              <strong>PWA + Google Photos + WakeLock</strong><br>
+              平時自動輪播家庭照片；3 分鐘閒置自動進入微光防烙印時鐘，碰觸螢幕 800ms 防呆攔截，喚醒絕不誤觸撥號。
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 完整七大開發里程碑 -->
+    <!-- 完整八大開發里程碑 -->
     <section class="section-card">
-      <h2 class="section-title">🚀 七大開發演進里程碑 (Milestones)</h2>
+      <h2 class="section-title">🚀 完整八大開發演進里程碑 (Milestones)</h2>
       
       <div class="timeline">
 
         <!-- 階段 1 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-phase">Phase 1</div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase">Phase 1</span>
+            <span class="timeline-time">2026-10-28 10:30 ~ 12:00</span>
+          </div>
           <div class="timeline-title">PWA 離線漸進式架構與長輩大按鈕介面</div>
           <div class="timeline-desc">
             建立 Service Worker 離線快取機制與 Web Manifest，支援安裝至 Android 平板主畫面。採用 28px 超大圓角高對比卡片、110px 大頭貼、全螢幕時鐘與日曆，並整合 Screen Wake Lock 防止螢幕休眠。
@@ -507,7 +549,10 @@
         <!-- 階段 2 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-phase">Phase 2</div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase">Phase 2</span>
+            <span class="timeline-time">2026-10-28 14:00 ~ 15:30</span>
+          </div>
           <div class="timeline-title">攻克 Jitsi 主持人登入限制（遷移至 jitsi.riot.im）</div>
           <div class="timeline-desc">
             針對官方 <code>meet.jit.si</code> 強制要求 Google 登入主持人的痛點，徹底切換至免認證開源伺服器 <code>jitsi.riot.im</code>，同時隱藏 Jitsi 所有複雜工具列，消除所有可能讓長輩困惑的操作。
@@ -522,7 +567,10 @@
         <!-- 階段 3 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-phase">Phase 3</div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase">Phase 3</span>
+            <span class="timeline-time">2026-10-28 16:00 ~ 17:30</span>
+          </div>
           <div class="timeline-title">以長輩為中心的多角色家庭架構（阿笑 ↔ 阿禮、阿龍、小君）</div>
           <div class="timeline-desc">
             構建 1 位長輩對應 3 位晚輩的專屬網址架構（<code>?u=axiao</code>、<code>?u=ali</code>、<code>?u=along</code>、<code>?u=xiaojun</code>）。支援 <code>join</code> 參數一鍵快速通關，晚輩點開通知直接進房，無須手動重複撥打。
@@ -537,7 +585,10 @@
         <!-- 階段 4 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-phase">Phase 4</div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase">Phase 4</span>
+            <span class="timeline-time">2026-10-28 19:00 ~ 20:30</span>
+          </div>
           <div class="timeline-title">即時信號通道與長輩端「5 秒倒數自動接聽」</div>
           <div class="timeline-desc">
             整合 <code>ntfy.sh</code> 雲端通道。晚輩撥號時長輩平板即時響起自製 Web Audio 和弦鈴聲，並浮現 5 秒自動接聽倒數條。秒數歸零後平板自動調用 Jitsi API 加入視訊，達成真正的長輩零手動操作。
@@ -552,7 +603,10 @@
         <!-- 階段 5 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-phase">Phase 5</div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase">Phase 5</span>
+            <span class="timeline-time">2026-10-28 21:00 ~ 22:30</span>
+          </div>
           <div class="timeline-title">消滅「雙媽媽幽靈分身」與通話中忙線保護</div>
           <div class="timeline-desc">
             掛斷時延遲 500ms 釋放 DOM，確保伺服器離線封包送達，消滅幽靈分身；若長輩已在通話中，其他晚輩打來會收到「長輩通話中」提示且不打擾現有通話；晚輩掛斷時，長輩端自動退出視訊乾淨返回首頁。
@@ -567,7 +621,10 @@
         <!-- 階段 6 -->
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-phase">Phase 6</div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase">Phase 6</span>
+            <span class="timeline-time">2026-10-29 09:30 ~ 10:30</span>
+          </div>
           <div class="timeline-title">常駐底欄鎖定與平板矮螢幕響應式優化</div>
           <div class="timeline-desc">
             修復 Flexbox 導致底欄被擠出螢幕外的邊界問題，為底部狀態列加上 <code>flex-shrink: 0</code> 與專屬白色浮雕卡片；頂部時鐘與重新整理按鈕改為橫向並排；加入專屬矮螢幕自適應，橫向直向平板皆能一屏完整收納。
@@ -581,8 +638,11 @@
 
         <!-- 階段 7 -->
         <div class="timeline-item">
-          <div class="timeline-dot success"></div>
-          <div class="timeline-phase" style="background:#dcfce7; color:#15803d;">Phase 7</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase">Phase 7</span>
+            <span class="timeline-time">2026-10-29 11:00 ~ 12:30</span>
+          </div>
           <div class="timeline-title">LINE Messaging API + Google Apps Script (GAS) 智慧群組中繼站</div>
           <div class="timeline-desc">
             全面取代即將停用的 LINE Notify，建立免費 Google 雲端中繼站。支援機器人進群自動學習綁定群組 ID，並將 Webhook 寫入前端核心，長輩點擊任一位家人，家庭 LINE 群組全員立刻收到直通來電通知。
@@ -592,6 +652,31 @@
             <span class="tag">Google Apps Script</span>
             <span class="tag">家庭群組自動綁定</span>
             <span class="tag">全家統一推播</span>
+          </div>
+        </div>
+
+        <!-- 階段 8 -->
+        <div class="timeline-item">
+          <div class="timeline-dot success"></div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase highlight">Phase 8</span>
+            <span class="timeline-time">2026-10-29 14:30 ~ 16:00</span>
+          </div>
+          <div class="timeline-title">微光時鐘防呆喚醒、家庭相簿輪播滑動、主畫面無框大頭照設計、Jitsi 純語音通話雙模式</div>
+          <div class="timeline-desc">
+            <strong>1. 微光時鐘防呆喚醒</strong>：長輩觸摸喚醒螢幕時，以全局捕捉階段攔截點擊並加上 800ms 冷卻期，徹底杜絕喚醒瞬間誤觸撥號。<br>
+            <strong>2. 家庭相簿功能</strong>：嵌入 Google 相簿照片，支援 5 秒自動輪播、手勢左右滑動翻頁、上下張切換與指示點。<br>
+            <strong>3. 主畫面版型進化</strong>：卡片無外框、無底色；大頭照尺寸擴大至 150px、無外框、無陰影；刪除「點我通話」標籤。<br>
+            <strong>4. 視訊與純語音雙模式</strong>：姓名下方配置視訊（鏡頭）與只通話（電話）單色向量圖示，Jitsi 配置支援 <code>startAudioOnly</code>。<br>
+            <strong>5. 預設六功能槽</strong>：三位人物（阿禮、阿龍、小君）、兩個空白預留槽、一個家庭相簿（放最後），排版優雅平衡。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">微光防烙印時鐘</span>
+            <span class="tag">喚醒防呆 Anti-Dial</span>
+            <span class="tag">家庭相簿輪播</span>
+            <span class="tag">手勢滑動翻頁</span>
+            <span class="tag">純語音通話</span>
+            <span class="tag">六格九宮格</span>
           </div>
         </div>
 
@@ -617,7 +702,7 @@
         <tbody>
           <tr>
             <td>👵 <strong>阿笑</strong></td>
-            <td>客廳平板專用（大按鈕、自動接聽）</td>
+            <td>客廳平板專用（大按鈕、自動接聽、相簿）</td>
             <td><code>?u=axiao</code></td>
             <td><a href="./?u=axiao" class="btn-visit">開啟</a></td>
           </tr>
@@ -646,7 +731,7 @@
     <!-- 頁尾 -->
     <footer class="footer">
       <p>Smile Video Call (微笑視訊) • 守護家庭溫馨通話每一刻</p>
-      <p style="margin-top: 4px; font-size: 0.8rem;">GitHub Pages 託管 • 100% 免費開源架構</p>
+      <p style="margin-top: 4px; font-size: 0.8rem;">本報告僅存於本地端供開發與維護查閱 • 100% 免費開源架構</p>
     </footer>
 
   </div>

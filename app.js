@@ -1,22 +1,34 @@
 /**
- * Smile Video Call (微笑視訊) - 多角色、即時通訊與自動接聽系統
+ * Smile Video Call (微笑視訊) - 核心邏輯
+ * 專為高齡長輩量身設計：零阻力大按鈕、微光防烙印時鐘防呆喚醒、家庭相簿輪播、Jitsi 視訊與語音雙模式、LINE 即時中繼推播
  */
 
 class SmileVideoCallApp {
   constructor() {
+    this.currentRole = this.getInitialRole();
     this.config = this.loadConfig();
-    this.currentRole = this.detectRole();
     this.currentCallApi = null;
-    this.currentRoomName = null;
-    this.isCallActive = false;
-    this.currentCallPeerName = null;
     this.wakeLock = null;
     this.audioCtx = null;
+    this.isCallActive = false;
+    this.currentCallPeerName = null;
+    this.currentRoomName = null;
+    this.currentCallType = "video"; // 'video' | 'audio'
+    this.pendingIncomingCallType = "video";
     this.ringInterval = null;
     this.connectingTimeout = null;
     this.eventSource = null;
     this.incomingCountdownTimer = null;
     this.currentIncomingPayload = null;
+
+    // 喚醒防呆冷卻時間戳（避免喚醒微光時鐘瞬間直接觸發底下的通話按鈕）
+    this.justWokeUpUntil = 0;
+    this.screensaverTimer = null;
+
+    // 相簿輪播狀態
+    this.currentAlbumIndex = 0;
+    this.albumAutoplayTimer = null;
+    this.isAlbumAutoplay = true;
 
     this.dom = {
       appTitle: document.getElementById("app-title"),
@@ -31,6 +43,7 @@ class SmileVideoCallApp {
       connectingOverlay: document.getElementById("connecting-overlay"),
       connectingAvatar: document.getElementById("connecting-avatar"),
       connectingName: document.getElementById("connecting-name"),
+      connectingTip: document.getElementById("connecting-tip"),
       btnCancelCall: document.getElementById("btn-cancel-call"),
       btnFloatingHangup: document.getElementById("btn-floating-hangup"),
       btnSwitchRole: document.getElementById("btn-switch-role"),
@@ -54,78 +67,99 @@ class SmileVideoCallApp {
       // 通話中提示元件
       busyOverlay: document.getElementById("busy-overlay"),
       busyDesc: document.getElementById("busy-desc"),
-      btnCloseBusy: document.getElementById("btn-close-busy")
+      btnCloseBusy: document.getElementById("btn-close-busy"),
+      // 微光待機時鐘遮罩
+      screensaverOverlay: document.getElementById("screensaver-overlay"),
+      screensaverClockTime: document.getElementById("screensaver-clock-time"),
+      screensaverClockDate: document.getElementById("screensaver-clock-date"),
+      btnTriggerScreensaver: document.getElementById("btn-trigger-screensaver"),
+      // 相簿瀏覽 Modal 元件
+      albumModal: document.getElementById("album-modal"),
+      albumCounter: document.getElementById("album-counter"),
+      albumViewport: document.getElementById("album-viewport"),
+      albumCurrentImg: document.getElementById("album-current-img"),
+      albumCaption: document.getElementById("album-caption"),
+      albumDots: document.getElementById("album-dots"),
+      btnAlbumPrev: document.getElementById("btn-album-prev"),
+      btnAlbumNext: document.getElementById("btn-album-next"),
+      btnAlbumAutoplay: document.getElementById("btn-album-autoplay"),
+      albumAutoplayText: document.getElementById("album-autoplay-text"),
+      btnCloseAlbum: document.getElementById("btn-close-album"),
+      btnOpenGooglePhotos: document.getElementById("btn-open-google-photos")
     };
 
     this.init();
   }
 
   // ==========================================
-  // 初始化
+  // 初始化流程
   // ==========================================
   init() {
     this.initClock();
     this.renderCurrentRoleView();
     this.bindEvents();
+    this.initAlbum();
+    this.initScreensaver();
     this.requestWakeLock();
     this.registerServiceWorker();
     this.requestWebNotificationPermission();
     this.startIncomingCallListener();
     this.checkAutoJoin();
-    this.initScreensaver();
   }
 
-  // 檢查 URL 是否帶有直接加入參數 (例如點擊通知訊息)
+  // 檢查 URL 是否帶有快速連線參數 (如點擊通知訊息直通)
   checkAutoJoin() {
     const params = new URLSearchParams(window.location.search);
     const joinTarget = params.get("join");
+    const callType = params.get("callType") || "video";
+
     if (joinTarget) {
       const roleData = this.config.roles[this.currentRole] || this.config.roles.axiao;
-      const targetContact = roleData.contacts.find((c) => c.id === joinTarget || c.name.includes(joinTarget));
+      const targetContact = roleData.contacts.find((c) => c.id === joinTarget || (c.name && c.name.includes(joinTarget)));
       if (targetContact) {
-        console.log("偵測到快速連線參數，自動進入房間:", targetContact.roomName);
+        console.log("偵測到快速連線參數，自動進入房間:", targetContact.roomName, "模式:", callType);
         setTimeout(() => {
-          this.joinConferenceRoom(targetContact.roomName, targetContact.name);
+          this.joinConferenceRoom(targetContact.roomName, targetContact.name, callType);
         }, 500);
       }
     }
   }
 
-  // 偵測目前身分（優先順序：URL ?u=xxx > 本機快取 > 預設阿笑）
-  detectRole() {
+  // 取得目前身分 (優先讀取 URL query ?u=xxx，次之讀取 localStorage)
+  getInitialRole() {
     const params = new URLSearchParams(window.location.search);
-    const urlRole = params.get("u") || params.get("user");
-    if (urlRole && this.config.roles[urlRole]) {
+    const urlRole = params.get("u");
+    if (urlRole && ["axiao", "ali", "along", "xiaojun"].includes(urlRole)) {
       localStorage.setItem("smile_call_current_role", urlRole);
       return urlRole;
     }
 
     const savedRole = localStorage.getItem("smile_call_current_role");
-    if (savedRole && this.config.roles[savedRole]) {
+    if (savedRole && ["axiao", "ali", "along", "xiaojun"].includes(savedRole)) {
       return savedRole;
     }
 
     return "axiao";
   }
 
+  // 讀取設定檔
   loadConfig() {
     try {
-      const saved = localStorage.getItem("smile_call_config_v6");
+      const saved = localStorage.getItem("smile_call_config_v7");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (!parsed.jitsiDomain || parsed.jitsiDomain === "meet.jit.si") {
           parsed.jitsiDomain = "jitsi.riot.im";
         }
-        // 若儲存的仍為舊 Discord 網址，自動升級為全家統一的 LINE 家庭群組 Webhook
         if (parsed.defaultWebhookUrl && parsed.defaultWebhookUrl.includes("discord.com")) {
           parsed.defaultWebhookUrl = DEFAULT_CONFIG.defaultWebhookUrl;
         }
-        if (parsed.roles?.axiao?.contacts) {
-          parsed.roles.axiao.contacts.forEach((c) => {
-            if (!c.webhookUrl || c.webhookUrl.includes("discord.com")) {
-              c.webhookUrl = DEFAULT_CONFIG.defaultWebhookUrl;
-            }
-          });
+        // 確認 axiao 的 contacts 具備 6 格定義
+        if (!parsed.roles?.axiao?.contacts || parsed.roles.axiao.contacts.length < 6) {
+          parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
+        }
+        if (!parsed.albumPhotos) {
+          parsed.albumPhotos = DEFAULT_CONFIG.albumPhotos;
         }
         return parsed;
       }
@@ -137,7 +171,7 @@ class SmileVideoCallApp {
 
   saveConfig(newConfig) {
     this.config = newConfig;
-    localStorage.setItem("smile_call_config_v6", JSON.stringify(newConfig));
+    localStorage.setItem("smile_call_config_v7", JSON.stringify(newConfig));
     this.renderCurrentRoleView();
   }
 
@@ -151,55 +185,32 @@ class SmileVideoCallApp {
     window.history.replaceState({}, "", newUrl);
 
     this.renderCurrentRoleView();
-    this.dom.roleModal.classList.add("hidden");
+    this.closeRoleModal();
     this.startIncomingCallListener();
   }
 
   // ==========================================
-  // 強制重新整理（專門解決 PWA 應用更新難的問題）
-  // ==========================================
-  async forceReload() {
-    this.dom.btnForceReload.textContent = "🔄 更新中...";
-    this.dom.btnForceReload.disabled = true;
-
-    try {
-      if ("serviceWorker" in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (let registration of registrations) {
-          await registration.unregister();
-        }
-      }
-
-      if ("caches" in window) {
-        const cacheNames = await caches.keys();
-        for (let name of cacheNames) {
-          await caches.delete(name);
-        }
-      }
-    } catch (e) {
-      console.warn("清除快取時略過錯誤:", e);
-    }
-
-    const reloadUrl = new URL(window.location.href);
-    reloadUrl.searchParams.set("_t", Date.now());
-    window.location.replace(reloadUrl.toString());
-  }
-
-  // ==========================================
-  // 時鐘與日期更新
+  // 頂部時鐘與待機微光時鐘更新
   // ==========================================
   initClock() {
     const updateTime = () => {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, "0");
       const minutes = String(now.getMinutes()).padStart(2, "0");
-      this.dom.clockTime.textContent = `${hours}:${minutes}`;
+      const timeStr = `${hours}:${minutes}`;
 
-      const months = now.getMonth() + 1;
+      const month = now.getMonth() + 1;
       const date = now.getDate();
-      const days = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-      const day = days[now.getDay()];
-      this.dom.clockDate.textContent = `${months}月${date}日 ${day}`;
+      const dayNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+      const dayStr = dayNames[now.getDay()];
+      const dateStr = `${month}月${date}日 ${dayStr}`;
+
+      if (this.dom.clockTime) this.dom.clockTime.textContent = timeStr;
+      if (this.dom.clockDate) this.dom.clockDate.textContent = dateStr;
+
+      // 同步更新微光時鐘
+      if (this.dom.screensaverClockTime) this.dom.screensaverClockTime.textContent = timeStr;
+      if (this.dom.screensaverClockDate) this.dom.screensaverClockDate.textContent = dateStr;
     };
 
     updateTime();
@@ -207,39 +218,277 @@ class SmileVideoCallApp {
   }
 
   // ==========================================
-  // 長輩專屬防烙印微光待機時鐘 (Ambient Screensaver)
+  // 長輩微光待機時鐘與防呆喚醒機制 (Anti-Dialing Screensaver)
   // ==========================================
   initScreensaver() {
-    let screensaverTimer = null;
+    const resetIdleTimer = () => {
+      clearTimeout(this.screensaverTimer);
 
-    const wakeUp = () => {
-      if (document.body.classList.contains("screensaver-mode")) {
-        document.body.classList.remove("screensaver-mode");
-      }
-      clearTimeout(screensaverTimer);
-
-      // 通話中或有來電畫面時不進入微光時鐘
-      if (this.isCallActive || !this.dom.incomingOverlay.classList.contains("hidden")) {
+      // 通話中、來電中或相簿瀏覽中不進入微光時鐘
+      if (this.isCallActive ||
+          !this.dom.incomingOverlay.classList.contains("hidden") ||
+          !this.dom.albumModal.classList.contains("hidden")) {
         return;
       }
 
-      // 閒置 3 分鐘後自動進入微光防烙印時鐘（插電常亮保護）
-      screensaverTimer = setTimeout(() => {
-        if (!this.isCallActive && this.dom.incomingOverlay.classList.contains("hidden")) {
-          document.body.classList.add("screensaver-mode");
-        }
+      // 閒置 3 分鐘後自動進入微光待機時鐘
+      this.screensaverTimer = setTimeout(() => {
+        this.enterScreensaver();
       }, 3 * 60 * 1000);
     };
 
-    ["touchstart", "pointerdown", "mousedown", "click", "keydown"].forEach((evt) => {
-      window.addEventListener(evt, wakeUp, { passive: true });
+    // 監聽一般使用者活動以重設閒置計時
+    ["touchstart", "pointerdown", "mousemove", "keydown"].forEach((evt) => {
+      window.addEventListener(evt, resetIdleTimer, { passive: true });
     });
 
-    wakeUp();
+    // 核心防呆：捕捉階段全局攔截喚醒瞬間的點擊事件，徹底避免觸發底下的撥號按鈕！
+    const blockClickIfWaking = (e) => {
+      if (Date.now() < this.justWokeUpUntil) {
+        e.stopPropagation();
+        e.preventDefault();
+        console.log("防呆攔截：已阻止微光時鐘喚醒瞬間之點擊事件傳遞");
+      }
+    };
+
+    window.addEventListener("click", blockClickIfWaking, true);
+    window.addEventListener("touchend", blockClickIfWaking, true);
+    window.addEventListener("pointerup", blockClickIfWaking, true);
+
+    // 點擊微光遮罩本身喚醒
+    if (this.dom.screensaverOverlay) {
+      ["pointerdown", "touchstart", "click"].forEach((evt) => {
+        this.dom.screensaverOverlay.addEventListener(evt, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.wakeUpScreensaver();
+        });
+      });
+    }
+
+    resetIdleTimer();
+  }
+
+  enterScreensaver() {
+    if (this.isCallActive ||
+        !this.dom.incomingOverlay.classList.contains("hidden") ||
+        !this.dom.albumModal.classList.contains("hidden")) {
+      return;
+    }
+    if (this.dom.screensaverOverlay) {
+      this.dom.screensaverOverlay.classList.remove("hidden");
+    }
+  }
+
+  wakeUpScreensaver() {
+    if (!this.dom.screensaverOverlay || this.dom.screensaverOverlay.classList.contains("hidden")) {
+      return;
+    }
+    this.dom.screensaverOverlay.classList.add("hidden");
+    // 設定 800ms 喚醒冷卻時間，期間內任何聯絡人卡片點擊皆無效
+    this.justWokeUpUntil = Date.now() + 800;
   }
 
   // ==========================================
-  // 音效合成（Web Audio API）
+  // 家庭相簿功能 (輪播、手勢滑動、上下張)
+  // ==========================================
+  initAlbum() {
+    if (!this.dom.albumModal) return;
+
+    // 前一張 / 後一張按鈕
+    if (this.dom.btnAlbumPrev) {
+      this.dom.btnAlbumPrev.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.prevAlbumPhoto();
+      });
+    }
+
+    if (this.dom.btnAlbumNext) {
+      this.dom.btnAlbumNext.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.nextAlbumPhoto();
+      });
+    }
+
+    // 輪播開關
+    if (this.dom.btnAlbumAutoplay) {
+      this.dom.btnAlbumAutoplay.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleAlbumAutoplay();
+      });
+    }
+
+    // 關閉相簿
+    if (this.dom.btnCloseAlbum) {
+      this.dom.btnCloseAlbum.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.closeAlbumModal();
+      });
+    }
+
+    // 觸控手勢滑動上下張支援 (Swipe Left / Right)
+    if (this.dom.albumViewport) {
+      let touchStartX = 0;
+      let touchStartY = 0;
+
+      this.dom.albumViewport.addEventListener("touchstart", (e) => {
+        if (e.touches && e.touches[0]) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      this.dom.albumViewport.addEventListener("touchend", (e) => {
+        if (e.changedTouches && e.changedTouches[0]) {
+          const touchEndX = e.changedTouches[0].clientX;
+          const touchEndY = e.changedTouches[0].clientY;
+          const diffX = touchEndX - touchStartX;
+          const diffY = touchEndY - touchStartY;
+
+          // 判定為水平滑動且位移大於 40px
+          if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+            if (diffX < 0) {
+              this.nextAlbumPhoto();
+            } else {
+              this.prevAlbumPhoto();
+            }
+          }
+        }
+      }, { passive: true });
+
+      // 桌機/滑鼠拖曳滑動支援
+      let mouseStartX = 0;
+      let isMouseDown = false;
+
+      this.dom.albumViewport.addEventListener("mousedown", (e) => {
+        isMouseDown = true;
+        mouseX = e.clientX;
+        mouseStartX = e.clientX;
+      });
+
+      this.dom.albumViewport.addEventListener("mouseup", (e) => {
+        if (!isMouseDown) return;
+        isMouseDown = false;
+        const diffX = e.clientX - mouseStartX;
+        if (Math.abs(diffX) > 50) {
+          if (diffX < 0) this.nextAlbumPhoto();
+          else this.prevAlbumPhoto();
+        }
+      });
+
+      this.dom.albumViewport.addEventListener("mouseleave", () => {
+        isMouseDown = false;
+      });
+    }
+
+    // 鍵盤左右鍵與 ESC 鍵支援
+    window.addEventListener("keydown", (e) => {
+      if (!this.dom.albumModal.classList.contains("hidden")) {
+        if (e.key === "ArrowLeft") this.prevAlbumPhoto();
+        else if (e.key === "ArrowRight") this.nextAlbumPhoto();
+        else if (e.key === "Escape") this.closeAlbumModal();
+      }
+    });
+  }
+
+  openAlbumModal() {
+    if (Date.now() < this.justWokeUpUntil) return;
+    this.dom.albumModal.classList.remove("hidden");
+    this.currentAlbumIndex = 0;
+    this.renderAlbumPhoto();
+    this.startAlbumAutoplay();
+  }
+
+  closeAlbumModal() {
+    this.stopAlbumAutoplay();
+    this.dom.albumModal.classList.add("hidden");
+  }
+
+  renderAlbumPhoto() {
+    const photos = this.config.albumPhotos || [];
+    if (!photos.length) return;
+
+    if (this.currentAlbumIndex >= photos.length) this.currentAlbumIndex = 0;
+    if (this.currentAlbumIndex < 0) this.currentAlbumIndex = photos.length - 1;
+
+    const photo = photos[this.currentAlbumIndex];
+
+    // 平滑淡入切換效果
+    if (this.dom.albumCurrentImg) {
+      this.dom.albumCurrentImg.style.opacity = "0.3";
+      this.dom.albumCurrentImg.src = photo.url;
+      this.dom.albumCurrentImg.onload = () => {
+        this.dom.albumCurrentImg.style.opacity = "1";
+      };
+    }
+
+    if (this.dom.albumCaption) {
+      this.dom.albumCaption.textContent = photo.caption || "家庭珍藏相片";
+    }
+
+    if (this.dom.albumCounter) {
+      this.dom.albumCounter.textContent = `${this.currentAlbumIndex + 1} / ${photos.length}`;
+    }
+
+    // 渲染底部指示圓點
+    if (this.dom.albumDots) {
+      this.dom.albumDots.innerHTML = "";
+      photos.forEach((_, idx) => {
+        const dot = document.createElement("button");
+        dot.className = `album-dot ${idx === this.currentAlbumIndex ? "active" : ""}`;
+        dot.setAttribute("aria-label", `跳至第 ${idx + 1} 張相片`);
+        dot.addEventListener("click", () => {
+          this.currentAlbumIndex = idx;
+          this.renderAlbumPhoto();
+        });
+        this.dom.albumDots.appendChild(dot);
+      });
+    }
+  }
+
+  nextAlbumPhoto() {
+    const photos = this.config.albumPhotos || [];
+    if (!photos.length) return;
+    this.currentAlbumIndex = (this.currentAlbumIndex + 1) % photos.length;
+    this.renderAlbumPhoto();
+  }
+
+  prevAlbumPhoto() {
+    const photos = this.config.albumPhotos || [];
+    if (!photos.length) return;
+    this.currentAlbumIndex = (this.currentAlbumIndex - 1 + photos.length) % photos.length;
+    this.renderAlbumPhoto();
+  }
+
+  toggleAlbumAutoplay() {
+    if (this.isAlbumAutoplay) {
+      this.stopAlbumAutoplay();
+      this.isAlbumAutoplay = false;
+      if (this.dom.albumAutoplayText) this.dom.albumAutoplayText.textContent = "▶️ 開始輪播";
+    } else {
+      this.isAlbumAutoplay = true;
+      this.startAlbumAutoplay();
+      if (this.dom.albumAutoplayText) this.dom.albumAutoplayText.textContent = "⏸️ 輪播中";
+    }
+  }
+
+  startAlbumAutoplay() {
+    this.stopAlbumAutoplay();
+    if (!this.isAlbumAutoplay) return;
+    this.albumAutoplayTimer = setInterval(() => {
+      this.nextAlbumPhoto();
+    }, 5000);
+  }
+
+  stopAlbumAutoplay() {
+    if (this.albumAutoplayTimer) {
+      clearInterval(this.albumAutoplayTimer);
+      this.albumAutoplayTimer = null;
+    }
+  }
+
+  // ==========================================
+  // 音效合成 (Web Audio API)
   // ==========================================
   getAudioContext() {
     if (!this.audioCtx) {
@@ -274,7 +523,6 @@ class SmileVideoCallApp {
   startRingingSound() {
     this.stopRingingSound();
 
-    // 震動支援
     if ("vibrate" in navigator) {
       try { navigator.vibrate([500, 250, 500, 250, 1000]); } catch (e) {}
     }
@@ -319,20 +567,19 @@ class SmileVideoCallApp {
   async broadcastSignal(payload) {
     const topic = this.config.signalTopic || "smile-axiao-call-78vince";
     const signalUrl = `https://ntfy.sh/${topic}`;
+
     try {
       await fetch(signalUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+      console.log("信號廣播成功:", payload.action);
     } catch (e) {
-      console.warn("廣播信號略過:", e);
+      console.warn("信號廣播略過錯誤:", e);
     }
   }
 
-  // ==========================================
-  // 即時來電與信號監聽（雙向支援：自動接聽、忙線提示、遠端同步掛斷）
-  // ==========================================
+  // 監聽即時通訊信號 (Server-Sent Events)
   startIncomingCallListener() {
     if (this.eventSource) {
       try { this.eventSource.close(); } catch (e) {}
@@ -342,37 +589,25 @@ class SmileVideoCallApp {
     const topic = this.config.signalTopic || "smile-axiao-call-78vince";
     const sseUrl = `https://ntfy.sh/${topic}/sse`;
 
-    if (this.dom.connectionStatus) {
-      this.dom.connectionStatus.textContent = "即時通道連線中...";
-      this.dom.statusDot.style.backgroundColor = "#eab308";
-    }
-
     try {
       this.eventSource = new EventSource(sseUrl);
 
       this.eventSource.onopen = () => {
         if (this.dom.connectionStatus) {
-          if (this.currentRole === "axiao") {
-            this.dom.connectionStatus.textContent = "● 平板自動接聽已就緒（阿笑）";
-            this.dom.statusDot.style.backgroundColor = "#16a34a";
-          } else {
-            this.dom.connectionStatus.textContent = `身分：${this.config.roles[this.currentRole]?.name}（隨時可撥打媽媽）`;
-            this.dom.statusDot.style.backgroundColor = "#2563eb";
-          }
+          this.dom.connectionStatus.textContent = "連線正常，隨時可撥打與接收來電";
+          this.dom.statusDot.style.backgroundColor = "#22c55e";
         }
       };
 
       this.eventSource.onmessage = (event) => {
         try {
-          const raw = JSON.parse(event.data);
-          if (!raw.message) return;
-          const payload = JSON.parse(raw.message);
+          const payload = JSON.parse(event.data);
 
-          // 1. 來電呼叫處理 (call)
-          if (payload.action === "call" && (payload.target === "axiao" || payload.target === this.currentRole)) {
-            // 核心防護：若長輩已在通話中且有新來電，不中斷通話，回覆「通話中/忙線中」信號！
+          // 1. 接收來電信號 (call)
+          if (payload.action === "call" && payload.target === this.currentRole) {
+            // 通話忙線守護：若長輩正在與他人通話，回覆 busy 信號
             if (this.isCallActive && this.currentRoomName !== payload.roomName) {
-              console.log("長輩正在通話中，回覆忙線信號給:", payload.callerId);
+              console.log("長輩通話中，回傳忙線信號給撥號者:", payload.callerId);
               this.broadcastSignal({
                 action: "busy",
                 target: payload.callerId,
@@ -386,11 +621,11 @@ class SmileVideoCallApp {
           else if (payload.action === "busy" && payload.target === this.currentRole) {
             this.handleBusyLine(payload);
           }
-          // 3. 遠端同步掛斷 (remote_hangup) -> 晚輩掛斷時，連同長輩端自動退出房間回首頁！
+          // 3. 遠端同步掛斷 (remote_hangup) -> 對方掛斷時，自動同步退出房間回首頁
           else if (payload.action === "remote_hangup") {
             if (this.isCallActive && this.currentRoomName === payload.roomName) {
               console.log("收到遠端掛斷信號，同步結束通話返回首頁");
-              this.hangupCall(true); // true = 不重複廣播
+              this.hangupCall(true);
             }
           }
           // 4. 取消撥號
@@ -412,27 +647,27 @@ class SmileVideoCallApp {
     }
   }
 
-  // 處理對方忙線中提示（晚輩介面）
+  // 處理對方忙線中提示
   handleBusyLine(payload) {
     this.endCall();
     this.stopRingingSound();
 
     const busyPeer = payload.busyWith ? `【${payload.busyWith}】` : "其他家人";
-    this.dom.busyDesc.textContent = `阿笑媽媽目前正在與 ${busyPeer} 視訊通話中，請稍候再撥！`;
+    this.dom.busyDesc.textContent = `阿笑媽媽目前正在與 ${busyPeer} 通話中，請稍候再撥！`;
     this.dom.busyOverlay.classList.remove("hidden");
   }
 
-  // 當晚輩打來時觸發（長輩平板畫面）
+  // 來電觸發 (長輩平板畫面)
   handleIncomingCall(payload) {
-    document.body.classList.remove("screensaver-mode");
+    this.wakeUpScreensaver();
+    this.closeAlbumModal();
 
-    // 關鍵防呆：若長輩已經在該通話房間中等待，表示長輩早就已經開好鏡頭在等了，絕對不要打斷長輩或重複響鈴！
+    // 關鍵防呆：若長輩已經在該通話房間中等待，忽略重複呼叫信號
     if (this.currentCallApi && this.currentRoomName === payload.roomName) {
       console.log("長輩已在通話房間中等待，忽略重複呼叫信號");
       return;
     }
 
-    // 若長輩正在其他房間，先優雅掛斷舊連線，避免出現雙重分身
     if (this.currentCallApi) {
       try { this.currentCallApi.executeCommand("hangup"); } catch (e) {}
       try { this.currentCallApi.dispose(); } catch (e) {}
@@ -440,10 +675,12 @@ class SmileVideoCallApp {
     }
 
     this.currentIncomingPayload = payload;
-    this.dom.incomingAvatar.src = payload.avatarUrl || "https://api.dicebear.com/7.x/bottts/svg?seed=" + payload.callerId;
-    this.dom.incomingTitle.textContent = `👦 ${payload.callerName} 來電中...`;
+    const isAudio = payload.callType === "audio";
+    this.pendingIncomingCallType = isAudio ? "audio" : "video";
 
-    // 顯示來電全螢幕並播放鈴聲
+    this.dom.incomingAvatar.src = payload.avatarUrl || "https://api.dicebear.com/7.x/bottts/svg?seed=" + payload.callerId;
+    this.dom.incomingTitle.textContent = `${isAudio ? "📞" : "📹"} ${payload.callerName} ${isAudio ? "語音" : "視訊"}來電中...`;
+
     this.dom.incomingOverlay.classList.remove("hidden");
     this.startRingingSound();
     this.requestWakeLock();
@@ -480,7 +717,7 @@ class SmileVideoCallApp {
     const payload = this.currentIncomingPayload;
     this.currentIncomingPayload = null;
 
-    this.joinConferenceRoom(payload.roomName, payload.callerName);
+    this.joinConferenceRoom(payload.roomName, payload.callerName, this.pendingIncomingCallType || "video");
   }
 
   // 拒絕或取消來電
@@ -495,7 +732,7 @@ class SmileVideoCallApp {
   }
 
   // 發送信號通知長輩平板來電
-  async sendIncomingSignalToSenior(roomName, myRoleData) {
+  async sendIncomingSignalToSenior(roomName, myRoleData, callType = "video") {
     const topic = this.config.signalTopic || "smile-axiao-call-78vince";
     const signalUrl = `https://ntfy.sh/${topic}`;
 
@@ -505,6 +742,7 @@ class SmileVideoCallApp {
       callerName: myRoleData.name,
       target: "axiao",
       roomName: roomName,
+      callType: callType,
       avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${myRoleData.id}&backgroundColor=b6e3f4`
     };
 
@@ -513,14 +751,14 @@ class SmileVideoCallApp {
         method: "POST",
         body: JSON.stringify(payload)
       });
-      console.log("已發送即時呼叫信號至 ntfy.sh");
+      console.log("已發送即時呼叫信號至 ntfy.sh, 模式:", callType);
     } catch (e) {
       console.warn("發送即時呼叫信號略過錯誤:", e);
     }
   }
 
   // ==========================================
-  // 畫面渲染：根據目前身分動態產生
+  // 主畫面功能格渲染（支援 6 格排版：人物、空白、相簿）
   // ==========================================
   renderCurrentRoleView() {
     const roleData = this.config.roles[this.currentRole] || this.config.roles.axiao;
@@ -532,23 +770,99 @@ class SmileVideoCallApp {
 
     this.dom.contactsGrid.innerHTML = "";
 
+    // 依序產生功能卡片
     roleData.contacts.forEach((contact) => {
-      const card = document.createElement("button");
+      // 1. 空白預留槽 (Slot 4 & 5)
+      if (contact.type === "blank") {
+        const blankCard = document.createElement("div");
+        blankCard.className = "contact-card card-blank";
+        blankCard.innerHTML = `
+          <div class="card-blank-circle"></div>
+          <div class="card-blank-name-placeholder"></div>
+          <div class="card-blank-actions-placeholder"></div>
+        `;
+        this.dom.contactsGrid.appendChild(blankCard);
+        return;
+      }
+
+      // 2. 家庭相簿卡片 (Slot 6)
+      if (contact.type === "album") {
+        const albumCard = document.createElement("div");
+        albumCard.className = "contact-card card-album";
+        albumCard.innerHTML = `
+          <div class="card-album-cover-wrapper" title="點擊瀏覽家庭相簿">
+            <img class="card-album-cover-img" src="${contact.coverUrl || this.config.albumPhotos[0]?.url}" alt="家庭相簿封面">
+          </div>
+          <div class="contact-name">${contact.name || "家庭相簿"}</div>
+          <div class="contact-actions-row">
+            <button class="btn-call-action btn-action-album" title="開啟家庭相簿" aria-label="開啟家庭相簿">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </button>
+          </div>
+        `;
+
+        albumCard.addEventListener("click", () => {
+          if (Date.now() < this.justWokeUpUntil) return;
+          this.playTapSound();
+          this.openAlbumModal();
+        });
+
+        this.dom.contactsGrid.appendChild(albumCard);
+        return;
+      }
+
+      // 3. 常規使用者聯絡人卡片（無外匡、無底色、大頭照加大無外匡無陰影、單色視訊與語音雙按鈕）
+      const card = document.createElement("div");
       card.className = "contact-card";
-      card.style.borderColor = contact.accentColor || "#e2e8f0";
 
       card.innerHTML = `
-        <div class="contact-avatar-wrapper">
+        <div class="contact-avatar-wrapper" title="點擊大頭貼發起視訊通話">
           <img class="contact-avatar" src="${contact.avatarUrl}" alt="${contact.name}" loading="lazy">
-          <div class="badge-video-icon" style="background-color: ${contact.accentColor || '#16a34a'}">📹</div>
         </div>
         <div class="contact-name">${contact.name}</div>
-        <div class="contact-action-hint">點我通話</div>
+        <div class="contact-actions-row">
+          <button class="btn-call-action btn-call-video" title="視訊通話" aria-label="視訊通話">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 7l-7 5 7 5V7z"></path>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+            </svg>
+          </button>
+          <button class="btn-call-action btn-call-audio" title="語音通話" aria-label="語音通話">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+          </button>
+        </div>
       `;
 
-      card.addEventListener("click", () => {
+      // 點擊大頭貼預設發起視訊
+      const avatarWrap = card.querySelector(".contact-avatar-wrapper");
+      avatarWrap.addEventListener("click", () => {
+        if (Date.now() < this.justWokeUpUntil) return;
         this.playTapSound();
-        this.startCall(contact, roleData);
+        this.startCall(contact, roleData, "video");
+      });
+
+      // 點擊視訊鏡頭按鈕
+      const btnVideo = card.querySelector(".btn-call-video");
+      btnVideo.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (Date.now() < this.justWokeUpUntil) return;
+        this.playTapSound();
+        this.startCall(contact, roleData, "video");
+      });
+
+      // 點擊純語音電話按鈕
+      const btnAudio = card.querySelector(".btn-call-audio");
+      btnAudio.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (Date.now() < this.justWokeUpUntil) return;
+        this.playTapSound();
+        this.startCall(contact, roleData, "audio");
       });
 
       this.dom.contactsGrid.appendChild(card);
@@ -556,11 +870,12 @@ class SmileVideoCallApp {
   }
 
   // ==========================================
-  // 發起視訊通話
+  // 發起通話（支援視訊 video 與純語音 audio 模式）
   // ==========================================
-  startCall(contact, myRoleData) {
+  startCall(contact, myRoleData, callType = "video") {
     const roomName = contact.roomName;
     const roomUrl = `https://${this.config.jitsiDomain}/${roomName}`;
+    this.currentCallType = callType;
 
     // 1. 切換至視訊主畫面
     this.dom.homeView.classList.add("hidden");
@@ -568,30 +883,38 @@ class SmileVideoCallApp {
 
     // 2. 顯示撥號等待畫面
     this.dom.connectingAvatar.src = contact.avatarUrl;
-    this.dom.connectingName.textContent = `正在連線 ${contact.name}...`;
+    if (callType === "audio") {
+      this.dom.connectingName.textContent = `正在語音撥打給 ${contact.name}...`;
+      this.dom.connectingTip.textContent = "已開啟麥克風，等待對方接通...";
+    } else {
+      this.dom.connectingName.textContent = `正在連線 ${contact.name}...`;
+      this.dom.connectingTip.textContent = "正在為您開啟視訊鏡頭，請稍候...";
+    }
+
     this.dom.connectingOverlay.classList.remove("hidden");
     this.startRingingSound();
 
     // 3. 如果晚輩撥打給阿笑媽媽，發送「即時信號」通知長輩平板自動接聽！
     if (contact.id === "axiao" || this.currentRole !== "axiao") {
-      this.sendIncomingSignalToSenior(roomName, myRoleData);
+      this.sendIncomingSignalToSenior(roomName, myRoleData, callType);
     }
 
     // 4. 發送手機 LINE / Discord Webhook 通知
-    this.sendNotification(contact, myRoleData, roomUrl);
+    this.sendNotification(contact, myRoleData, roomUrl, callType);
 
-    // 5. 啟動視訊連線
-    this.joinConferenceRoom(roomName, contact.name);
+    // 5. 啟動 Jitsi 連線
+    this.joinConferenceRoom(roomName, contact.name, callType);
   }
 
-  // 進入 Jitsi 視訊會議
-  joinConferenceRoom(roomName, peerName) {
+  // 進入 Jitsi 會議房間
+  joinConferenceRoom(roomName, peerName, callType = "video") {
     this.requestWakeLock();
     this.currentRoomName = roomName;
     this.isCallActive = true;
     this.currentCallPeerName = peerName;
+    this.currentCallType = callType;
 
-    // 若有未清理乾淨的舊連線，先通知伺服器離線，消滅「幽靈媽媽分身」
+    // 若有未清理乾淨的舊連線，先通知伺服器離線，杜絕幽靈分身
     if (this.currentCallApi) {
       try { this.currentCallApi.executeCommand("hangup"); } catch (e) {}
       try { this.currentCallApi.dispose(); } catch (e) {}
@@ -603,6 +926,8 @@ class SmileVideoCallApp {
     this.dom.callView.classList.remove("hidden");
 
     const myDisplayName = this.config.roles[this.currentRole]?.name || "家庭成員";
+    const isAudioOnly = callType === "audio";
+
     const options = {
       roomName: roomName,
       width: "100%",
@@ -616,8 +941,9 @@ class SmileVideoCallApp {
         prejoinPageEnabled: false,
         enableInsecureRoomNameWarning: false,
         requireDisplayName: false,
+        startAudioOnly: isAudioOnly,
+        startWithVideoMuted: isAudioOnly,
         startWithAudioMuted: false,
-        startWithVideoMuted: false,
         disableDeepLinking: true,
         enableWelcomePage: false,
         enableClosePage: false,
@@ -646,7 +972,7 @@ class SmileVideoCallApp {
         this.dom.connectingOverlay.classList.add("hidden");
       });
 
-      // 核心需求 2：對方離開房間時，自己也自動退出房間回到首頁！
+      // 對方離開房間時，自己也自動退出房間回到首頁
       this.currentCallApi.addEventListener("participantLeft", (event) => {
         console.log("偵測到對方離開房間:", event);
         setTimeout(() => {
@@ -664,7 +990,7 @@ class SmileVideoCallApp {
         }, 500);
       });
 
-      // 當伺服器確認已離開房間時
+      // 伺服器確認已離開房間
       this.currentCallApi.addEventListener("videoConferenceLeft", () => {
         this.endCall();
       });
@@ -673,20 +999,18 @@ class SmileVideoCallApp {
       });
     } catch (err) {
       console.error("載入 Jitsi 失敗:", err);
-      alert("無法啟動視訊，請檢查網路連線。");
+      alert("無法啟動通話，請檢查網路連線。");
       this.endCall();
     }
   }
 
-  // 掛斷電話（優雅掛斷並廣播遠端同步掛斷，讓對方也自動回首頁）
-  hangupCall(skipBroadcast = false) {
-    if (!skipBroadcast && this.currentRoomName) {
-      // 廣播給另一端同步結束通話
+  // 主動掛斷通話
+  hangupCall(isRemote = false) {
+    if (this.isCallActive && !isRemote) {
       this.broadcastSignal({
         action: "remote_hangup",
-        callerId: this.currentRole,
-        target: this.currentRole === "axiao" ? "junior" : "axiao",
-        roomName: this.currentRoomName
+        roomName: this.currentRoomName,
+        sender: this.currentRole
       });
     }
 
@@ -694,17 +1018,15 @@ class SmileVideoCallApp {
       try {
         this.currentCallApi.executeCommand("hangup");
       } catch (e) {}
-
-      // 延遲 500ms 確保封包傳遞完成後清理 DOM，徹底消滅幽靈分身
       setTimeout(() => {
         this.endCall();
-      }, 500);
+      }, 300);
     } else {
       this.endCall();
     }
   }
 
-  // 結束通話畫面清理
+  // 乾淨清空狀態回到主畫面
   endCall() {
     this.isCallActive = false;
     this.currentCallPeerName = null;
@@ -727,19 +1049,23 @@ class SmileVideoCallApp {
   }
 
   // ==========================================
-  // 發送手機推播通知（同時支援 Discord 與 LINE GAS）
+  // 發送手機推播通知（LINE GAS / Discord）
   // ==========================================
-  async sendNotification(contact, callerRole, roomUrl) {
+  async sendNotification(contact, callerRole, roomUrl, callType = "video") {
     const webhookUrl = contact.webhookUrl || this.config.defaultWebhookUrl;
     if (!webhookUrl) return;
 
     const callerName = callerRole.name;
     const targetName = contact.name;
-    // 智慧一鍵直通連結：晚輩點開直接連線，無須在網頁手動再撥打
-    const webJoinUrl = `https://78vince.github.io/smile-video-call/?u=${contact.id}&join=${callerRole.id}`;
+    const isAudio = callType === "audio";
+    const typeLabel = isAudio ? "語音通話" : "視訊通話";
+    const iconLabel = isAudio ? "📞" : "📹";
+
+    // 一鍵直通連結（帶入 callType）
+    const webJoinUrl = `https://78vince.github.io/smile-video-call/?u=${contact.id}&join=${callerRole.id}&callType=${callType}`;
     const directRoomUrl = `https://${this.config.jitsiDomain}/${contact.roomName}`;
 
-    const msg = `📢 **【微笑視訊通知】**\n**${callerName}** 正在呼叫 **${targetName}**！\n👉 **點此立即加入：** ${webJoinUrl}\n（直接開鏡頭連線，免按鈕）\n備用連結：${directRoomUrl}`;
+    const msg = `📢 **【微笑視訊通知】**\n${iconLabel} **${callerName}** 正在發起 **${typeLabel}**，呼叫 **${targetName}**！\n👉 **點此立即加入：** ${webJoinUrl}\n（直接連線，免按鈕）\n備用連結：${directRoomUrl}`;
 
     try {
       if (webhookUrl.includes("script.google.com")) {
@@ -747,9 +1073,10 @@ class SmileVideoCallApp {
           method: "POST",
           headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({
-            content: `📢【微笑視訊】${callerName} 正在呼叫 ${targetName}！\n👉 點此立即加入：${webJoinUrl}`,
+            content: `📢【微笑視訊】${iconLabel} ${callerName} 正在發起${typeLabel}呼叫 ${targetName}！\n👉 點此立即加入：${webJoinUrl}`,
             caller: callerName,
             target: targetName,
+            callType: typeLabel,
             roomUrl: webJoinUrl
           })
         });
@@ -764,7 +1091,7 @@ class SmileVideoCallApp {
       console.warn("通知發送略過:", err);
     }
 
-    this.sendBrowserNotification(`${callerName} 正在撥打視訊`, `通話對象：${targetName}，點擊加入！`, webJoinUrl);
+    this.sendBrowserNotification(`${callerName} 正在撥打${typeLabel}`, `通話對象：${targetName}，點擊加入！`, webJoinUrl);
   }
 
   requestWebNotificationPermission() {
@@ -788,114 +1115,150 @@ class SmileVideoCallApp {
     }
   }
 
+  // 螢幕常亮鎖定 (Screen Wake Lock API)
   async requestWakeLock() {
-    if ("wakeLock" in navigator) {
-      try {
+    try {
+      if ("wakeLock" in navigator && !this.wakeLock) {
         this.wakeLock = await navigator.wakeLock.request("screen");
         this.wakeLock.addEventListener("release", () => {
           this.wakeLock = null;
         });
-      } catch (err) {}
+        console.log("螢幕常亮鎖定啟用成功");
+      }
+    } catch (err) {
+      console.warn("無法取得螢幕鎖定:", err);
     }
   }
 
+  // PWA Service Worker 註冊
   registerServiceWorker() {
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
-      });
+      navigator.serviceWorker
+        .register("sw.js")
+        .then(() => console.log("Service Worker 註冊成功"))
+        .catch((err) => console.warn("SW 註冊失敗:", err));
     }
   }
 
   // ==========================================
-  // 事件綁定
+  // 事件綁定 (UI 操作與彈窗)
   // ==========================================
   bindEvents() {
-    // 強制重新載入按鈕
-    this.dom.btnForceReload.addEventListener("click", () => this.forceReload());
-
-    // 來電手動接聽 / 拒絕
-    this.dom.btnAnswerCall.addEventListener("click", () => this.answerIncomingCall());
-    this.dom.btnDeclineCall.addEventListener("click", () => this.handleCancelIncomingCall());
-
-    // 關閉通話中 (忙線) 提示彈窗
-    if (this.dom.btnCloseBusy) {
-      this.dom.btnCloseBusy.addEventListener("click", () => {
-        this.dom.busyOverlay.classList.add("hidden");
-      });
-    }
-
-    // 取消撥號
-    this.dom.btnCancelCall.addEventListener("click", () => this.hangupCall());
-
-    // 懸浮大掛斷鍵（優雅掛斷）
+    // 浮動大掛斷按鈕
     this.dom.btnFloatingHangup.addEventListener("click", () => {
+      this.playTapSound();
       this.hangupCall();
     });
 
-    // 瀏覽器關閉或刷新時，主動通知 Jitsi 伺服器掛斷，避免留下幽靈分身
-    window.addEventListener("beforeunload", () => {
-      if (this.currentCallApi) {
-        try { this.currentCallApi.executeCommand("hangup"); } catch (e) {}
-      }
-    });
-    window.addEventListener("pagehide", () => {
-      if (this.currentCallApi) {
-        try { this.currentCallApi.executeCommand("hangup"); } catch (e) {}
-      }
+    // 取消撥號
+    this.dom.btnCancelCall.addEventListener("click", () => {
+      this.playTapSound();
+      this.broadcastSignal({ action: "cancel", caller: this.currentRole });
+      this.endCall();
     });
 
-    // 任何觸控嘗試獲取 AudioContext
-    document.body.addEventListener("touchstart", () => this.getAudioContext(), { once: true });
-    document.body.addEventListener("click", () => this.getAudioContext(), { once: true });
+    // 關閉忙線提示
+    this.dom.btnCloseBusy.addEventListener("click", () => {
+      this.dom.busyOverlay.classList.add("hidden");
+    });
 
-    // 切換角色 Modal
+    // 接聽來電
+    this.dom.btnAnswerCall.addEventListener("click", () => {
+      this.playTapSound();
+      this.answerIncomingCall();
+    });
+
+    // 稍後再聊 (拒絕來電)
+    this.dom.btnDeclineCall.addEventListener("click", () => {
+      this.playTapSound();
+      this.handleCancelIncomingCall();
+    });
+
+    // 強制重新整理
+    this.dom.btnForceReload.addEventListener("click", async () => {
+      this.playTapSound();
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          await reg.unregister();
+        }
+      }
+      if ("caches" in window) {
+        const cacheNames = await caches.keys();
+        for (const name of cacheNames) {
+          await caches.delete(name);
+        }
+      }
+      window.location.reload(true);
+    });
+
+    // 身分切換 Modal
     this.dom.btnSwitchRole.addEventListener("click", () => {
-      this.dom.roleModal.classList.remove("hidden");
+      this.openRoleModal();
     });
-
     this.dom.btnCloseRoleModal.addEventListener("click", () => {
-      this.dom.roleModal.classList.add("hidden");
+      this.closeRoleModal();
+    });
+    this.dom.roleModal.addEventListener("click", (e) => {
+      if (e.target === this.dom.roleModal) this.closeRoleModal();
     });
 
     document.querySelectorAll(".role-select-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const role = btn.getAttribute("data-role");
-        this.switchRole(role);
+        const selected = btn.getAttribute("data-role");
+        this.switchRole(selected);
       });
     });
 
-    // 後台設定 Modal
-    this.dom.btnOpenSettings.addEventListener("click", () => this.openSettingsModal());
-    this.dom.btnCloseSettings.addEventListener("click", () => this.closeSettingsModal());
-    this.dom.btnSaveSettings.addEventListener("click", () => this.saveSettingsFromModal());
-
-    // 設定分頁切換
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-        document.querySelectorAll(".tab-pane").forEach((p) => p.classList.remove("active"));
-        btn.classList.add("active");
-        const targetId = btn.getAttribute("data-tab");
-        document.getElementById(targetId).classList.add("active");
-      });
+    // 家屬後台設定 Modal
+    this.dom.btnOpenSettings.addEventListener("click", () => {
+      this.openSettingsModal();
+    });
+    this.dom.btnCloseSettings.addEventListener("click", () => {
+      this.closeSettingsModal();
+    });
+    this.dom.settingsModal.addEventListener("click", (e) => {
+      if (e.target === this.dom.settingsModal) this.closeSettingsModal();
+    });
+    this.dom.btnSaveSettings.addEventListener("click", () => {
+      this.saveSettingsFromModal();
     });
 
-    // 模擬測試自動接聽來電按鈕（可直接在平板上驗證來電鈴聲與 5 秒接聽流程）
-    if (this.dom.btnTestIncoming) {
-      this.dom.btnTestIncoming.addEventListener("click", () => {
+    // 立即進入微光待機時鐘按鈕
+    if (this.dom.btnTriggerScreensaver) {
+      this.dom.btnTriggerScreensaver.addEventListener("click", () => {
         this.closeSettingsModal();
-        this.handleIncomingCall({
-          callerId: "ali",
-          callerName: "阿禮 (測試來電)",
-          target: "axiao",
-          roomName: "smile-axiao-ali",
-          avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=ali&backgroundColor=b6e3f4"
-        });
+        setTimeout(() => this.enterScreensaver(), 300);
       });
     }
 
-    // 個別測試通知按鈕
+    // 設定頁籤切換
+    document.querySelectorAll(".settings-tabs .tab-btn").forEach((tabBtn) => {
+      tabBtn.addEventListener("click", () => {
+        document.querySelectorAll(".settings-tabs .tab-btn").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".tab-pane").forEach((p) => p.classList.remove("active"));
+
+        tabBtn.classList.add("active");
+        const targetId = tabBtn.getAttribute("data-tab");
+        document.getElementById(targetId)?.classList.add("active");
+      });
+    });
+
+    // 模擬測試長輩來電
+    this.dom.btnTestIncoming.addEventListener("click", () => {
+      this.closeSettingsModal();
+      this.handleIncomingCall({
+        action: "call",
+        callerId: "ali",
+        callerName: "阿禮",
+        target: "axiao",
+        roomName: "smile-axiao-ali",
+        callType: "video",
+        avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=ali&backgroundColor=b6e3f4"
+      });
+    });
+
+    // 測試個別通知發送按鈕
     document.querySelectorAll(".btn-test-single").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const target = btn.getAttribute("data-target");
@@ -965,9 +1328,11 @@ class SmileVideoCallApp {
       alert("已請求螢幕常亮鎖定！");
     });
 
-    // 恢復預設
+    // 恢復原廠預設
     document.getElementById("btn-reset-default").addEventListener("click", () => {
       if (confirm("確定要重設為原廠預設設定嗎？")) {
+        localStorage.removeItem("smile_call_config_v7");
+        localStorage.removeItem("smile_call_config_v6");
         localStorage.removeItem("smile_call_config_v4");
         localStorage.removeItem("smile_call_current_role");
         this.config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -979,9 +1344,15 @@ class SmileVideoCallApp {
     });
   }
 
-  // ==========================================
+  openRoleModal() {
+    this.dom.roleModal.classList.remove("hidden");
+  }
+
+  closeRoleModal() {
+    this.dom.roleModal.classList.add("hidden");
+  }
+
   // 後台設定開啟與儲存
-  // ==========================================
   openSettingsModal() {
     const axiaoContacts = this.config.roles.axiao.contacts;
     const aliContact = axiaoContacts.find((c) => c.id === "ali");

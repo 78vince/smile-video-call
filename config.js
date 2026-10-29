@@ -18,14 +18,43 @@ const DEFAULT_CONFIG = {
   // 預設全局通知（統一採用 Google Apps Script LINE 家庭群組轉發中繼站）
   defaultWebhookUrl: LINE_FAMILY_WEBHOOK_URL,
 
+  // Google 相簿公開連結與精選相片清單
+  googlePhotosAlbumUrl: "https://photos.app.goo.gl/aFTRxKidVotBq1eXA",
+  albumPhotos: [
+    {
+      url: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w1600",
+      caption: "溫馨家庭回憶"
+    },
+    {
+      url: "https://lh3.googleusercontent.com/pw/AP1GczOkwFIvU2l6tIb1KjO33Bg9e-noxioqSXRJ5R3RN819hXW_XZPE6BykrTM4wtg4gTJgsL60nUle4fyx8MxdT9t4jLDS9kXKXmcpRNxX_HXH9OgatZVt=w1600",
+      caption: "快樂出遊合照"
+    },
+    {
+      url: "https://lh3.googleusercontent.com/pw/AP1GczPm5rpW1IiOhrEylCnX_4xya4S8H7p_0tEpI7MPZNxuk0nL6ZAXEqfkQr9kbqkLp25rTw1m6zI6Gc0hvof0NFZENBM-U9EjNNY-TAamW9FeXc6zjAlO=w1600",
+      caption: "幸福歡聚時光"
+    },
+    {
+      url: "photo/994D0D80-78FA-4B9C-BC0E-C923E3225BD4_1_105_c.jpeg",
+      caption: "生活珍貴點滴"
+    },
+    {
+      url: "photo/6E8BBD19-A6DA-4CEF-9977-814073B35AF9_1_105_c.jpeg",
+      caption: "燦爛美好笑顏"
+    },
+    {
+      url: "photo/Gemini_Generated_Image_yekb79yekb79yekb.jpeg",
+      caption: "家族幸福肖像"
+    }
+  ],
+
   // 角色群組資料
   roles: {
-    // 1. 阿笑（長輩平板）
+    // 1. 阿笑（長輩平板）- 預設 6 個功能槽：3 人物、2 空白、1 相簿（放最後）
     axiao: {
       id: "axiao",
       name: "阿笑",
       appTitle: "阿笑的視訊機",
-      welcomeSubtitle: "點一下照片，馬上視訊聊聊天！",
+      welcomeSubtitle: "點一下照片，馬上聊聊天！",
       contacts: [
         {
           id: "ali",
@@ -53,6 +82,22 @@ const DEFAULT_CONFIG = {
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=xiaojun&backgroundColor=ffd5dc",
           accentColor: "#db2777",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
+        },
+        {
+          id: "blank-1",
+          type: "blank",
+          name: "預留位置"
+        },
+        {
+          id: "blank-2",
+          type: "blank",
+          name: "預留位置"
+        },
+        {
+          id: "album",
+          type: "album",
+          name: "家庭相簿",
+          coverUrl: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w400"
         }
       ]
     },
@@ -72,6 +117,12 @@ const DEFAULT_CONFIG = {
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=axiao&backgroundColor=fef08a",
           accentColor: "#f59e0b",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
+        },
+        {
+          id: "album",
+          type: "album",
+          name: "家庭相簿",
+          coverUrl: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w400"
         }
       ]
     },
@@ -91,6 +142,12 @@ const DEFAULT_CONFIG = {
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=axiao&backgroundColor=fef08a",
           accentColor: "#f59e0b",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
+        },
+        {
+          id: "album",
+          type: "album",
+          name: "家庭相簿",
+          coverUrl: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w400"
         }
       ]
     },
@@ -110,6 +167,12 @@ const DEFAULT_CONFIG = {
           avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=axiao&backgroundColor=fef08a",
           accentColor: "#f59e0b",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
+        },
+        {
+          id: "album",
+          type: "album",
+          name: "家庭相簿",
+          coverUrl: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w400"
         }
       ]
     }

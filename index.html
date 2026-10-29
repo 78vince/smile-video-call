@@ -28,7 +28,7 @@
             身分：<span id="current-role-name">阿笑</span> ▾
           </button>
         </div>
-        <p id="app-subtitle" class="subtitle">點一下照片，馬上視訊聊聊天！</p>
+        <p id="app-subtitle" class="subtitle">點一下照片，馬上聊聊天！</p>
       </div>
 
       <div class="header-right">
@@ -43,10 +43,10 @@
       </div>
     </header>
 
-    <!-- 聯絡人九宮格清單 -->
+    <!-- 聯絡人與功能九宮格清單 -->
     <section class="contacts-container">
       <div id="contacts-grid" class="contacts-grid">
-        <!-- 由 JavaScript 動態產生聯絡人卡片 -->
+        <!-- 由 JavaScript 動態產生 6 格選項（3 人物、2 空白、1 相簿） -->
       </div>
     </section>
 
@@ -62,6 +62,62 @@
       </button>
     </footer>
   </main>
+
+  <!-- 長輩專屬微光待機時鐘遮罩（防烙印防誤觸喚醒遮罩） -->
+  <div id="screensaver-overlay" class="screensaver-overlay hidden" aria-hidden="true">
+    <div class="screensaver-content">
+      <div id="screensaver-clock-time" class="screensaver-time">12:00</div>
+      <div id="screensaver-clock-date" class="screensaver-date">10月29日 星期四</div>
+      <div class="screensaver-hint">
+        <span class="screensaver-pulse-dot"></span>
+        <span>輕觸螢幕喚醒</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 家庭相簿輪播瀏覽器 Modal -->
+  <div id="album-modal" class="album-modal hidden" aria-hidden="true">
+    <div class="album-container">
+      <header class="album-header">
+        <div class="album-header-left">
+          <span class="album-title">🖼️ 家庭相簿</span>
+          <span id="album-counter" class="album-counter">1 / 4</span>
+        </div>
+        <div class="album-header-right">
+          <a id="btn-open-google-photos" href="https://photos.app.goo.gl/aFTRxKidVotBq1eXA" target="_blank" rel="noopener" class="btn-album-google" title="在 Google 相簿中開啟相簿">
+            在 Google 相簿開啟 ↗
+          </a>
+          <button id="btn-album-autoplay" class="btn-album-control" title="自動輪播開關">
+            <span id="album-autoplay-text">⏸️ 輪播中</span>
+          </button>
+          <button id="btn-close-album" class="btn-album-close" title="關閉相簿">✕ 關閉</button>
+        </div>
+      </header>
+
+      <!-- 圖片展示舞台（支援左右滑動與點擊翻頁） -->
+      <div id="album-stage" class="album-stage">
+        <button id="btn-album-prev" class="album-arrow-btn prev-btn" aria-label="上一張相片">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div id="album-viewport" class="album-photo-container">
+          <img id="album-current-img" class="album-current-img" src="" alt="家庭相片">
+          <div id="album-caption" class="album-caption">美好時光</div>
+        </div>
+
+        <button id="btn-album-next" class="album-arrow-btn next-btn" aria-label="下一張相片">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 底部指標圓點 -->
+      <div id="album-dots" class="album-dots"></div>
+    </div>
+  </div>
 
   <!-- 角色切換 Modal -->
   <div id="role-modal" class="modal hidden">
@@ -136,7 +192,7 @@
         <img id="connecting-avatar" class="connecting-avatar" src="" alt="通話對象">
       </div>
       <h2 id="connecting-name" class="connecting-name">正在撥號中...</h2>
-      <p class="connecting-tip">正在為您開啟視訊鏡頭，請稍候</p>
+      <p id="connecting-tip" class="connecting-tip">正在為您開啟視訊鏡頭，請稍候</p>
       <button id="btn-cancel-call" class="btn-cancel-call">取消撥號</button>
     </div>
   </div>
@@ -250,14 +306,10 @@
             <button id="btn-test-sound" class="btn-secondary">🔊 測試撥號音效</button>
             <button id="btn-test-incoming" class="btn-secondary" style="background:#dcfce7; color:#166534; border:1px solid #86efac;">🧪 模擬測試自動接聽來電</button>
             <button id="btn-request-wakelock" class="btn-secondary">💡 鎖定螢幕不休眠</button>
+            <button id="btn-trigger-screensaver" class="btn-secondary" style="background:#f1f5f9; color:#334155;">🌙 立即進入微光待機時鐘</button>
           </div>
           <div class="form-group">
             <button id="btn-reset-default" class="btn-danger">⚠️ 重設回出廠預設值</button>
-          </div>
-          <div class="form-group" style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #e2e8f0;">
-            <a href="log.html" target="_blank" class="btn-secondary" style="display: block; text-align: center; text-decoration: none; background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; font-weight: 700; padding: 10px;">
-              📖 開啟系統開發歷程與技術報告 ↗
-            </a>
           </div>
         </div>
       </div>
