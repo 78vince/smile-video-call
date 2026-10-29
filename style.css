@@ -799,6 +799,61 @@ body {
 }
 
 /* ============================================================
+   長輩防烙印微光待機時鐘 (Ambient Screensaver Mode)
+   ============================================================ */
+body.screensaver-mode {
+  background-color: #000000 !important;
+}
+
+body.screensaver-mode .app-header {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+body.screensaver-mode .header-left,
+body.screensaver-mode .btn-reload-badge,
+body.screensaver-mode .contacts-container,
+body.screensaver-mode .app-footer {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.8s ease;
+}
+
+body.screensaver-mode .header-right {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  transition: all 0.8s ease;
+  pointer-events: none;
+}
+
+body.screensaver-mode .clock-box {
+  align-items: center;
+}
+
+body.screensaver-mode .clock-time {
+  font-size: 5rem;
+  color: #64748b;
+  letter-spacing: 2px;
+  animation: floatClock 30s ease-in-out infinite alternate;
+}
+
+body.screensaver-mode .clock-date {
+  font-size: 1.3rem;
+  color: #475569;
+  margin-top: 8px;
+}
+
+@keyframes floatClock {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(12px, -12px); }
+  100% { transform: translate(-12px, 12px); }
+}
+
+/* ============================================================
    響應式設計（平板與手機優化）
    ============================================================ */
 @media (max-width: 768px) {

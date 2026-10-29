@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2563EB">
+  <title>微笑視訊 (Smile Video Call) - 系統開發歷程與技術報告</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 16px 60px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* 頂部導航 */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+      background: #eff6ff;
+      border-color: var(--primary);
+    }
+
+    /* 英雄區 */
+    .hero-card {
+      background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+      color: white;
+      padding: 36px 28px;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px -4px rgba(37, 99, 235, 0.25);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      opacity: 0.9;
+      max-width: 650px;
+      margin: 0 auto 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      padding: 12px 8px;
+    }
+
+    .stat-num {
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+
+    /* 卡片區塊 */
+    .section-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 10px;
+    }
+
+    /* 時間軸 */
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+      margin-top: 10px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      bottom: 10px;
+      left: 10px;
+      width: 3px;
+      background: #e2e8f0;
+      border-radius: 999px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -28px;
+      top: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      border: 4px solid var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .timeline-dot.success {
+      border-color: var(--success);
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+    }
+
+    .timeline-phase {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: #eff6ff;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+
+    .timeline-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .timeline-desc {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .timeline-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    /* 架構圖區塊 */
+    .arch-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .arch-card {
+      background: white;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .arch-card-title {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .arch-card-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* 角色專屬連結表格 */
+    .role-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .role-table th, .role-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    .role-table th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .role-table code {
+      background: #f1f5f9;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--primary-dark);
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .btn-visit {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* 對比表 */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .compare-col {
+      padding: 16px;
+      border-radius: 12px;
+      border: 1.5px solid;
+    }
+
+    .compare-bad {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .compare-bad h4 {
+      color: var(--danger);
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .compare-good {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .compare-good h4 {
+      color: var(--success);
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .compare-list {
+      list-style-type: none;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 600px) {
+      .hero-title {
+        font-size: 1.8rem;
+      }
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+      .section-card {
+        padding: 20px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 導航列 -->
+    <header class="top-nav">
+      <a href="./" class="btn-back">← 返回視訊大按鈕主畫面</a>
+      <span style="font-size: 0.9rem; color: var(--muted); font-weight: 600;">阿笑家庭專屬視訊系統</span>
+    </header>
+
+    <!-- 英雄區塊 -->
+    <section class="hero-card">
+      <div class="hero-badge">🌟 全端系統開發實錄</div>
+      <h1 class="hero-title">Smile Video Call 微笑視訊</h1>
+      <p class="hero-subtitle">專為高齡長輩量身設計的「零操作門檻、大按鈕、自動接聽、家庭 LINE 群組即時推播」視訊通話 PWA</p>
+      
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-num">0 次</div>
+          <div class="stat-label">免帳號/免登入</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">1 鍵</div>
+          <div class="stat-label">直通視訊連線</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">5 秒</div>
+          <div class="stat-label">平板自動接聽</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">LINE 群組即時推播</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 為什麼要做？設計哲學與體驗對比 -->
+    <section class="section-card">
+      <h2 class="section-title">💡 為什麼需要這套系統？</h2>
+      <p style="color: var(--muted); margin-bottom: 14px;">
+        在日常照護長輩時，市面通訊軟體（LINE、FaceTime、Zoom、Google Meet）雖然功能豐富，但對年長者而言存在著巨大的數位鴻溝：
+      </p>
+
+      <div class="compare-grid">
+        <div class="compare-col compare-bad">
+          <h4>❌ 市售通訊軟體的長輩痛點</h4>
+          <ul class="compare-list">
+            <li>• 操作選單層級深，常常找不到視訊按鈕</li>
+            <li>• 平板久放容易跳出密碼驗證或被強制登出</li>
+            <li>• 來電時滑動解鎖不靈敏，長輩常常手忙腳亂</li>
+            <li>• 開會軟體動輒要求「主辦人 / 會議主持人登入」</li>
+            <li>• 長輩不知道誰打來，也沒有自動接通機制</li>
+          </ul>
+        </div>
+        <div class="compare-col compare-good">
+          <h4>✅ 微笑視訊的核心解答</h4>
+          <ul class="compare-list">
+            <li>• <strong>超大照片與姓名</strong>：一眼看懂，點照片立即通話</li>
+            <li>• <strong>永遠常亮不休眠</strong>：透過 WakeLock 鎖定螢幕</li>
+            <li>• <strong>5 秒自動接通</strong>：晚輩撥號，長輩端完全免按鍵自動開鏡頭</li>
+            <li>• <strong>免主持人開源伺服器</strong>：徹底消除登入認證卡點</li>
+            <li>• <strong>家庭 LINE 群組聯防</strong>：一撥號全家同步叮咚提醒</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 系統架構與技術核心 -->
+    <section class="section-card">
+      <h2 class="section-title">🏗️ 系統整體架構與運作原理</h2>
+      <p style="color: var(--muted); margin-bottom: 12px;">
+        系統由三個關鍵骨幹緊密咬合，實現毫秒級信號傳遞與無障礙視訊通話：
+      </p>
+
+      <div class="arch-box">
+        <div class="arch-grid">
+          <div class="arch-card">
+            <div class="arch-card-title">📹 開源視訊引擎</div>
+            <div class="arch-card-desc">
+              <strong>Jitsi Meet (jitsi.riot.im)</strong><br>
+              開源社群維護的公開伺服器。免登入、無 Google/GitHub 主持人身分限制，進入房間瞬間啟用視訊與麥克風。
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-title">📡 雙向即時信號通道</div>
+            <div class="arch-card-desc">
+              <strong>ntfy.sh (Server-Sent Events)</strong><br>
+              長輩平板待機時透過 SSE 保持連線。晚輩一撥號，信號在 0.2 秒內廣播至平板觸發自動接聽、忙線提示與同步掛斷。
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-title">🤖 LINE 群組中繼站</div>
+            <div class="arch-card-desc">
+              <strong>Google Apps Script (GAS)</strong><br>
+              零伺服器成本的雲端 Webhook。自動學習家庭群組 ID，並調用 LINE Messaging API 將通話一鍵直通連結推播至家庭群組。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 完整七大開發里程碑 -->
+    <section class="section-card">
+      <h2 class="section-title">🚀 七大開發演進里程碑 (Milestones)</h2>
+      
+      <div class="timeline">
+
+        <!-- 階段 1 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-phase">Phase 1</div>
+          <div class="timeline-title">PWA 離線漸進式架構與長輩大按鈕介面</div>
+          <div class="timeline-desc">
+            建立 Service Worker 離線快取機制與 Web Manifest，支援安裝至 Android 平板主畫面。採用 28px 超大圓角高對比卡片、110px 大頭貼、全螢幕時鐘與日曆，並整合 Screen Wake Lock 防止螢幕休眠。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">PWA</span>
+            <span class="tag">Service Worker</span>
+            <span class="tag">Screen WakeLock</span>
+            <span class="tag">Dicebear Avatars</span>
+          </div>
+        </div>
+
+        <!-- 階段 2 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-phase">Phase 2</div>
+          <div class="timeline-title">攻克 Jitsi 主持人登入限制（遷移至 jitsi.riot.im）</div>
+          <div class="timeline-desc">
+            針對官方 <code>meet.jit.si</code> 強制要求 Google 登入主持人的痛點，徹底切換至免認證開源伺服器 <code>jitsi.riot.im</code>，同時隱藏 Jitsi 所有複雜工具列，消除所有可能讓長輩困惑的操作。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">Jitsi External API</span>
+            <span class="tag">無登入伺服器</span>
+            <span class="tag">自動開鏡頭</span>
+          </div>
+        </div>
+
+        <!-- 階段 3 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-phase">Phase 3</div>
+          <div class="timeline-title">以長輩為中心的多角色家庭架構（阿笑 ↔ 阿禮、阿龍、小君）</div>
+          <div class="timeline-desc">
+            構建 1 位長輩對應 3 位晚輩的專屬網址架構（<code>?u=axiao</code>、<code>?u=ali</code>、<code>?u=along</code>、<code>?u=xiaojun</code>）。支援 <code>join</code> 參數一鍵快速通關，晚輩點開通知直接進房，無須手動重複撥打。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">多身分 URL 架構</span>
+            <span class="tag">一鍵直通 Auto-Join</span>
+            <span class="tag">專屬獨立房間</span>
+          </div>
+        </div>
+
+        <!-- 階段 4 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-phase">Phase 4</div>
+          <div class="timeline-title">即時信號通道與長輩端「5 秒倒數自動接聽」</div>
+          <div class="timeline-desc">
+            整合 <code>ntfy.sh</code> 雲端通道。晚輩撥號時長輩平板即時響起自製 Web Audio 和弦鈴聲，並浮現 5 秒自動接聽倒數條。秒數歸零後平板自動調用 Jitsi API 加入視訊，達成真正的長輩零手動操作。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">ntfy.sh SSE</span>
+            <span class="tag">自動接聽 Auto-Answer</span>
+            <span class="tag">Web Audio API</span>
+          </div>
+        </div>
+
+        <!-- 階段 5 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-phase">Phase 5</div>
+          <div class="timeline-title">消滅「雙媽媽幽靈分身」與通話中忙線保護</div>
+          <div class="timeline-desc">
+            掛斷時延遲 500ms 釋放 DOM，確保伺服器離線封包送達，消滅幽靈分身；若長輩已在通話中，其他晚輩打來會收到「長輩通話中」提示且不打擾現有通話；晚輩掛斷時，長輩端自動退出視訊乾淨返回首頁。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">幽靈分身消除</span>
+            <span class="tag">忙線保護 Busy Protection</span>
+            <span class="tag">遠端同步掛斷</span>
+          </div>
+        </div>
+
+        <!-- 階段 6 -->
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-phase">Phase 6</div>
+          <div class="timeline-title">常駐底欄鎖定與平板矮螢幕響應式優化</div>
+          <div class="timeline-desc">
+            修復 Flexbox 導致底欄被擠出螢幕外的邊界問題，為底部狀態列加上 <code>flex-shrink: 0</code> 與專屬白色浮雕卡片；頂部時鐘與重新整理按鈕改為橫向並排；加入專屬矮螢幕自適應，橫向直向平板皆能一屏完整收納。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">常駐底欄 Docked Footer</span>
+            <span class="tag">矮螢幕響應式</span>
+            <span class="tag">PWA 強制刷新按鈕</span>
+          </div>
+        </div>
+
+        <!-- 階段 7 -->
+        <div class="timeline-item">
+          <div class="timeline-dot success"></div>
+          <div class="timeline-phase" style="background:#dcfce7; color:#15803d;">Phase 7</div>
+          <div class="timeline-title">LINE Messaging API + Google Apps Script (GAS) 智慧群組中繼站</div>
+          <div class="timeline-desc">
+            全面取代即將停用的 LINE Notify，建立免費 Google 雲端中繼站。支援機器人進群自動學習綁定群組 ID，並將 Webhook 寫入前端核心，長輩點擊任一位家人，家庭 LINE 群組全員立刻收到直通來電通知。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">LINE Messaging API</span>
+            <span class="tag">Google Apps Script</span>
+            <span class="tag">家庭群組自動綁定</span>
+            <span class="tag">全家統一推播</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 專屬身分直通網址清單 -->
+    <section class="section-card">
+      <h2 class="section-title">🔗 家庭專屬身分直通網址</h2>
+      <p style="color: var(--muted); margin-bottom: 12px;">
+        長輩與晚輩各自擁有獨立的專屬入口，在手機打開即可一鍵通話：
+      </p>
+
+      <table class="role-table">
+        <thead>
+          <tr>
+            <th>身分</th>
+            <th>角色說明</th>
+            <th>專屬連結</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>👵 <strong>阿笑</strong></td>
+            <td>客廳平板專用（大按鈕、自動接聽）</td>
+            <td><code>?u=axiao</code></td>
+            <td><a href="./?u=axiao" class="btn-visit">開啟</a></td>
+          </tr>
+          <tr>
+            <td>👦 <strong>阿禮</strong></td>
+            <td>大兒子手機專用（直通阿笑媽媽）</td>
+            <td><code>?u=ali</code></td>
+            <td><a href="./?u=ali" class="btn-visit">開啟</a></td>
+          </tr>
+          <tr>
+            <td>🧑 <strong>阿龍</strong></td>
+            <td>二兒子手機專用（直通阿笑媽媽）</td>
+            <td><code>?u=along</code></td>
+            <td><a href="./?u=along" class="btn-visit">開啟</a></td>
+          </tr>
+          <tr>
+            <td>👧 <strong>小君</strong></td>
+            <td>孫女手機專用（直通阿笑奶奶）</td>
+            <td><code>?u=xiaojun</code></td>
+            <td><a href="./?u=xiaojun" class="btn-visit">開啟</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer class="footer">
+      <p>Smile Video Call (微笑視訊) • 守護家庭溫馨通話每一刻</p>
+      <p style="margin-top: 4px; font-size: 0.8rem;">GitHub Pages 託管 • 100% 免費開源架構</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

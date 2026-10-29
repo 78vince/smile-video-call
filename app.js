@@ -72,6 +72,7 @@ class SmileVideoCallApp {
     this.requestWebNotificationPermission();
     this.startIncomingCallListener();
     this.checkAutoJoin();
+    this.initScreensaver();
   }
 
   // 檢查 URL 是否帶有直接加入參數 (例如點擊通知訊息)
@@ -203,6 +204,38 @@ class SmileVideoCallApp {
 
     updateTime();
     setInterval(updateTime, 1000);
+  }
+
+  // ==========================================
+  // 長輩專屬防烙印微光待機時鐘 (Ambient Screensaver)
+  // ==========================================
+  initScreensaver() {
+    let screensaverTimer = null;
+
+    const wakeUp = () => {
+      if (document.body.classList.contains("screensaver-mode")) {
+        document.body.classList.remove("screensaver-mode");
+      }
+      clearTimeout(screensaverTimer);
+
+      // 通話中或有來電畫面時不進入微光時鐘
+      if (this.isCallActive || !this.dom.incomingOverlay.classList.contains("hidden")) {
+        return;
+      }
+
+      // 閒置 3 分鐘後自動進入微光防烙印時鐘（插電常亮保護）
+      screensaverTimer = setTimeout(() => {
+        if (!this.isCallActive && this.dom.incomingOverlay.classList.contains("hidden")) {
+          document.body.classList.add("screensaver-mode");
+        }
+      }, 3 * 60 * 1000);
+    };
+
+    ["touchstart", "pointerdown", "mousedown", "click", "keydown"].forEach((evt) => {
+      window.addEventListener(evt, wakeUp, { passive: true });
+    });
+
+    wakeUp();
   }
 
   // ==========================================
@@ -391,6 +424,8 @@ class SmileVideoCallApp {
 
   // 當晚輩打來時觸發（長輩平板畫面）
   handleIncomingCall(payload) {
+    document.body.classList.remove("screensaver-mode");
+
     // 關鍵防呆：若長輩已經在該通話房間中等待，表示長輩早就已經開好鏡頭在等了，絕對不要打斷長輩或重複響鈴！
     if (this.currentCallApi && this.currentRoomName === payload.roomName) {
       console.log("長輩已在通話房間中等待，忽略重複呼叫信號");

@@ -1,7 +1,8 @@
-const CACHE_NAME = "smile-call-v13";
+const CACHE_NAME = "smile-call-v14";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
+  "./log.html",
   "./style.css",
   "./app.js",
   "./config.js",
