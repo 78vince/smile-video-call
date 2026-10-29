@@ -657,10 +657,10 @@
 
         <!-- 階段 8 -->
         <div class="timeline-item">
-          <div class="timeline-dot success"></div>
+          <div class="timeline-dot"></div>
           <div class="timeline-header-row">
-            <span class="timeline-phase highlight">Phase 8</span>
-            <span class="timeline-time">2026-10-29 14:30 ~ 16:00</span>
+            <span class="timeline-phase">Phase 8</span>
+            <span class="timeline-time">2026-10-29 14:30 ~ 15:00</span>
           </div>
           <div class="timeline-title">微光時鐘防呆喚醒、家庭相簿輪播滑動、主畫面無框大頭照設計、Jitsi 純語音通話雙模式</div>
           <div class="timeline-desc">
@@ -674,9 +674,30 @@
             <span class="tag">微光防烙印時鐘</span>
             <span class="tag">喚醒防呆 Anti-Dial</span>
             <span class="tag">家庭相簿輪播</span>
-            <span class="tag">手勢滑動翻頁</span>
             <span class="tag">純語音通話</span>
-            <span class="tag">六格九宮格</span>
+          </div>
+        </div>
+
+        <!-- 階段 9 -->
+        <div class="timeline-item">
+          <div class="timeline-dot success"></div>
+          <div class="timeline-header-row">
+            <span class="timeline-phase highlight">Phase 9</span>
+            <span class="timeline-time">2026-10-29 15:00 ~ 15:30</span>
+          </div>
+          <div class="timeline-title">相簿極簡全螢幕化、平板動態可視高度鎖定、語音通話頭像化、即時信號通道解析修復</div>
+          <div class="timeline-desc">
+            <strong>1. 相簿功能極大化</strong>：僅使用 Google 相簿公開相片，無文字描述，相片滿版最大化（100vw x 100vh）；移除左上角字樣與圖示；底部指示點改為扁平單色；輪播時維持 WakeLock 不休眠，超時 10 分鐘自動返回主畫面並進入微光模式。<br>
+            <strong>2. 平板底欄齒輪與綠燈常駐修復</strong>：導入 <code>--app-height: window.innerHeight</code> 與 <code>position: fixed; inset: 0;</code>，卡片大頭照彈性自適應，徹底解決平板重新整理後網址列/工具列將底端設定齒輪擠出螢幕外的頑疾。<br>
+            <strong>3. 語音通話頭像化</strong>：全角色配置 PNG 頭像並於 Jitsi <code>userInfo.avatarURL</code> 與 <code>avatarUrl</code> 命令注入，並在通話中提供專屬頭像畫面與音波脈衝動畫，徹底取代原本字母圓形圖示。<br>
+            <strong>4. 修復晚輩撥打長輩功能</strong>：徹底解決 <code>ntfy.sh</code> SSE 內部 <code>raw.message</code> 字串二次解析問題，恢復長輩平板毫秒級自動響鈴與 5 秒倒數自動接聽功能。
+          </div>
+          <div class="timeline-tags">
+            <span class="tag">相簿最大化</span>
+            <span class="tag">10分鐘自動休眠</span>
+            <span class="tag">平板可視高度鎖定</span>
+            <span class="tag">語音大頭貼</span>
+            <span class="tag">信號通道修復</span>
           </div>
         </div>
 

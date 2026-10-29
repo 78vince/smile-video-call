@@ -75,48 +75,30 @@
     </div>
   </div>
 
-  <!-- 家庭相簿輪播瀏覽器 Modal -->
+  <!-- 家庭相簿輪播全螢幕（相片最大化、無文字描述、無左上角字樣、純色扁平指示點、10分鐘自動休眠） -->
   <div id="album-modal" class="album-modal hidden" aria-hidden="true">
-    <div class="album-container">
-      <header class="album-header">
-        <div class="album-header-left">
-          <span class="album-title">🖼️ 家庭相簿</span>
-          <span id="album-counter" class="album-counter">1 / 4</span>
-        </div>
-        <div class="album-header-right">
-          <a id="btn-open-google-photos" href="https://photos.app.goo.gl/aFTRxKidVotBq1eXA" target="_blank" rel="noopener" class="btn-album-google" title="在 Google 相簿中開啟相簿">
-            在 Google 相簿開啟 ↗
-          </a>
-          <button id="btn-album-autoplay" class="btn-album-control" title="自動輪播開關">
-            <span id="album-autoplay-text">⏸️ 輪播中</span>
-          </button>
-          <button id="btn-close-album" class="btn-album-close" title="關閉相簿">✕ 關閉</button>
-        </div>
-      </header>
+    <!-- 右上角極簡關閉按鈕 -->
+    <button id="btn-close-album" class="album-floating-close" title="關閉相簿" aria-label="關閉相簿">✕</button>
 
-      <!-- 圖片展示舞台（支援左右滑動與點擊翻頁） -->
-      <div id="album-stage" class="album-stage">
-        <button id="btn-album-prev" class="album-arrow-btn prev-btn" aria-label="上一張相片">
-          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
+    <!-- 左右翻頁箭頭 -->
+    <button id="btn-album-prev" class="album-arrow-btn prev-btn" aria-label="上一張相片">
+      <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
 
-        <div id="album-viewport" class="album-photo-container">
-          <img id="album-current-img" class="album-current-img" src="" alt="家庭相片">
-          <div id="album-caption" class="album-caption">美好時光</div>
-        </div>
-
-        <button id="btn-album-next" class="album-arrow-btn next-btn" aria-label="下一張相片">
-          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </div>
-
-      <!-- 底部指標圓點 -->
-      <div id="album-dots" class="album-dots"></div>
+    <div id="album-viewport" class="album-photo-container">
+      <img id="album-current-img" class="album-current-img" src="" alt="Google 相簿照片">
     </div>
+
+    <button id="btn-album-next" class="album-arrow-btn next-btn" aria-label="下一張相片">
+      <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- 底部單色扁平指示點（無立體效果） -->
+    <div id="album-dots" class="album-dots"></div>
   </div>
 
   <!-- 角色切換 Modal -->
@@ -209,11 +191,21 @@
     </div>
   </div>
 
-  <!-- 視訊畫面容器 -->
+  <!-- 視訊與語音畫面容器 -->
   <section id="call-view" class="view hidden">
     <!-- Jitsi Iframe 注入區 -->
     <div id="jitsi-container"></div>
     
+    <!-- 純語音通話專屬大頭貼畫面（取代原本文字圓形圖示） -->
+    <div id="audio-call-stage" class="audio-call-stage hidden">
+      <div class="audio-call-avatar-wrapper">
+        <div class="audio-call-pulse"></div>
+        <img id="audio-call-avatar" class="audio-call-avatar" src="" alt="通話者頭像">
+      </div>
+      <h2 id="audio-call-peer-name" class="audio-call-peer-name">通話對象</h2>
+      <div id="audio-call-status" class="audio-call-status">📞 語音通話中</div>
+    </div>
+
     <!-- 輔助退出按鈕（避免長輩找不到 Jitsi 內建的小掛斷鈕） -->
     <button id="btn-floating-hangup" class="btn-floating-hangup" title="結束通話返回首頁">
       <span class="hangup-icon">📞</span>
