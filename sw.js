@@ -1,4 +1,4 @@
-const CACHE_NAME = "smile-call-v19";
+const CACHE_NAME = "smile-call-v20";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -9,7 +9,11 @@ const ASSETS_TO_CACHE = [
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icons/apple-touch-icon.png",
+  "./avatars/ali.png",
+  "./avatars/along.png",
+  "./avatars/pengjun.png",
+  "./avatars/album-cover.png"
 ];
 
 // 安裝並快取靜態檔案

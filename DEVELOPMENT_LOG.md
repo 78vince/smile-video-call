@@ -202,6 +202,23 @@ flowchart TD
 
 ---
 
+### 階段 13：家庭成員真人頭貼更換（阿禮、阿龍、芃君）、小君改名為芃君、家庭相簿溫馨封面替換
+- **時間**：`2026-10-29 17:15 ~ 17:30`
+- **真人頭貼精準裁切與高解析更換**：
+  - **阿龍（二兒子）**：戴帽子男士照片，去除原圖外圍黑邊與按鈕，居中光學聚焦臉部與帽子，裁切導出為 512x512 高清大頭貼 (`avatars/along.png`)。
+  - **芃君（孫女）**：黑白黑框眼鏡短髮微笑照片，居中聚焦臉部，導出為 512x512 高清大頭貼 (`avatars/pengjun.png`)。
+  - **阿禮（大兒子）**：細框眼鏡白衣服微笑男士照片，居中臉部，導出為 512x512 高清大頭貼 (`avatars/ali.png`)。
+- **角色稱謂全面更名（小君 ➔ 芃君）**：
+  - 統一將「小君」更名為「芃君」，角色 ID 更新為 `pengjun`，直通網址升級為 `?u=pengjun`。
+  - 雙向兼顧相容性：舊網址 `?u=xiaojun` 自動重導向至 `pengjun`，既有捷徑完全不受影響。
+- **家庭相簿專屬溫馨封面圖標**：
+  - 解決原本直接抓取 Google 相簿遠景人像照片在小圓槽中看不清的問題。
+  - 繪製專屬 512x512 溫馨漸層相簿封面圖標 (`avatars/album-cover.png`)：珊瑚橙紅圓形漸層底、立體疊加拍立得卡片、翠綠山嵐朝陽與小愛心，長輩一眼即能認出為家庭相簿。
+  - 鎖定相簿主畫面圖標，避免雲端相簿自動同步時覆蓋專屬圖案。
+- **快取升級**：Service Worker 快取版本升至 `smile-call-v20`。
+
+---
+
 ## 四、關鍵技術規格一覽表
 
 | 項目 | 技術 / 服務 | 說明 |
@@ -233,8 +250,8 @@ flowchart TD
   `https://78vince.github.io/smile-video-call/?u=ali`
 - 🧑 **阿龍的手機**：  
   `https://78vince.github.io/smile-video-call/?u=along`
-- 👧 **小君的手機**：  
-  `https://78vince.github.io/smile-video-call/?u=xiaojun`
+- 👧 **芃君的手機**：  
+  `https://78vince.github.io/smile-video-call/?u=pengjun`（相容 `?u=xiaojun`）
 
 ### 3. LINE 機器人與中繼站配置
 - **LINE 官方帳號**：`阿笑的視訊機`（Basic ID: `@355pvwuh`）

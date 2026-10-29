@@ -3,11 +3,12 @@
  */
 const LINE_FAMILY_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwFd5_E2nJ14Dmf6ZNuqTgaxWrVtJRNeQLL8wPcYyaEC3ZGa8X9Xs8j_gMfDeO-V9ZZAQ/exec";
 
-// 統一頭像圖庫（採用 PNG 格式以確保 Jitsi Meet 語音模式 100% 渲染頭像，杜絕字母圓形）
+// 統一頭像圖庫（阿禮、阿龍、芃君採用真人專屬相片；家庭相簿採用精緻溫暖封面）
 const AVATAR_AXIAO = "https://api.dicebear.com/7.x/bottts/png?seed=axiao&backgroundColor=fef08a";
-const AVATAR_ALI = "https://api.dicebear.com/7.x/bottts/png?seed=ali&backgroundColor=b6e3f4";
-const AVATAR_ALONG = "https://api.dicebear.com/7.x/bottts/png?seed=along&backgroundColor=c084fc";
-const AVATAR_XIAOJUN = "https://api.dicebear.com/7.x/bottts/png?seed=xiaojun&backgroundColor=ffd5dc";
+const AVATAR_ALI = "./avatars/ali.png";
+const AVATAR_ALONG = "./avatars/along.png";
+const AVATAR_PENGJUN = "./avatars/pengjun.png";
+const COVER_ALBUM = "./avatars/album-cover.png";
 
 const DEFAULT_CONFIG = {
   // 視訊伺服器（使用開源免登入、免主持人驗證的公開伺服器）
@@ -69,11 +70,11 @@ const DEFAULT_CONFIG = {
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
         },
         {
-          id: "xiaojun",
-          name: "小君",
+          id: "pengjun",
+          name: "芃君",
           relation: "孫女",
-          roomName: "smile-axiao-xiaojun",
-          avatarUrl: AVATAR_XIAOJUN,
+          roomName: "smile-axiao-pengjun",
+          avatarUrl: AVATAR_PENGJUN,
           accentColor: "#db2777",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
         },
@@ -91,7 +92,7 @@ const DEFAULT_CONFIG = {
           id: "album",
           type: "album",
           name: "家庭相簿",
-          coverUrl: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w600"
+          coverUrl: COVER_ALBUM
         }
       ]
     },
@@ -136,19 +137,19 @@ const DEFAULT_CONFIG = {
       ]
     },
 
-    // 4. 小君（晚輩頁面，稱呼奶奶）
-    xiaojun: {
-      id: "xiaojun",
-      name: "小君",
-      avatarUrl: AVATAR_XIAOJUN,
-      appTitle: "小君的家庭通話",
+    // 4. 芃君（晚輩頁面，稱呼奶奶）
+    pengjun: {
+      id: "pengjun",
+      name: "芃君",
+      avatarUrl: AVATAR_PENGJUN,
+      appTitle: "芃君的家庭通話",
       welcomeSubtitle: "點擊大頭貼，立即連線阿笑奶奶",
       contacts: [
         {
           id: "axiao",
           name: "阿笑奶奶",
           relation: "奶奶",
-          roomName: "smile-axiao-xiaojun",
+          roomName: "smile-axiao-pengjun",
           avatarUrl: AVATAR_AXIAO,
           accentColor: "#f59e0b",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
@@ -157,3 +158,6 @@ const DEFAULT_CONFIG = {
     }
   }
 };
+
+// 保持與舊網址 ?u=xiaojun 雙向相容
+DEFAULT_CONFIG.roles.xiaojun = DEFAULT_CONFIG.roles.pengjun;

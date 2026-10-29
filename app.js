@@ -142,14 +142,16 @@ class SmileVideoCallApp {
   // 取得目前身分 (優先讀取 URL query ?u=xxx，次之讀取 localStorage)
   getInitialRole() {
     const params = new URLSearchParams(window.location.search);
-    const urlRole = params.get("u");
-    if (urlRole && ["axiao", "ali", "along", "xiaojun"].includes(urlRole)) {
+    let urlRole = params.get("u");
+    if (urlRole === "xiaojun") urlRole = "pengjun";
+    if (urlRole && ["axiao", "ali", "along", "pengjun"].includes(urlRole)) {
       localStorage.setItem("smile_call_current_role", urlRole);
       return urlRole;
     }
 
-    const savedRole = localStorage.getItem("smile_call_current_role");
-    if (savedRole && ["axiao", "ali", "along", "xiaojun"].includes(savedRole)) {
+    let savedRole = localStorage.getItem("smile_call_current_role");
+    if (savedRole === "xiaojun") savedRole = "pengjun";
+    if (savedRole && ["axiao", "ali", "along", "pengjun"].includes(savedRole)) {
       return savedRole;
     }
 
@@ -172,12 +174,12 @@ class SmileVideoCallApp {
         if (!parsed.roles?.axiao?.contacts || parsed.roles.axiao.contacts.length < 6) {
           parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
         }
-        // 確保晚輩角色（阿禮、阿龍、小君）介面純淨，不含家庭相簿與空白槽
-        ["ali", "along", "xiaojun"].forEach((r) => {
-          if (parsed.roles && parsed.roles[r]) {
-            parsed.roles[r].contacts = DEFAULT_CONFIG.roles[r].contacts;
-          }
-        });
+        // 確保最新真人頭貼、名稱（阿禮、阿龍、芃君）與相簿封面更新為最新設定
+        parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
+        parsed.roles.ali = DEFAULT_CONFIG.roles.ali;
+        parsed.roles.along = DEFAULT_CONFIG.roles.along;
+        parsed.roles.pengjun = DEFAULT_CONFIG.roles.pengjun;
+        parsed.roles.xiaojun = DEFAULT_CONFIG.roles.pengjun;
         // 若儲存的相片數量少於預設設定，優先升級為預設相片
         if (!parsed.albumPhotos || parsed.albumPhotos.length < DEFAULT_CONFIG.albumPhotos.length) {
           parsed.albumPhotos = DEFAULT_CONFIG.albumPhotos;
@@ -526,14 +528,6 @@ class SmileVideoCallApp {
       if (data && data.status === "success" && Array.isArray(data.photos) && data.photos.length > 0) {
         console.log("成功從 Google 相簿雲端中繼同步最新相片:", data.photos.length, "張");
         this.config.albumPhotos = data.photos;
-
-        // 若相簿封面也在，同步更新主畫面封面
-        if (this.config.roles && this.config.roles.axiao) {
-          const albumSlot = this.config.roles.axiao.contacts.find((c) => c.type === "album");
-          if (albumSlot && data.photos[0]) {
-            albumSlot.coverUrl = data.photos[0].url.replace("=w1600", "=w600");
-          }
-        }
 
         // 儲存至本地快取
         try {
