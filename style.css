@@ -146,6 +146,39 @@ body {
   justify-items: center;
 }
 
+/* 晚輩手機介面單一聯絡人（置中且加大，大方優雅） */
+.contacts-grid.single-contact {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+
+.contacts-grid.single-contact .contact-card {
+  max-width: 320px;
+}
+
+.contacts-grid.single-contact .contact-avatar-wrapper {
+  width: clamp(100px, 20vh, 160px);
+  height: clamp(100px, 20vh, 160px);
+  margin-bottom: 8px;
+}
+
+.contacts-grid.single-contact .contact-name {
+  font-size: clamp(1.5rem, 3.2vh, 2.1rem);
+  margin-bottom: 12px;
+}
+
+.contacts-grid.single-contact .btn-call-action {
+  width: 56px;
+  height: 56px;
+}
+
+.contacts-grid.single-contact .btn-call-action svg {
+  width: 26px;
+  height: 26px;
+}
+
 /* 長輩使用者卡片（無外匡、無底色、無陰影） */
 .contact-card {
   background: transparent;

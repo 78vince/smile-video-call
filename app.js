@@ -172,6 +172,12 @@ class SmileVideoCallApp {
         if (!parsed.roles?.axiao?.contacts || parsed.roles.axiao.contacts.length < 6) {
           parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
         }
+        // 確保晚輩角色（阿禮、阿龍、小君）介面純淨，不含家庭相簿與空白槽
+        ["ali", "along", "xiaojun"].forEach((r) => {
+          if (parsed.roles && parsed.roles[r]) {
+            parsed.roles[r].contacts = DEFAULT_CONFIG.roles[r].contacts;
+          }
+        });
         // 若儲存的相片數量少於預設設定，優先升級為預設相片
         if (!parsed.albumPhotos || parsed.albumPhotos.length < DEFAULT_CONFIG.albumPhotos.length) {
           parsed.albumPhotos = DEFAULT_CONFIG.albumPhotos;
@@ -857,8 +863,22 @@ class SmileVideoCallApp {
 
     this.dom.contactsGrid.innerHTML = "";
 
+    // 過濾卡片：只有長輩（阿笑）才顯示相簿與空白槽，其他晚輩角色僅顯示通話聯絡人
+    const activeContacts = roleData.contacts.filter((c) => {
+      if (this.currentRole !== "axiao" && (c.type === "album" || c.type === "blank")) {
+        return false;
+      }
+      return true;
+    });
+
+    if (activeContacts.length <= 1) {
+      this.dom.contactsGrid.classList.add("single-contact");
+    } else {
+      this.dom.contactsGrid.classList.remove("single-contact");
+    }
+
     // 依序產生功能卡片
-    roleData.contacts.forEach((contact) => {
+    activeContacts.forEach((contact) => {
       // 1. 空白預留槽 (Slot 4 & 5)
       if (contact.type === "blank") {
         const blankCard = document.createElement("div");

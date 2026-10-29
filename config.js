@@ -112,12 +112,6 @@ const DEFAULT_CONFIG = {
           avatarUrl: AVATAR_AXIAO,
           accentColor: "#f59e0b",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
-        },
-        {
-          id: "album",
-          type: "album",
-          name: "家庭相簿",
-          coverUrl: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w600"
         }
       ]
     },
@@ -138,12 +132,6 @@ const DEFAULT_CONFIG = {
           avatarUrl: AVATAR_AXIAO,
           accentColor: "#f59e0b",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
-        },
-        {
-          id: "album",
-          type: "album",
-          name: "家庭相簿",
-          coverUrl: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w600"
         }
       ]
     },
@@ -164,12 +152,6 @@ const DEFAULT_CONFIG = {
           avatarUrl: AVATAR_AXIAO,
           accentColor: "#f59e0b",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
-        },
-        {
-          id: "album",
-          type: "album",
-          name: "家庭相簿",
-          coverUrl: "https://lh3.googleusercontent.com/pw/AP1GczO1rO8LgLGfxT0xOZSJUNaqbpvGXk5pE08dCfvlB42B0bLzUqcL8MMPEmC5hv7u_pWy56RwsKaeiOIL7orxiiXrxTKDoJDo-PQoOXQh5epPYstCvQ=w600"
         }
       ]
     }
