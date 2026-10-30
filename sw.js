@@ -1,4 +1,4 @@
-const CACHE_NAME = "smile-call-v27";
+const CACHE_NAME = "smile-call-v28";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",

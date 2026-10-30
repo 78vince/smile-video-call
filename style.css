@@ -190,20 +190,20 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 1280px;
+  max-width: 100%;
   height: 100%;
   margin: 0 auto;
   padding: 0 clamp(8px, 1.5vw, 24px);
   box-sizing: border-box;
 }
 
-/* 左欄：生活功能（相簿、微光模式，純圓形封面，不放文字） */
+/* 左欄：生活功能（相簿、微光模式，純圓形封面，不放文字，維持 180px） */
 .utility-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(18px, 3.8vh, 36px);
+  gap: clamp(16px, 3.5vh, 32px);
   flex-shrink: 0;
   padding: 6px clamp(8px, 1.2vw, 20px);
 }
@@ -264,8 +264,8 @@ body {
 .contacts-col {
   flex: 1 1 0%;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  column-gap: clamp(6px, 1.2vw, 20px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: clamp(4px, 1.2vw, 24px);
   align-items: center;
   justify-items: center;
   width: 100%;
@@ -284,24 +284,26 @@ body {
   box-shadow: none;
   outline: none;
   width: 100%;
-  max-width: 290px;
+  max-width: 360px;
   position: relative;
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* 大頭貼容器（頭像超大幅放大至 220px、立體柔和圓形） */
+/* 大頭貼容器（頭像超大幅放大至 320px、立體柔和圓形） */
 .contact-avatar-wrapper {
   position: relative;
-  width: clamp(140px, 27vh, 220px);
-  height: clamp(140px, 27vh, 220px);
+  width: clamp(160px, 42vh, 320px);
+  height: clamp(160px, 42vh, 320px);
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   cursor: pointer;
   background-color: #e2e8f0;
-  border: 3px solid #ffffff;
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.14);
+  border: 3.5px solid #ffffff;
+  box-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.15);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
