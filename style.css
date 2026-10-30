@@ -197,15 +197,15 @@ body {
   box-sizing: border-box;
 }
 
-/* 左欄：生活功能（相簿、微光模式，純圓形封面，不放文字，維持 180px） */
+/* 左欄：生活功能（相簿、微光模式，純圓形封面，不放文字，固定 120px） */
 .utility-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(16px, 3.5vh, 32px);
+  gap: clamp(16px, 3vh, 28px);
   flex-shrink: 0;
-  padding: 6px clamp(8px, 1.2vw, 20px);
+  padding: 6px clamp(8px, 1.2vw, 16px);
 }
 
 .utility-card {
@@ -223,19 +223,21 @@ body {
 
 .utility-cover-wrapper {
   position: relative;
-  width: clamp(120px, 22vh, 180px);
-  height: clamp(120px, 22vh, 180px);
+  width: clamp(95px, 16vh, 120px);
+  height: clamp(95px, 16vh, 120px);
+  max-width: 120px;
+  max-height: 120px;
   border-radius: 50%;
   overflow: hidden;
   background: #e2e8f0;
-  box-shadow: 0 6px 20px -3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.1);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  border: 2.5px solid #ffffff;
+  border: 2px solid #ffffff;
 }
 
 .utility-cover-wrapper:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.16);
+  transform: scale(1.04);
+  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.14);
 }
 
 .utility-cover-wrapper:active {
@@ -256,23 +258,55 @@ body {
   height: 65%;
   background: #e2e8f0;
   border-radius: 1px;
-  margin: 0 clamp(10px, 2vw, 26px);
+  margin: 0 clamp(8px, 1.5vw, 24px);
   flex-shrink: 0;
 }
 
-/* 右欄：家人聯絡人清單（阿禮、阿龍、宜靜、芃君） */
+/* 右欄：家人聯絡人清單（支援水平平滑滑動瀏覽、擴充無上限） */
 .contacts-col {
   flex: 1 1 0%;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  column-gap: clamp(4px, 1.2vw, 24px);
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-items: center;
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  gap: clamp(14px, 2.2vw, 32px);
+  padding: 8px clamp(12px, 2vw, 32px);
+  box-sizing: border-box;
   width: 100%;
 }
 
-/* 聯絡人卡片（無外匡、無底色、無陰影，極簡純淨） */
+/* 當總數量較少時自動置中，超過時自然向右展開滾動 */
+.contacts-col .contact-card:first-child {
+  margin-left: auto;
+}
+.contacts-col .contact-card:last-child {
+  margin-right: auto;
+}
+
+/* 自訂美化輕量水平滾動條 */
+.contacts-col::-webkit-scrollbar {
+  height: 6px;
+}
+.contacts-col::-webkit-scrollbar-track {
+  background: transparent;
+}
+.contacts-col::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.contacts-col::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 聯絡人卡片（無外匡、無底色、無陰影，支援水平滾動） */
 .contact-card {
+  flex: 0 0 auto;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -283,27 +317,29 @@ body {
   justify-content: center;
   box-shadow: none;
   outline: none;
-  width: 100%;
-  max-width: 360px;
+  width: clamp(210px, 34vh, 270px);
+  max-width: 270px;
   position: relative;
   user-select: none;
   -webkit-user-select: none;
+  scroll-snap-align: center;
 }
 
-/* 大頭貼容器（頭像超大幅放大至 320px、立體柔和圓形） */
+/* 大頭貼容器（頭像直徑鎖定 240px、立體柔和圓形） */
 .contact-avatar-wrapper {
   position: relative;
-  width: clamp(160px, 42vh, 320px);
-  height: clamp(160px, 42vh, 320px);
-  max-width: 100%;
+  width: clamp(160px, 32vh, 240px);
+  height: clamp(160px, 32vh, 240px);
+  max-width: 240px;
+  max-height: 240px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 8px;
   cursor: pointer;
   background-color: #e2e8f0;
-  border: 3.5px solid #ffffff;
-  box-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.15);
+  border: 3px solid #ffffff;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.14);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -1386,9 +1422,17 @@ body {
     margin: 4px 0;
   }
   .contacts-col {
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: 16px;
-    column-gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 12px;
+    overflow-x: visible;
+  }
+  .contacts-col .contact-card {
+    width: clamp(140px, 45vw, 175px);
+    max-width: 175px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
   .contact-avatar-wrapper {
     width: 114px;

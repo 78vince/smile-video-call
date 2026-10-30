@@ -1047,6 +1047,32 @@ class SmileVideoCallApp {
           });
         }
       });
+
+      // 支援滑鼠拖曳滑動瀏覽（遠端連線 AnyDesk、桌機滑鼠拖曳無縫支援）
+      const contactsCol = this.dom.contactsGrid.querySelector(".contacts-col");
+      if (contactsCol) {
+        let isDown = false;
+        let startX = 0;
+        let scrollLeft = 0;
+
+        contactsCol.addEventListener("mousedown", (e) => {
+          isDown = true;
+          startX = e.pageX - contactsCol.offsetLeft;
+          scrollLeft = contactsCol.scrollLeft;
+        });
+
+        window.addEventListener("mouseup", () => {
+          isDown = false;
+        });
+
+        contactsCol.addEventListener("mousemove", (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - contactsCol.offsetLeft;
+          const walk = (x - startX) * 1.4;
+          contactsCol.scrollLeft = scrollLeft - walk;
+        });
+      }
     } else {
       // 2. 晚輩角色（阿禮、阿龍、宜靜、芃君）：單一聯絡人直覺撥號
       this.dom.contactsGrid.className = "contacts-grid single-contact";
