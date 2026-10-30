@@ -3,18 +3,18 @@
    ============================================================ */
 
 :root {
-  --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
-  --bg-color: #f1f5f9;
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --bg-color: #f8fafc;
   --card-bg: #ffffff;
-  --text-main: #0f172a;
+  --text-main: #1e293b;
   --text-muted: #64748b;
   --danger-color: #dc2626;
   --success-color: #16a34a;
-  --radius-lg: 28px;
-  --radius-md: 16px;
-  --shadow-card: 0 12px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-  --shadow-active: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.04);
+  --shadow-active: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
 * {
@@ -70,56 +70,90 @@ body {
   overflow: hidden;
 }
 
-/* 頂部時間與問候列 */
+/* 頂部時間與功能列（一列式整齊收納） */
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
-  padding: 8px 18px;
+  background: #ffffff;
+  padding: 8px 20px;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   margin-bottom: 6px;
   flex-shrink: 0;
 }
 
-.header-left .title {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--primary-color);
-  letter-spacing: 1px;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-.header-left .subtitle {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-  margin-top: 1px;
+.header-left .title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 0.5px;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-align: right;
+}
+
+/* 頂部單色圓形按鈕 */
+.btn-header-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn-header-icon svg {
+  display: block;
+}
+
+.btn-header-icon:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.btn-header-icon:active {
+  transform: scale(0.92);
+  background: #cbd5e1;
 }
 
 .clock-box {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  margin-left: 4px;
 }
 
 .clock-time {
-  font-size: 1.85rem;
+  font-size: 1.7rem;
   font-weight: 800;
-  color: var(--text-main);
+  color: #0f172a;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .clock-date {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  color: #64748b;
   margin-top: 2px;
 }
 
@@ -130,64 +164,114 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  align-items: center;
+  overflow: hidden;
   padding: 4px 0;
+  width: 100%;
 }
 
 .contacts-grid {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   長輩主畫面：兩欄式格局 (Two-Column Dashboard)
+   左側：家庭相簿、微光模式（生活伴侶，無文字）
+   中隔：細柔淡灰色分隔線
+   右側：家人聯絡人清單（阿禮、阿龍、宜靜、芃君，大頭像加大按鈕）
+   ============================================================ */
+.two-column-dashboard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1280px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 clamp(8px, 1.5vw, 24px);
+  box-sizing: border-box;
+}
+
+/* 左欄：生活功能（相簿、微光模式，純圓形封面，不放文字） */
+.utility-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3.8vh, 36px);
+  flex-shrink: 0;
+  padding: 6px clamp(8px, 1.2vw, 20px);
+}
+
+.utility-card {
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.utility-cover-wrapper {
+  position: relative;
+  width: clamp(95px, 17vh, 135px);
+  height: clamp(95px, 17vh, 135px);
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e2e8f0;
+  box-shadow: 0 6px 20px -3px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 2.5px solid #ffffff;
+}
+
+.utility-cover-wrapper:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.16);
+}
+
+.utility-cover-wrapper:active {
+  transform: scale(0.93);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+.utility-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 中間細柔淡灰色分隔線 */
+.dashboard-divider {
+  width: 1.5px;
+  height: 65%;
+  background: #e2e8f0;
+  border-radius: 1px;
+  margin: 0 clamp(10px, 2vw, 26px);
+  flex-shrink: 0;
+}
+
+/* 右欄：家人聯絡人清單（阿禮、阿龍、宜靜、芃君） */
+.contacts-col {
+  flex: 1 1 0%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  row-gap: clamp(28px, 5.5vh, 48px);
-  column-gap: clamp(14px, 2.5vw, 28px);
-  width: 100%;
-  max-width: 1100px;
-  margin: auto;
+  column-gap: clamp(10px, 2vw, 26px);
   align-items: center;
   justify-items: center;
+  width: 100%;
 }
 
-/* 四欄排列時，第二列的家庭相簿與微光模式自動置中（置於第 2、3 欄） */
-@media (min-width: 641px) {
-  .contacts-grid:not(.single-contact) .contact-card.card-album:nth-child(5) {
-    grid-column-start: 2;
-  }
-}
-
-/* 晚輩手機介面單一聯絡人（置中且加大，大方優雅） */
-.contacts-grid.single-contact {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: auto;
-}
-
-.contacts-grid.single-contact .contact-card {
-  max-width: 320px;
-}
-
-.contacts-grid.single-contact .contact-avatar-wrapper {
-  width: clamp(100px, 20vh, 160px);
-  height: clamp(100px, 20vh, 160px);
-  margin-bottom: 8px;
-}
-
-.contacts-grid.single-contact .contact-name {
-  font-size: clamp(1.5rem, 3.2vh, 2.1rem);
-  margin-bottom: 12px;
-}
-
-.contacts-grid.single-contact .btn-call-action {
-  width: 56px;
-  height: 56px;
-}
-
-.contacts-grid.single-contact .btn-call-action svg {
-  width: 26px;
-  height: 26px;
-}
-
-/* 長輩使用者卡片（無外匡、無底色、無陰影） */
+/* 聯絡人卡片（無外匡、無底色、無陰影，極簡純淨） */
 .contact-card {
   background: transparent;
   border: none;
@@ -200,24 +284,34 @@ body {
   box-shadow: none;
   outline: none;
   width: 100%;
-  max-width: 260px;
+  max-width: 250px;
   position: relative;
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* 大頭貼容器（彈性自適應高度、無外匡、無陰影） */
+/* 大頭貼容器（頭像大幅加大、立體柔和圓形） */
 .contact-avatar-wrapper {
   position: relative;
-  width: clamp(75px, 14.5vh, 125px);
-  height: clamp(75px, 14.5vh, 125px);
-  margin-bottom: 4px;
+  width: clamp(105px, 19vh, 150px);
+  height: clamp(105px, 19vh, 150px);
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 6px;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  background-color: #e2e8f0;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 6px 20px -3px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.contact-avatar-wrapper:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.16);
 }
 
 .contact-avatar-wrapper:active {
-  transform: scale(0.95);
+  transform: scale(0.94);
 }
 
 .contact-avatar {
@@ -226,33 +320,31 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: none;
-  box-shadow: none;
-  background-color: #f1f5f9;
   display: block;
 }
 
-/* 使用者姓名 */
+/* 使用者姓名（加粗、沉穩 Slate-800） */
 .contact-name {
-  font-size: clamp(1.2rem, 2.5vh, 1.65rem);
+  font-size: clamp(1.35rem, 2.7vh, 1.85rem);
   font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 4px;
+  color: #1e293b;
+  margin-bottom: 8px;
   text-align: center;
   line-height: 1.15;
 }
 
-/* 名字下方的功能按鈕橫列（視訊與只通話雙按鈕） */
+/* 功能按鈕橫列（兩顆按鈕中間間隔加大到約 20px） */
 .contact-actions-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: clamp(16px, 2.2vw, 24px);
 }
 
-/* 單色圖示通話按鈕 */
+/* 單色通話按鈕（加大尺寸、提升點擊舒適度） */
 .btn-call-action {
-  width: clamp(38px, 5.5vh, 46px);
-  height: clamp(38px, 5.5vh, 46px);
+  width: clamp(50px, 7.5vh, 62px);
+  height: clamp(50px, 7.5vh, 62px);
   border-radius: 50%;
   border: none;
   outline: none;
@@ -262,7 +354,6 @@ body {
   justify-content: center;
   color: #ffffff;
   transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.15s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -270,142 +361,57 @@ body {
   transform: scale(0.92);
 }
 
-/* 視訊通話按鈕（藍色基底 + 單色鏡頭 SVG） */
+/* 視訊通話按鈕（鮮明藍底 + 鏡頭 SVG） */
 .btn-call-video {
   background-color: #2563eb;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
 }
 
 .btn-call-video:hover {
   background-color: #1d4ed8;
 }
 
-/* 語音通話按鈕（綠色基底 + 單色電話 SVG） */
+/* 語音通話按鈕（鮮明綠底 + 電話 SVG） */
 .btn-call-audio {
-  background-color: #059669;
+  background-color: #16a34a;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
 }
 
 .btn-call-audio:hover {
-  background-color: #047857;
+  background-color: #15803d;
 }
 
-/* 空白佔位卡片（Slot 4 & 5） */
-.contact-card.card-blank {
-  opacity: 0.35;
-  pointer-events: none;
-}
-
-.card-blank-circle {
-  width: clamp(75px, 14.5vh, 125px);
-  height: clamp(75px, 14.5vh, 125px);
-  border-radius: 50%;
-  border: 2px dashed #94a3b8;
+/* 晚輩手機介面單一聯絡人（置中且加大，大方優雅） */
+.contacts-grid.single-contact {
   display: flex;
-  align-items: center;
   justify-content: center;
-  margin-bottom: 4px;
-  color: #94a3b8;
-  font-size: 1.6rem;
-}
-
-.card-blank-name-placeholder {
-  height: 22px;
-  margin-bottom: 4px;
-}
-
-.card-blank-actions-placeholder {
-  height: 40px;
-}
-
-/* 隱藏佔位器：保持家庭相簿與微光模式卡片高度與聯絡人按鈕列完全一致 */
-.card-action-spacer {
-  height: clamp(38px, 5.5vh, 46px);
-  visibility: hidden;
-  pointer-events: none;
-}
-
-/* 微光模式卡片（Slot 5） */
-.contact-card.card-screensaver {
-  cursor: pointer;
-}
-
-.card-screensaver-cover-wrapper {
-  position: relative;
-  width: clamp(75px, 14.5vh, 125px);
-  height: clamp(75px, 14.5vh, 125px);
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 4px;
-  background: #0f172a;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  transition: transform 0.15s ease;
-  box-shadow: none;
-}
-
-.card-screensaver-cover-wrapper:active {
-  transform: scale(0.95);
-}
-
-.card-screensaver-cover-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
-.btn-action-screensaver {
-  background-color: #1e1b4b;
-  color: #fde047;
+.contacts-grid.single-contact .contact-card {
+  max-width: 320px;
 }
 
-.btn-action-screensaver:hover {
-  background-color: #312e81;
+.contacts-grid.single-contact .contact-avatar-wrapper {
+  width: clamp(120px, 24vh, 180px);
+  height: clamp(120px, 24vh, 180px);
+  margin-bottom: 10px;
 }
 
-/* 相簿卡片（Slot 6） */
-.contact-card.card-album {
-  cursor: pointer;
+.contacts-grid.single-contact .contact-name {
+  font-size: clamp(1.6rem, 3.5vh, 2.3rem);
+  margin-bottom: 14px;
 }
 
-.card-album-cover-wrapper {
-  position: relative;
-  width: clamp(75px, 14.5vh, 125px);
-  height: clamp(75px, 14.5vh, 125px);
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 4px;
-  background: #eff6ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s ease;
-  box-shadow: none;
+.contacts-grid.single-contact .contact-actions-row {
+  gap: 24px;
 }
 
-.card-album-cover-wrapper:active {
-  transform: scale(0.95);
-}
-
-.card-album-cover-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.card-album-icon-fallback {
-  width: 50px;
-  height: 50px;
-  color: #3b82f6;
-}
-
-.btn-action-album {
-  background-color: #4f46e5;
-}
-
-.btn-action-album:hover {
-  background-color: #4338ca;
+.contacts-grid.single-contact .btn-call-action {
+  width: clamp(56px, 8.5vh, 70px);
+  height: clamp(56px, 8.5vh, 70px);
 }
 
 /* 底部列（常駐底端，絕不被擠出畫面） */
@@ -771,9 +777,9 @@ body {
 }
 
 .btn-role-badge {
-  background: #eff6ff;
-  border: 1.5px solid #bfdbfe;
-  color: var(--primary-color);
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 0.95rem;
@@ -781,13 +787,47 @@ body {
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   transition: all 0.2s ease;
 }
 
+.btn-role-badge:hover {
+  background: #e2e8f0;
+}
+
 .btn-role-badge:active {
-  background: #dbeafe;
+  background: #cbd5e1;
   transform: scale(0.96);
+}
+
+.btn-role-badge .role-arrow {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-left: 2px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+  flex-shrink: 0;
+}
+
+.status-dot.online {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+}
+
+.status-dot.reconnecting {
+  background: #eab308;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.7);
+}
+
+.status-dot.offline {
+  background: #94a3b8;
+  box-shadow: none;
 }
 
 .role-selection-grid {
@@ -1314,53 +1354,50 @@ body {
     padding: 10px 14px max(10px, env(safe-area-inset-bottom));
   }
   .app-header {
-    padding: 8px 16px;
-    margin-bottom: 8px;
-  }
-  .header-left .title {
-    font-size: 1.5rem;
-  }
-  .header-left .subtitle {
-    font-size: 0.95rem;
-  }
-  .clock-time {
-    font-size: 1.7rem;
-  }
-  .clock-date {
-    font-size: 0.9rem;
-  }
-  .contacts-grid {
-    grid-template-columns: repeat(4, 1fr);
-    row-gap: clamp(24px, 4.5vh, 40px);
-    column-gap: 14px;
-  }
-  .contact-card {
-    padding: 6px 4px;
-  }
-  .contact-avatar-wrapper,
-  .card-blank-circle,
-  .card-album-cover-wrapper,
-  .card-screensaver-cover-wrapper {
-    width: 110px;
-    height: 110px;
+    padding: 8px 14px;
     margin-bottom: 6px;
   }
-  .contact-name {
+  .header-left .title {
+    font-size: 1.35rem;
+  }
+  .clock-time {
     font-size: 1.5rem;
   }
-  .btn-call-action,
-  .card-action-spacer {
-    height: 44px;
+  .two-column-dashboard {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
+    overflow-y: auto;
+  }
+  .utility-col {
+    flex-direction: row;
+    gap: 20px;
+    padding: 2px 0;
+  }
+  .utility-cover-wrapper {
+    width: clamp(75px, 12vh, 95px);
+    height: clamp(75px, 12vh, 95px);
+  }
+  .dashboard-divider {
+    width: 80%;
+    height: 1.5px;
+    margin: 4px 0;
+  }
+  .contacts-col {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 16px;
+    column-gap: 12px;
+  }
+  .contact-avatar-wrapper {
+    width: 95px;
+    height: 95px;
+  }
+  .contact-name {
+    font-size: 1.35rem;
   }
   .btn-call-action {
-    width: 44px;
-  }
-  .app-footer {
-    padding: 8px 14px;
-    margin-top: 6px;
-  }
-  .status-indicator {
-    font-size: 0.9rem;
+    width: 46px;
+    height: 46px;
   }
 }
 
@@ -1374,52 +1411,33 @@ body {
     margin-bottom: 4px;
   }
   .header-left .title {
-    font-size: 1.35rem;
-  }
-  .header-left .subtitle {
-    display: none;
+    font-size: 1.25rem;
   }
   .clock-time {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
   .clock-date {
     display: none;
   }
-  .contacts-grid {
-    grid-template-columns: repeat(4, 1fr);
-    row-gap: 18px;
-    column-gap: 12px;
+  .utility-col {
+    gap: 16px;
   }
-  .contact-card {
-    padding: 4px 2px;
+  .utility-cover-wrapper {
+    width: clamp(75px, 16vh, 95px);
+    height: clamp(75px, 16vh, 95px);
   }
-  .contact-avatar-wrapper,
-  .card-blank-circle,
-  .card-album-cover-wrapper,
-  .card-screensaver-cover-wrapper {
-    width: 90px;
-    height: 90px;
-    margin-bottom: 4px;
+  .contact-avatar-wrapper {
+    width: clamp(80px, 18vh, 105px);
+    height: clamp(80px, 18vh, 105px);
+    margin-bottom: 3px;
   }
   .contact-name {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     margin-bottom: 4px;
   }
-  .btn-call-action,
-  .card-action-spacer {
-    height: 42px;
-  }
   .btn-call-action {
-    width: 42px;
-  }
-  .app-footer {
-    padding: 6px 12px;
-    margin-top: 4px;
-  }
-  .btn-settings-gear {
-    width: 34px;
-    height: 34px;
-    font-size: 1.1rem;
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -1429,12 +1447,7 @@ body {
     padding: max(52px, env(safe-area-inset-top, 52px)) 14px max(14px, env(safe-area-inset-bottom, 14px));
   }
   .app-header {
-    margin-bottom: 12px;
-  }
-  .contacts-grid {
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: 20px;
-    column-gap: 14px;
+    margin-bottom: 10px;
   }
 }
 
@@ -1448,7 +1461,7 @@ body {
     text-align: center;
     gap: 8px;
     padding: 10px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
   .header-left {
     display: flex;
@@ -1459,31 +1472,15 @@ body {
     justify-content: center;
     width: 100%;
   }
-  .contacts-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .contacts-grid.single-contact {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    margin: auto !important;
-  }
-  .contact-avatar-wrapper,
-  .card-blank-circle,
-  .card-album-cover-wrapper,
-  .card-screensaver-cover-wrapper {
-    width: 100px;
-    height: 100px;
+  .contact-avatar-wrapper {
+    width: 85px;
+    height: 85px;
   }
   .contact-name {
-    font-size: 1.35rem;
-  }
-  .btn-call-action,
-  .card-action-spacer {
-    height: 42px;
+    font-size: 1.25rem;
   }
   .btn-call-action {
-    width: 42px;
+    width: 44px;
+    height: 44px;
   }
 }

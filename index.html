@@ -22,27 +22,38 @@
 
   <!-- 主畫面：大按鈕介面 -->
   <main id="home-view" class="view active">
-    <!-- 頂部時間與問候列 -->
+    <!-- 頂部時間與功能列（一列式整齊收納） -->
     <header class="app-header">
       <div class="header-left">
-        <div class="title-row">
-          <h1 id="app-title" class="title">阿笑的視訊機</h1>
-          <!-- 角色切換標籤 -->
-          <button id="btn-switch-role" class="btn-role-badge" title="切換家庭身分">
-            身分：<span id="current-role-name">阿笑</span> ▾
-          </button>
-        </div>
-        <p id="app-subtitle" class="subtitle">點一下照片，馬上聊聊天！</p>
+        <h1 id="app-title" class="title">阿笑的視訊機</h1>
+        <!-- 整合連線狀態燈號與身分切換標籤 -->
+        <button id="btn-switch-role" class="btn-role-badge" title="連線正常（點擊切換家庭身分）">
+          <span id="status-dot" class="status-dot online"></span>
+          <span id="current-role-name">阿笑</span>
+          <span class="role-arrow">▾</span>
+        </button>
       </div>
 
       <div class="header-right">
-        <!-- 微光模式按鈕（一鍵進入待機微光時鐘） -->
-        <button id="btn-home-screensaver" class="btn-screensaver-badge" title="立即進入微光待機時鐘模式">
-          🌙 微光模式
+        <!-- 微光模式單色按鈕（無文字） -->
+        <button id="btn-home-screensaver" class="btn-header-icon" title="進入微光待機時鐘" aria-label="微光模式">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
         </button>
-        <!-- 重新載入按鈕（專門解決 PWA 應用難刷新問題） -->
-        <button id="btn-force-reload" class="btn-reload-badge" title="強制重新整理（清除快取並載入最新版）">
-          🔄 重新整理
+        <!-- 強制重新整理單色按鈕（無文字） -->
+        <button id="btn-force-reload" class="btn-header-icon" title="重新整理（清除快取並載入最新版）" aria-label="重新整理">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+        <!-- 全螢幕切換按鈕（自動隱藏系統狀態列） -->
+        <button id="btn-toggle-fullscreen" class="btn-header-icon" title="切換全螢幕模式（隱藏狀態列）" aria-label="全螢幕模式">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+          </svg>
         </button>
         <div class="clock-box">
           <div id="clock-time" class="clock-time">12:00</div>
@@ -51,24 +62,12 @@
       </div>
     </header>
 
-    <!-- 聯絡人與功能九宮格清單 -->
+    <!-- 聯絡人與生活功能兩欄式佈局容器 -->
     <section class="contacts-container">
       <div id="contacts-grid" class="contacts-grid">
-        <!-- 由 JavaScript 動態產生 6 格選項（3 人物、2 空白、1 相簿） -->
+        <!-- 由 JavaScript 動態產生：左欄生活功能、右欄聯絡人 -->
       </div>
     </section>
-
-    <!-- 底部狀態列 -->
-    <footer class="app-footer">
-      <div class="status-indicator">
-        <span id="status-dot" class="status-dot"></span>
-        <span id="connection-status">連線正常，隨時可撥打與接收來電</span>
-      </div>
-      <!-- 右下角管理員設定按鈕（預設隱藏，避免長輩誤觸） -->
-      <button id="btn-open-settings" class="btn-settings-gear" title="家屬設定" aria-label="設定" style="display: none;">
-        ⚙️
-      </button>
-    </footer>
   </main>
 
   <!-- 長輩專屬微光待機時鐘遮罩（防烙印防誤觸喚醒遮罩） -->

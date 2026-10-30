@@ -50,6 +50,7 @@ class SmileVideoCallApp {
       btnSwitchRole: document.getElementById("btn-switch-role"),
       btnForceReload: document.getElementById("btn-force-reload"),
       btnHomeScreensaver: document.getElementById("btn-home-screensaver"),
+      btnToggleFullscreen: document.getElementById("btn-toggle-fullscreen"),
       roleModal: document.getElementById("role-modal"),
       btnCloseRoleModal: document.getElementById("btn-close-role-modal"),
       btnOpenSettings: document.getElementById("btn-open-settings"),
@@ -98,6 +99,7 @@ class SmileVideoCallApp {
   // ==========================================
   init() {
     this.initViewportHeight();
+    this.initFullscreenHandler();
     this.initClock();
     this.renderCurrentRoleView();
     this.bindEvents();
@@ -109,6 +111,64 @@ class SmileVideoCallApp {
     this.startIncomingCallListener();
     this.checkAutoJoin();
     this.syncAlbumPhotosFromCloud(); // 雲端自動同步 Google 相簿最新相片
+  }
+
+  // 自動全螢幕與手動全螢幕切換（首觸自動全螢幕，徹底隱藏 Android 系統狀態列）
+  initFullscreenHandler() {
+    const requestFs = () => {
+      const docEl = document.documentElement;
+      const rfs =
+        docEl.requestFullscreen ||
+        docEl.webkitRequestFullscreen ||
+        docEl.mozRequestFullScreen ||
+        docEl.msRequestFullscreen;
+      if (rfs && !document.fullscreenElement && !document.webkitFullscreenElement) {
+        rfs.call(docEl).catch((err) => {
+          console.log("全螢幕請求略過（瀏覽器策略需首觸互動）:", err);
+        });
+      }
+    };
+
+    // 首次點擊或觸控畫面任意位置時自動進入全螢幕
+    const onFirstUserGesture = () => {
+      requestFs();
+      window.removeEventListener("click", onFirstUserGesture, true);
+      window.removeEventListener("touchstart", onFirstUserGesture, true);
+      window.removeEventListener("pointerdown", onFirstUserGesture, true);
+    };
+
+    window.addEventListener("click", onFirstUserGesture, true);
+    window.addEventListener("touchstart", onFirstUserGesture, true);
+    window.addEventListener("pointerdown", onFirstUserGesture, true);
+
+    // 頂部全螢幕按鈕手動切換
+    if (this.dom.btnToggleFullscreen) {
+      this.dom.btnToggleFullscreen.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.playTapSound();
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          requestFs();
+        } else {
+          const exitFs =
+            document.exitFullscreen ||
+            document.webkitExitFullscreen ||
+            document.mozCancelFullScreen ||
+            document.msExitFullscreen;
+          if (exitFs) {
+            exitFs.call(document).catch(() => {});
+          }
+        }
+      });
+    }
+
+    const updateFsTitle = () => {
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (this.dom.btnToggleFullscreen) {
+        this.dom.btnToggleFullscreen.title = isFull ? "退出全螢幕" : "切換全螢幕模式（隱藏狀態列）";
+      }
+    };
+    document.addEventListener("fullscreenchange", updateFsTitle);
+    document.addEventListener("webkitfullscreenchange", updateFsTitle);
   }
 
   // 動態適配平板可視高度（徹底解決平板重新整理後網址列/工具列將底欄擠出螢幕外的問題）
@@ -655,14 +715,20 @@ class SmileVideoCallApp {
       this.eventSource = new EventSource(sseUrl);
 
       this.eventSource.onopen = () => {
+        const isAxiao = this.currentRole === "axiao";
+        const statusText = isAxiao
+          ? "連線正常：平板自動接聽已就緒（阿笑）"
+          : `連線正常：身分 ${this.config.roles[this.currentRole]?.name || "家人"}（隨時可撥打長輩）`;
+
         if (this.dom.connectionStatus) {
-          if (this.currentRole === "axiao") {
-            this.dom.connectionStatus.textContent = "● 平板自動接聽已就緒（阿笑）";
-            this.dom.statusDot.style.backgroundColor = "#22c55e";
-          } else {
-            this.dom.connectionStatus.textContent = `身分：${this.config.roles[this.currentRole]?.name}（隨時可撥打長輩）`;
-            this.dom.statusDot.style.backgroundColor = "#2563eb";
-          }
+          this.dom.connectionStatus.textContent = statusText;
+        }
+        if (this.dom.btnSwitchRole) {
+          this.dom.btnSwitchRole.title = `${statusText}（點擊切換家庭身分）`;
+        }
+        if (this.dom.statusDot) {
+          this.dom.statusDot.className = "status-dot online";
+          this.dom.statusDot.style.backgroundColor = isAxiao ? "#22c55e" : "#2563eb";
         }
       };
 
@@ -719,6 +785,12 @@ class SmileVideoCallApp {
       this.eventSource.onerror = () => {
         if (this.dom.connectionStatus) {
           this.dom.connectionStatus.textContent = "通道斷線，重新連線中...";
+        }
+        if (this.dom.btnSwitchRole) {
+          this.dom.btnSwitchRole.title = "通道斷線，重新連線中...（點擊切換家庭身分）";
+        }
+        if (this.dom.statusDot) {
+          this.dom.statusDot.className = "status-dot reconnecting";
           this.dom.statusDot.style.backgroundColor = "#eab308";
         }
         setTimeout(() => this.startIncomingCallListener(), 4000);
@@ -847,95 +919,146 @@ class SmileVideoCallApp {
   }
 
   // ==========================================
-  // 主畫面功能格渲染（支援 6 格排版：人物、空白、相簿）
+  // 主畫面渲染（阿笑雙欄格局：左欄相簿/微光模式無文字、右欄大頭貼通話清單；晚輩單一卡片）
   // ==========================================
   renderCurrentRoleView() {
     const roleData = this.config.roles[this.currentRole] || this.config.roles.axiao;
 
     this.dom.appTitle.textContent = roleData.appTitle;
-    this.dom.appSubtitle.textContent = roleData.welcomeSubtitle;
+    if (this.dom.appSubtitle) {
+      this.dom.appSubtitle.textContent = roleData.welcomeSubtitle;
+    }
     this.dom.currentRoleName.textContent = roleData.name;
     document.title = `${roleData.appTitle} - 微笑視訊`;
 
     this.dom.contactsGrid.innerHTML = "";
 
-    // 過濾卡片：只有長輩（阿笑）才顯示相簿、微光模式與空白槽，其他晚輩角色僅顯示通話聯絡人
-    const activeContacts = roleData.contacts.filter((c) => {
-      if (this.currentRole !== "axiao" && (c.type === "album" || c.type === "blank" || c.type === "screensaver")) {
-        return false;
-      }
-      return true;
-    });
+    // 1. 長輩模式（阿笑）：兩欄式格局（左側生活相簿與微光模式，右側家人通話清單）
+    if (this.currentRole === "axiao") {
+      this.dom.contactsGrid.className = "contacts-grid dashboard-layout";
 
-    if (activeContacts.length <= 1) {
-      this.dom.contactsGrid.classList.add("single-contact");
-    } else {
-      this.dom.contactsGrid.classList.remove("single-contact");
-    }
+      const albumContact = roleData.contacts.find((c) => c.type === "album" || c.id === "album") || {
+        coverUrl: "./avatars/album-cover.png"
+      };
+      const screensaverContact = roleData.contacts.find((c) => c.type === "screensaver" || c.id === "screensaver") || {
+        coverUrl: "./avatars/screensaver-cover.png"
+      };
+      const familyContacts = roleData.contacts.filter(
+        (c) => c.type !== "album" && c.type !== "screensaver" && c.type !== "blank" && c.id !== "album" && c.id !== "screensaver"
+      );
 
-    // 依序產生功能卡片
-    activeContacts.forEach((contact) => {
-      // 1. 空白預留槽 (Slot 4)
-      if (contact.type === "blank") {
-        const blankCard = document.createElement("div");
-        blankCard.className = "contact-card card-blank";
-        blankCard.innerHTML = `
-          <div class="card-blank-circle">+</div>
-          <div class="card-blank-name-placeholder"></div>
-          <div class="card-blank-actions-placeholder"></div>
-        `;
-        this.dom.contactsGrid.appendChild(blankCard);
-        return;
-      }
-
-      // 2. 微光模式功能卡片 (Slot 6)
-      if (contact.type === "screensaver") {
-        const scCard = document.createElement("div");
-        scCard.className = "contact-card card-screensaver";
-        scCard.innerHTML = `
-          <div class="card-screensaver-cover-wrapper" title="點擊進入微光模式">
-            <img class="card-screensaver-cover-img" src="${contact.coverUrl || './avatars/screensaver-cover.png'}" alt="微光模式封面">
+      this.dom.contactsGrid.innerHTML = `
+        <div class="two-column-dashboard">
+          <!-- 左欄：生活功能（家庭相簿、微光模式，純圓形無文字，防烙印生活伴侶） -->
+          <div class="utility-col">
+            <button class="utility-card card-album" title="瀏覽家庭相簿" aria-label="家庭相簿">
+              <div class="utility-cover-wrapper">
+                <img class="utility-cover-img" src="${albumContact.coverUrl || './avatars/album-cover.png'}" alt="家庭相簿">
+              </div>
+            </button>
+            <button class="utility-card card-screensaver" title="進入微光待機時鐘" aria-label="微光模式">
+              <div class="utility-cover-wrapper">
+                <img class="utility-cover-img" src="${screensaverContact.coverUrl || './avatars/screensaver-cover.png'}" alt="微光模式">
+              </div>
+            </button>
           </div>
-          <div class="contact-name">${contact.name || "微光模式"}</div>
-          <div class="card-action-spacer"></div>
-        `;
 
-        scCard.addEventListener("click", () => {
-          if (Date.now() < this.justWokeUpUntil) return;
-          this.playTapSound();
-          this.enterScreensaver();
-        });
+          <!-- 中間細柔分隔線 -->
+          <div class="dashboard-divider"></div>
 
-        this.dom.contactsGrid.appendChild(scCard);
-        return;
-      }
-
-      // 3. 家庭相簿卡片 (Slot 5)
-      if (contact.type === "album") {
-        const albumCard = document.createElement("div");
-        albumCard.className = "contact-card card-album";
-        albumCard.innerHTML = `
-          <div class="card-album-cover-wrapper" title="點擊瀏覽家庭相簿">
-            <img class="card-album-cover-img" src="${contact.coverUrl || this.config.albumPhotos[0]?.url}" alt="家庭相簿封面">
+          <!-- 右欄：聯絡人清單（阿禮、阿龍、宜靜、芃君，加大頭像與按鈕） -->
+          <div class="contacts-col">
+            ${familyContacts.map((c) => `
+              <div class="contact-card" data-contact-id="${c.id}">
+                <div class="contact-avatar-wrapper" title="點擊大頭貼發起視訊通話">
+                  <img class="contact-avatar" src="${c.avatarUrl}" alt="${c.name}" loading="lazy">
+                </div>
+                <div class="contact-name">${c.name}</div>
+                <div class="contact-actions-row">
+                  <button class="btn-call-action btn-call-video" title="視訊通話" aria-label="視訊通話">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M23 7l-7 5 7 5V7z"></path>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                    </svg>
+                  </button>
+                  <button class="btn-call-action btn-call-audio" title="語音通話" aria-label="語音通話">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            `).join("")}
           </div>
-          <div class="contact-name">${contact.name || "家庭相簿"}</div>
-          <div class="card-action-spacer"></div>
-        `;
+        </div>
+      `;
 
-        albumCard.addEventListener("click", () => {
+      // 綁定左欄相簿事件
+      const btnAlbum = this.dom.contactsGrid.querySelector(".card-album");
+      if (btnAlbum) {
+        btnAlbum.addEventListener("click", () => {
           if (Date.now() < this.justWokeUpUntil) return;
           this.playTapSound();
           this.openAlbumModal();
         });
-
-        this.dom.contactsGrid.appendChild(albumCard);
-        return;
       }
 
-      // 3. 常規使用者聯絡人卡片（無外匡、無底色、大頭照加大無外匡無陰影、單色視訊與語音雙按鈕）
+      // 綁定左欄微光模式事件
+      const btnScreensaver = this.dom.contactsGrid.querySelector(".card-screensaver");
+      if (btnScreensaver) {
+        btnScreensaver.addEventListener("click", () => {
+          if (Date.now() < this.justWokeUpUntil) return;
+          this.playTapSound();
+          this.enterScreensaver();
+        });
+      }
+
+      // 綁定右欄聯絡人頭像與通話按鈕事件
+      familyContacts.forEach((contact) => {
+        const card = this.dom.contactsGrid.querySelector(`.contact-card[data-contact-id="${contact.id}"]`);
+        if (!card) return;
+
+        const avatarWrap = card.querySelector(".contact-avatar-wrapper");
+        if (avatarWrap) {
+          avatarWrap.addEventListener("click", () => {
+            if (Date.now() < this.justWokeUpUntil) return;
+            this.playTapSound();
+            this.startCall(contact, roleData, "video");
+          });
+        }
+
+        const btnVideo = card.querySelector(".btn-call-video");
+        if (btnVideo) {
+          btnVideo.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (Date.now() < this.justWokeUpUntil) return;
+            this.playTapSound();
+            this.startCall(contact, roleData, "video");
+          });
+        }
+
+        const btnAudio = card.querySelector(".btn-call-audio");
+        if (btnAudio) {
+          btnAudio.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (Date.now() < this.justWokeUpUntil) return;
+            this.playTapSound();
+            this.startCall(contact, roleData, "audio");
+          });
+        }
+      });
+    } else {
+      // 2. 晚輩角色（阿禮、阿龍、宜靜、芃君）：單一聯絡人直覺撥號
+      this.dom.contactsGrid.className = "contacts-grid single-contact";
+      const contact = roleData.contacts[0] || {
+        id: "axiao",
+        name: "阿笑媽媽",
+        avatarUrl: AVATAR_AXIAO,
+        roomName: "smile-axiao-ali"
+      };
+
       const card = document.createElement("div");
       card.className = "contact-card";
-
       card.innerHTML = `
         <div class="contact-avatar-wrapper" title="點擊大頭貼發起視訊通話">
           <img class="contact-avatar" src="${contact.avatarUrl}" alt="${contact.name}" loading="lazy">
@@ -943,20 +1066,19 @@ class SmileVideoCallApp {
         <div class="contact-name">${contact.name}</div>
         <div class="contact-actions-row">
           <button class="btn-call-action btn-call-video" title="視訊通話" aria-label="視訊通話">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M23 7l-7 5 7 5V7z"></path>
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
             </svg>
           </button>
           <button class="btn-call-action btn-call-audio" title="語音通話" aria-label="語音通話">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
             </svg>
           </button>
         </div>
       `;
 
-      // 點擊大頭貼預設發起視訊
       const avatarWrap = card.querySelector(".contact-avatar-wrapper");
       avatarWrap.addEventListener("click", () => {
         if (Date.now() < this.justWokeUpUntil) return;
@@ -964,7 +1086,6 @@ class SmileVideoCallApp {
         this.startCall(contact, roleData, "video");
       });
 
-      // 點擊視訊鏡頭按鈕
       const btnVideo = card.querySelector(".btn-call-video");
       btnVideo.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -973,7 +1094,6 @@ class SmileVideoCallApp {
         this.startCall(contact, roleData, "video");
       });
 
-      // 點擊純語音電話按鈕
       const btnAudio = card.querySelector(".btn-call-audio");
       btnAudio.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -983,7 +1103,7 @@ class SmileVideoCallApp {
       });
 
       this.dom.contactsGrid.appendChild(card);
-    });
+    }
   }
 
   // ==========================================
