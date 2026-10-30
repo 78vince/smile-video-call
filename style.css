@@ -223,8 +223,8 @@ body {
 
 .utility-cover-wrapper {
   position: relative;
-  width: clamp(95px, 17vh, 135px);
-  height: clamp(95px, 17vh, 135px);
+  width: clamp(114px, 20.5vh, 162px);
+  height: clamp(114px, 20.5vh, 162px);
   border-radius: 50%;
   overflow: hidden;
   background: #e2e8f0;
@@ -284,17 +284,17 @@ body {
   box-shadow: none;
   outline: none;
   width: 100%;
-  max-width: 250px;
+  max-width: 270px;
   position: relative;
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* 大頭貼容器（頭像大幅加大、立體柔和圓形） */
+/* 大頭貼容器（頭像進一步放大 1.2 倍、立體柔和圓形） */
 .contact-avatar-wrapper {
   position: relative;
-  width: clamp(105px, 19vh, 150px);
-  height: clamp(105px, 19vh, 150px);
+  width: clamp(126px, 23vh, 180px);
+  height: clamp(126px, 23vh, 180px);
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 6px;
@@ -1375,8 +1375,8 @@ body {
     padding: 2px 0;
   }
   .utility-cover-wrapper {
-    width: clamp(75px, 12vh, 95px);
-    height: clamp(75px, 12vh, 95px);
+    width: clamp(90px, 14.5vh, 115px);
+    height: clamp(90px, 14.5vh, 115px);
   }
   .dashboard-divider {
     width: 80%;
@@ -1389,8 +1389,8 @@ body {
     column-gap: 12px;
   }
   .contact-avatar-wrapper {
-    width: 95px;
-    height: 95px;
+    width: 114px;
+    height: 114px;
   }
   .contact-name {
     font-size: 1.35rem;
@@ -1423,12 +1423,12 @@ body {
     gap: 16px;
   }
   .utility-cover-wrapper {
-    width: clamp(75px, 16vh, 95px);
-    height: clamp(75px, 16vh, 95px);
+    width: clamp(90px, 19vh, 114px);
+    height: clamp(90px, 19vh, 114px);
   }
   .contact-avatar-wrapper {
-    width: clamp(80px, 18vh, 105px);
-    height: clamp(80px, 18vh, 105px);
+    width: clamp(96px, 21.5vh, 126px);
+    height: clamp(96px, 21.5vh, 126px);
     margin-bottom: 3px;
   }
   .contact-name {
