@@ -14,8 +14,8 @@
 // 請在 LINE Developers 的 Messaging API 分頁最下方「Channel access token」複製貼上：
 const LINE_ACCESS_TOKEN = "請在此貼上你的_LINE_CHANNEL_ACCESS_TOKEN";
 
-// 預設群組 ID（可先留空！只要將機器人拉進群組，系統會自動學習並儲存）
-const DEFAULT_GROUP_ID = "";
+// 預設群組 ID（已成功鎖定家庭群組 ID）
+const DEFAULT_GROUP_ID = "Cbaa9407dcce090399acdf70d6b344200";
 
 
 // ==========================================
@@ -30,7 +30,7 @@ function doPost(e) {
     const body = JSON.parse(e.postData.contents);
 
     // -------------------------------------------------------------
-    // 情境 A：來自 LINE 官方伺服器的事件（機器人加入群組、聊天室或收到訊息）
+    // 情境 A：來自 LINE 官方伺服器的事件（僅記錄 ID，平時家人聊天絕不回覆插嘴）
     // -------------------------------------------------------------
     if (body.events && Array.isArray(body.events)) {
       for (const event of body.events) {
@@ -43,11 +43,10 @@ function doPost(e) {
             // 將 ID 自動儲存至雲端腳本屬性中（持久保存）
             PropertiesService.getScriptProperties().setProperty("ACTIVE_GROUP_ID", targetId);
             
-            // 無論是剛被加入，或是有人在聊天室傳訊息 / @標註機器人
-            if (event.replyToken && (event.type === "join" || event.type === "message")) {
+            // ⚠️ 關鍵防干擾：僅在剛加入群組 (join) 打招呼一次；平時家人聊天 (message) 絕對不回覆！
+            if (event.replyToken && event.type === "join") {
               replyLineMessage(event.replyToken, 
                 "🎉【微笑視訊】已成功連線並綁定此聊天室！\n" +
-                "• 綁定 ID：" + targetId + "\n" +
                 "👵 之後長輩在平板點擊撥號時，我就會在這裡發送即時視訊通知囉！"
               );
             }
