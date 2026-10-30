@@ -223,8 +223,8 @@ body {
 
 .utility-cover-wrapper {
   position: relative;
-  width: clamp(114px, 20.5vh, 162px);
-  height: clamp(114px, 20.5vh, 162px);
+  width: clamp(120px, 22vh, 180px);
+  height: clamp(120px, 22vh, 180px);
   border-radius: 50%;
   overflow: hidden;
   background: #e2e8f0;
@@ -265,7 +265,7 @@ body {
   flex: 1 1 0%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  column-gap: clamp(10px, 2vw, 26px);
+  column-gap: clamp(6px, 1.2vw, 20px);
   align-items: center;
   justify-items: center;
   width: 100%;
@@ -276,7 +276,7 @@ body {
   background: transparent;
   border: none;
   border-radius: 0;
-  padding: 4px 2px;
+  padding: 2px 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -284,24 +284,24 @@ body {
   box-shadow: none;
   outline: none;
   width: 100%;
-  max-width: 270px;
+  max-width: 290px;
   position: relative;
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* 大頭貼容器（頭像進一步放大 1.2 倍、立體柔和圓形） */
+/* 大頭貼容器（頭像超大幅放大至 220px、立體柔和圓形） */
 .contact-avatar-wrapper {
   position: relative;
-  width: clamp(126px, 23vh, 180px);
-  height: clamp(126px, 23vh, 180px);
+  width: clamp(140px, 27vh, 220px);
+  height: clamp(140px, 27vh, 220px);
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 6px;
   cursor: pointer;
   background-color: #e2e8f0;
-  border: 2.5px solid #ffffff;
-  box-shadow: 0 6px 20px -3px rgba(0, 0, 0, 0.12);
+  border: 3px solid #ffffff;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.14);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
