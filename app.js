@@ -630,9 +630,9 @@ class SmileVideoCallApp {
       notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = "sine";
+        osc.type = "triangle"; // 泛音豐富，穿透力強
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.15, ctx.currentTime + idx * 0.08);
+        gain.gain.setValueAtTime(0.7, ctx.currentTime + idx * 0.08); // 點擊音量大幅提升 (0.15 -> 0.7)
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.3);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -654,28 +654,53 @@ class SmileVideoCallApp {
         const ctx = this.getAudioContext();
         if (ctx.state === "suspended") ctx.resume();
 
-        const osc1 = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        const gain = ctx.createGain();
+        // 建立高保真動態壓縮器（防止大音量破音，同時將感知響度最大化）
+        const compressor = ctx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-12, ctx.currentTime);
+        compressor.knee.setValueAtTime(10, ctx.currentTime);
+        compressor.ratio.setValueAtTime(6, ctx.currentTime);
+        compressor.attack.setValueAtTime(0.003, ctx.currentTime);
+        compressor.release.setValueAtTime(0.12, ctx.currentTime);
+        compressor.connect(ctx.destination);
 
-        osc1.frequency.value = 440;
-        osc2.frequency.value = 480;
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+        // 主增益節點（音量由原先 0.2 大幅拉升至 0.95，提升近 5 倍響度）
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(0.95, ctx.currentTime);
+        masterGain.connect(compressor);
 
-        osc1.connect(gain);
-        osc2.connect(gain);
-        gain.connect(ctx.destination);
+        // 專為長輩聽力頻段調校之「清脆穿透型雙音和弦電話鈴聲」
+        // 第一聲 Ding (784Hz [G5] + 1046.5Hz [C6]) -> 第二聲 Dong (659Hz [E5] + 880Hz [A5])
+        const chords = [
+          { time: 0.0, freqs: [784.0, 1046.5], duration: 0.55 },
+          { time: 0.55, freqs: [659.25, 880.0, 1318.5], duration: 0.85 }
+        ];
 
-        osc1.start(ctx.currentTime);
-        osc2.start(ctx.currentTime);
-        osc1.stop(ctx.currentTime + 1.2);
-        osc2.stop(ctx.currentTime + 1.2);
+        chords.forEach((chord) => {
+          chord.freqs.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const toneGain = ctx.createGain();
+            osc.type = idx === 0 ? "triangle" : "sine";
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + chord.time);
+
+            const startT = ctx.currentTime + chord.time;
+            const endT = startT + chord.duration;
+
+            toneGain.gain.setValueAtTime(0.001, startT);
+            toneGain.gain.linearRampToValueAtTime(0.85, startT + 0.04);
+            toneGain.gain.exponentialRampToValueAtTime(0.001, endT);
+
+            osc.connect(toneGain);
+            toneGain.connect(masterGain);
+
+            osc.start(startT);
+            osc.stop(endT + 0.05);
+          });
+        });
       } catch (e) {}
     };
 
     playRing();
-    this.ringInterval = setInterval(playRing, 2800);
+    this.ringInterval = setInterval(playRing, 2600);
   }
 
   stopRingingSound() {
@@ -1207,7 +1232,16 @@ class SmileVideoCallApp {
         enableWelcomePage: false,
         enableClosePage: false,
         disableInviteFunctions: true,
-        notifications: []
+        notifications: [],
+        // 音量與清晰度最佳化配置
+        disableAGC: false, // 啟用 WebRTC 自動增益補償（Automatic Gain Control）放大微弱人聲
+        audioQuality: {
+          stereo: false,
+          opusMaxAverageBitrate: 64000 // 提高 Opus 語音編碼頻寬至 64kbps，對話更厚實宏亮
+        },
+        p2p: {
+          enabled: true // 1對1通話啟用直連 P2P，降低延遲與音質損耗
+        }
       },
       interfaceConfigOverwrite: {
         TOOLBAR_BUTTONS: ["microphone", "camera", "hangup"],
@@ -1225,6 +1259,16 @@ class SmileVideoCallApp {
         this.currentCallApi.executeCommand("avatarUrl", myAvatarUrl);
       } catch (e) {}
 
+      // 監聽對方進入會議，強制將遠端參與者音量拉至 100% 最大值
+      this.currentCallApi.addEventListener("participantJoined", (event) => {
+        console.log("對方加入會議，自動強制音量至 100%:", event);
+        try {
+          if (event && event.id) {
+            this.currentCallApi.executeCommand("setParticipantVolume", event.id, 1);
+          }
+        } catch (e) {}
+      });
+
       this.connectingTimeout = setTimeout(() => {
         this.stopRingingSound();
         this.dom.connectingOverlay.classList.add("hidden");
@@ -1236,6 +1280,15 @@ class SmileVideoCallApp {
         this.dom.connectingOverlay.classList.add("hidden");
         try {
           this.currentCallApi.executeCommand("avatarUrl", myAvatarUrl);
+          // 若對方已在房間內，遍歷將所有參與者音量拉到 100%
+          const participants = this.currentCallApi.getParticipantsInfo();
+          if (Array.isArray(participants)) {
+            participants.forEach((p) => {
+              if (p && p.participantId) {
+                this.currentCallApi.executeCommand("setParticipantVolume", p.participantId, 1);
+              }
+            });
+          }
         } catch (e) {}
       });
 
