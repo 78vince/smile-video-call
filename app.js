@@ -991,27 +991,14 @@ class SmileVideoCallApp {
           <!-- 中間細柔分隔線 -->
           <div class="dashboard-divider"></div>
 
-          <!-- 右欄：聯絡人清單（阿禮、阿龍、宜靜、芃君，加大頭像與按鈕） -->
+          <!-- 右欄：聯絡人清單（阿禮、阿龍、宜靜、芃君，點選頭像直接撥號） -->
           <div class="contacts-col">
             ${familyContacts.map((c) => `
-              <div class="contact-card" data-contact-id="${c.id}">
-                <div class="contact-avatar-wrapper" title="點擊大頭貼發起視訊通話">
+              <div class="contact-card" data-contact-id="${c.id}" role="button" tabindex="0" title="點擊視訊撥打給 ${c.name}">
+                <div class="contact-avatar-wrapper">
                   <img class="contact-avatar" src="${c.avatarUrl}" alt="${c.name}" loading="lazy">
                 </div>
                 <div class="contact-name">${c.name}</div>
-                <div class="contact-actions-row">
-                  <button class="btn-call-action btn-call-video" title="視訊通話" aria-label="視訊通話">
-                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M23 7l-7 5 7 5V7z"></path>
-                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                    </svg>
-                  </button>
-                  <button class="btn-call-action btn-call-audio" title="語音通話" aria-label="語音通話">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                    </svg>
-                  </button>
-                </div>
               </div>
             `).join("")}
           </div>
@@ -1038,39 +1025,24 @@ class SmileVideoCallApp {
         });
       }
 
-      // 綁定右欄聯絡人頭像與通話按鈕事件
+      // 綁定右欄聯絡人點擊事件（點選頭像或姓名卡片直接發起視訊通話）
       familyContacts.forEach((contact) => {
         const card = this.dom.contactsGrid.querySelector(`.contact-card[data-contact-id="${contact.id}"]`);
         if (!card) return;
 
-        const avatarWrap = card.querySelector(".contact-avatar-wrapper");
-        if (avatarWrap) {
-          avatarWrap.addEventListener("click", () => {
-            if (Date.now() < this.justWokeUpUntil) return;
-            this.playTapSound();
-            this.startCall(contact, roleData, "video");
-          });
-        }
+        const handleCall = () => {
+          if (Date.now() < this.justWokeUpUntil) return;
+          this.playTapSound();
+          this.startCall(contact, roleData, "video");
+        };
 
-        const btnVideo = card.querySelector(".btn-call-video");
-        if (btnVideo) {
-          btnVideo.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (Date.now() < this.justWokeUpUntil) return;
-            this.playTapSound();
-            this.startCall(contact, roleData, "video");
-          });
-        }
-
-        const btnAudio = card.querySelector(".btn-call-audio");
-        if (btnAudio) {
-          btnAudio.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (Date.now() < this.justWokeUpUntil) return;
-            this.playTapSound();
-            this.startCall(contact, roleData, "audio");
-          });
-        }
+        card.addEventListener("click", handleCall);
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleCall();
+          }
+        });
       });
     } else {
       // 2. 晚輩角色（阿禮、阿龍、宜靜、芃君）：單一聯絡人直覺撥號
@@ -1084,47 +1056,28 @@ class SmileVideoCallApp {
 
       const card = document.createElement("div");
       card.className = "contact-card";
+      card.setAttribute("role", "button");
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("title", `點擊視訊撥打給 ${contact.name}`);
       card.innerHTML = `
-        <div class="contact-avatar-wrapper" title="點擊大頭貼發起視訊通話">
+        <div class="contact-avatar-wrapper">
           <img class="contact-avatar" src="${contact.avatarUrl}" alt="${contact.name}" loading="lazy">
         </div>
         <div class="contact-name">${contact.name}</div>
-        <div class="contact-actions-row">
-          <button class="btn-call-action btn-call-video" title="視訊通話" aria-label="視訊通話">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M23 7l-7 5 7 5V7z"></path>
-              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-            </svg>
-          </button>
-          <button class="btn-call-action btn-call-audio" title="語音通話" aria-label="語音通話">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-            </svg>
-          </button>
-        </div>
       `;
 
-      const avatarWrap = card.querySelector(".contact-avatar-wrapper");
-      avatarWrap.addEventListener("click", () => {
+      const handleJuniorCall = () => {
         if (Date.now() < this.justWokeUpUntil) return;
         this.playTapSound();
         this.startCall(contact, roleData, "video");
-      });
+      };
 
-      const btnVideo = card.querySelector(".btn-call-video");
-      btnVideo.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (Date.now() < this.justWokeUpUntil) return;
-        this.playTapSound();
-        this.startCall(contact, roleData, "video");
-      });
-
-      const btnAudio = card.querySelector(".btn-call-audio");
-      btnAudio.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (Date.now() < this.justWokeUpUntil) return;
-        this.playTapSound();
-        this.startCall(contact, roleData, "audio");
+      card.addEventListener("click", handleJuniorCall);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleJuniorCall();
+        }
       });
 
       this.dom.contactsGrid.appendChild(card);

@@ -299,12 +299,12 @@ body {
   background: #94a3b8;
 }
 
-/* 聯絡人卡片（無外匡、無底色、無陰影，極簡純淨） */
+/* 聯絡人卡片（無外框、無底色、無陰影，極簡純淨，支援全卡觸控點選撥號） */
 .contact-card {
   background: transparent;
   border: none;
-  border-radius: 0;
-  padding: 2px 2px;
+  border-radius: 20px;
+  padding: 4px 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -316,6 +316,8 @@ body {
   position: relative;
   user-select: none;
   -webkit-user-select: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* 大頭貼容器（頭像直徑鎖定 200px、立體柔和圓形） */
@@ -328,7 +330,7 @@ body {
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   cursor: pointer;
   background-color: #e2e8f0;
   border: 3px solid #ffffff;
@@ -336,13 +338,13 @@ body {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.contact-avatar-wrapper:hover {
-  transform: scale(1.03);
+.contact-card:hover .contact-avatar-wrapper {
+  transform: scale(1.04);
   box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.16);
 }
 
-.contact-avatar-wrapper:active {
-  transform: scale(0.94);
+.contact-card:active .contact-avatar-wrapper {
+  transform: scale(0.93);
 }
 
 .contact-avatar {
@@ -356,12 +358,18 @@ body {
 
 /* 使用者姓名（加粗、沉穩 Slate-800） */
 .contact-name {
-  font-size: clamp(1.35rem, 2.7vh, 1.85rem);
+  font-size: clamp(1.4rem, 2.8vh, 1.95rem);
   font-weight: 800;
   color: #1e293b;
-  margin-bottom: 8px;
+  margin-top: 2px;
+  margin-bottom: 0;
   text-align: center;
-  line-height: 1.15;
+  line-height: 1.2;
+  transition: color 0.15s ease;
+}
+
+.contact-card:hover .contact-name {
+  color: #2563eb;
 }
 
 /* 功能按鈕橫列（兩顆按鈕中間間隔加大到約 20px） */
@@ -426,14 +434,14 @@ body {
 }
 
 .contacts-grid.single-contact .contact-avatar-wrapper {
-  width: clamp(120px, 24vh, 180px);
-  height: clamp(120px, 24vh, 180px);
-  margin-bottom: 10px;
+  width: clamp(140px, 26vh, 220px);
+  height: clamp(140px, 26vh, 220px);
+  margin-bottom: 12px;
 }
 
 .contacts-grid.single-contact .contact-name {
-  font-size: clamp(1.6rem, 3.5vh, 2.3rem);
-  margin-bottom: 14px;
+  font-size: clamp(1.7rem, 3.8vh, 2.4rem);
+  margin-bottom: 0;
 }
 
 .contacts-grid.single-contact .contact-actions-row {
