@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1e293b">
+  <title>微笑視訊 (Smile Video Call) — 系統交接與維護查詢手冊</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --card-bg: #ffffff;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px -2px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: var(--slate-50);
+      color: var(--slate-800);
+      line-height: 1.65;
+      padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 頂部導航列 */
+    .top-header {
+      background: var(--slate-900);
+      color: white;
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-badge {
+      font-size: 0.75rem;
+      background: #2563eb;
+      color: white;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-tag {
+      font-size: 0.75rem;
+      background: rgba(255,255,255,0.12);
+      color: #94a3b8;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.08);
+      color: #e2e8f0;
+    }
+
+    .btn-nav:hover {
+      background: rgba(255,255,255,0.18);
+      color: white;
+    }
+
+    .btn-nav.highlight {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .btn-nav.highlight:hover {
+      background: var(--primary-dark);
+    }
+
+    /* 主要容器 */
+    .container {
+      max-width: 1100px;
+      margin: 28px auto 0;
+      padding: 0 16px;
+    }
+
+    /* 快捷導覽錨點列 (Anchor Pills) */
+    .anchor-nav {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .anchor-pill {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--slate-600);
+      background: var(--slate-100);
+      padding: 6px 12px;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .anchor-pill:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* 卡片區塊 */
+    .doc-section {
+      background: var(--card-bg);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 2px solid var(--slate-100);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--slate-900);
+    }
+
+    .section-subtitle {
+      font-size: 0.88rem;
+      color: var(--slate-500);
+      margin-top: 2px;
+    }
+
+    /* 醒目提示框 */
+    .alert-box {
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin: 16px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .alert-box.primary {
+      background: var(--primary-light);
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+
+    .alert-box.success {
+      background: var(--success-light);
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+
+    .alert-box.warning {
+      background: var(--warning-light);
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .alert-box.danger {
+      background: var(--danger-light);
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .alert-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* 步驟流程樣式 */
+    .step-list {
+      list-style: none;
+      counter-reset: step-counter;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 18px 0;
+    }
+
+    .step-item {
+      position: relative;
+      padding-left: 48px;
+    }
+
+    .step-item::before {
+      counter-increment: step-counter;
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    }
+
+    .step-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      font-size: 0.92rem;
+      color: var(--slate-600);
+    }
+
+    /* 網址與身分展示表格 */
+    .custom-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+
+    .custom-table th {
+      background: var(--slate-100);
+      color: var(--slate-700);
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--slate-200);
+    }
+
+    .custom-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--slate-200);
+      vertical-align: middle;
+    }
+
+    .custom-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .custom-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* 一鍵複製按鈕與程式碼框 */
+    .code-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #0f172a;
+      word-break: break-all;
+    }
+
+    .btn-copy {
+      background: white;
+      border: 1px solid var(--slate-300);
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--slate-700);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      margin-left: 6px;
+    }
+
+    .btn-copy:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* 角色頭像展示列 */
+    .avatar-preview-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 14px 0 20px;
+    }
+
+    .avatar-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .avatar-card img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 6px;
+      border: 2px solid white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .avatar-card .name {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--slate-800);
+    }
+
+    .avatar-card .role-desc {
+      font-size: 0.72rem;
+      color: var(--slate-500);
+    }
+
+    /* 標籤小元件 */
+    .badge-pill {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-pill.blue { background: #dbeafe; color: #1e40af; }
+    .badge-pill.green { background: #dcfce7; color: #166534; }
+    .badge-pill.amber { background: #fef3c7; color: #92400e; }
+    .badge-pill.purple { background: #f3e8ff; color: #6b21a8; }
+
+    /* 雙欄格狀對比卡 */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .info-box {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .info-box h4 {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-box ul {
+      padding-left: 20px;
+      font-size: 0.88rem;
+      color: var(--slate-600);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* 頁尾 */
+    .page-footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--slate-200);
+      color: var(--slate-500);
+      font-size: 0.85rem;
+    }
+
+    /* 列印樣式優化 */
+    @media print {
+      body { background: white; color: black; }
+      .top-header, .anchor-nav, .btn-copy, .btn-nav { display: none !important; }
+      .doc-section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部導航 -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-title">
+        <span>👵 微笑視訊 (Smile Video Call)</span>
+        <span class="brand-badge">HANDOFF</span>
+        <span class="brand-tag">v32 / Phase 1～25</span>
+      </div>
+      <div class="nav-actions">
+        <a href="./index.html" class="btn-nav" title="打開長輩平板主畫面">👵 視訊首頁</a>
+        <a href="./admin.html" class="btn-nav" title="打開家屬管理後台">🛠️ 家屬控制台</a>
+        <a href="./log.html" class="btn-nav" title="查看歷次開發日誌">📜 完整日誌</a>
+        <button onclick="window.print()" class="btn-nav highlight" title="列印或存為 PDF">🖨️ 友善列印 / PDF</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 快速目錄錨點導覽列 -->
+    <nav class="anchor-nav" aria-label="章節速查">
+      <a href="#section-overview" class="anchor-pill">🎯 系統概覽</a>
+      <a href="#section-urls" class="anchor-pill">🔗 身分直通網址</a>
+      <a href="#section-anydesk" class="anchor-pill" style="background:#fee2e2; color:#991b1b; font-weight:800;">🔴 AnyDesk 遠端控制完整手冊</a>
+      <a href="#section-tablet" class="anchor-pill">📱 平板系統與雙軌音量</a>
+      <a href="#section-cloud" class="anchor-pill">☁️ 雲端與 LINE 中繼站</a>
+      <a href="#section-ui" class="anchor-pill">🎨 介面佈局規格</a>
+      <a href="#section-timeline" class="anchor-pill">📅 開發演進總表</a>
+      <a href="#section-faq" class="anchor-pill">❓ 故障排除 FAQ</a>
+    </nav>
+
+    <!-- 區塊 1：專案核心定位與架構 -->
+    <section id="section-overview" class="doc-section">
+      <div class="section-header">
+        <div class="section-icon">🎯</div>
+        <div>
+          <h2 class="section-title">一、專案核心定位與設計哲學</h2>
+          <p class="section-subtitle">專為高齡長輩（阿笑）量身打造之「零認知、零阻力、全家聯防」客廳專用視訊機</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="info-box">
+          <h4>👵 長輩端極致零負擔</h4>
+          <ul>
+            <li><strong>點頭像即撥號（Phase 25）</strong>：移除所有電話與攝影機按鈕，長輩看見家人大臉點一下就撥通。</li>
+            <li><strong>來電 5 秒自動接聽</strong>：晚輩撥入時平板發出高穿透和弦鈴聲，倒數 5 秒自動開啟鏡頭，長輩不需手動找按鍵。</li>
+            <li><strong>微光時鐘防誤觸</strong>：待機時進入純黑防烙印時鐘，碰觸喚醒時備有 <strong>800ms 防呆鎖定</strong>，絕不誤撥。</li>
+            <li><strong>家庭 Google 相簿</strong>：平時作為客廳數位相框，支援手勢滑動翻頁，閒置 10 分鐘自動休眠進入微光模式。</li>
+          </ul>
+        </div>
+        <div class="info-box">
+          <h4>☁️ 免費、免帳號、免伺服器</h4>
+          <ul>
+            <li><strong>Jitsi Meet WebRTC</strong>：採用開源免登入公開伺服器 (<code>jitsi.riot.im</code>)，免主持人密碼、無過期踢除問題。</li>
+            <li><strong>ntfy.sh 即時信號 (SSE)</strong>：免費公共控制通道，毫秒級傳遞長輩來電、忙線與同步掛斷信號。</li>
+            <li><strong>全家透明 LINE 聯防</strong>：長輩點擊任何一位家人，Google Apps Script (GAS) 即刻推播通知至家庭 LINE 群組。</li>
+            <li><strong>全響度增益 (Phase 24)</strong>：鈴聲放大近 5 倍，WebRTC AGC 自動補償微弱說話聲，遠端音量 100% 鎖定。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="alert-box primary">
+        <div class="alert-icon">💡</div>
+        <div>
+          <strong>正式站點與開源倉庫：</strong><br>
+          • <strong>線上正式站：</strong> <a href="https://78vince.github.io/smile-video-call/" target="_blank" style="color:#1d4ed8; font-weight:700;">https://78vince.github.io/smile-video-call/</a><br>
+          • <strong>GitHub 原始碼倉庫：</strong> <code>git@github.com:78vince/smile-video-call.git</code> (分支：<code>main</code>)<br>
+          • <strong>本地專案目錄：</strong> <code>Jitsi Meet/Smile Video Call/</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊 2：家庭成員專屬直通網址 -->
+    <section id="section-urls" class="doc-section">
+      <div class="section-header">
+        <div class="section-icon">🔗</div>
+        <div>
+          <h2 class="section-title">二、家庭成員專屬身分直通網址</h2>
+          <p class="section-subtitle">每位家庭成員在手機或平板打開自己的專屬網址，無須輸入帳號密碼即可一鍵連線</p>
+        </div>
+      </div>
+
+      <!-- 頭像預覽列 -->
+      <div class="avatar-preview-row">
+        <div class="avatar-card">
+          <img src="./avatars/ali.png" alt="阿禮">
+          <span class="name">阿禮</span>
+          <span class="role-desc">大兒子</span>
+        </div>
+        <div class="avatar-card">
+          <img src="./avatars/along.png" alt="阿龍">
+          <span class="name">阿龍</span>
+          <span class="role-desc">二兒子</span>
+        </div>
+        <div class="avatar-card">
+          <img src="./avatars/yijing.png" alt="宜靜">
+          <span class="name">宜靜</span>
+          <span class="role-desc">家人晚輩</span>
+        </div>
+        <div class="avatar-card">
+          <img src="./avatars/pengjun.png" alt="芃君">
+          <span class="name">芃君</span>
+          <span class="role-desc">孫女</span>
+        </div>
+        <div class="avatar-card" style="border-color:#bfdbfe; background:#eff6ff;">
+          <img src="./avatars/album-cover.png" alt="家庭相簿">
+          <span class="name">家庭相簿</span>
+          <span class="role-desc">Google 相簿</span>
+        </div>
+        <div class="avatar-card" style="border-color:#cbd5e1; background:#f8fafc;">
+          <img src="./avatars/screensaver-cover.png" alt="微光模式">
+          <span class="name">微光時鐘</span>
+          <span class="role-desc">防烙印待機</span>
+        </div>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>身分 / 角色</th>
+            <th>使用設備與情境</th>
+            <th>專屬直通網址</th>
+            <th>預設視訊房名</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>👵 阿笑媽媽</strong><br><span class="badge-pill blue">核心主機</span></td>
+            <td>客廳 Android 平板專用（四人頭像、相簿輪播、自動接聽）</td>
+            <td>
+              <span class="code-pill">https://78vince.github.io/smile-video-call/?u=axiao</span>
+              <button class="btn-copy" onclick="copyText('https://78vince.github.io/smile-video-call/?u=axiao', this)">複製</button>
+            </td>
+            <td><code>smile-axiao-*</code></td>
+          </tr>
+          <tr>
+            <td><strong>👦 阿禮</strong><br><span class="badge-pill green">直通晚輩</span></td>
+            <td>大兒子手機專用（單擊頭像直通長輩，支援接收 LINE 來電推播）</td>
+            <td>
+              <span class="code-pill">https://78vince.github.io/smile-video-call/?u=ali</span>
+              <button class="btn-copy" onclick="copyText('https://78vince.github.io/smile-video-call/?u=ali', this)">複製</button>
+            </td>
+            <td><code>smile-axiao-ali</code></td>
+          </tr>
+          <tr>
+            <td><strong>🧑 阿龍</strong><br><span class="badge-pill green">直通晚輩</span></td>
+            <td>二兒子手機專用（單擊頭像直通長輩，支援接收 LINE 來電推播）</td>
+            <td>
+              <span class="code-pill">https://78vince.github.io/smile-video-call/?u=along</span>
+              <button class="btn-copy" onclick="copyText('https://78vince.github.io/smile-video-call/?u=along', this)">複製</button>
+            </td>
+            <td><code>smile-axiao-along</code></td>
+          </tr>
+          <tr>
+            <td><strong>👩 宜靜</strong><br><span class="badge-pill green">直通晚輩</span></td>
+            <td>家人晚輩手機專用（單擊頭像直通長輩，支援接收 LINE 來電推播）</td>
+            <td>
+              <span class="code-pill">https://78vince.github.io/smile-video-call/?u=yijing</span>
+              <button class="btn-copy" onclick="copyText('https://78vince.github.io/smile-video-call/?u=yijing', this)">複製</button>
+            </td>
+            <td><code>smile-axiao-yijing</code></td>
+          </tr>
+          <tr>
+            <td><strong>👧 芃君</strong><br><span class="badge-pill green">直通晚輩</span></td>
+            <td>孫女手機專用（單擊頭像直通長輩，支援接收 LINE 來電推播）</td>
+            <td>
+              <span class="code-pill">https://78vince.github.io/smile-video-call/?u=pengjun</span>
+              <button class="btn-copy" onclick="copyText('https://78vince.github.io/smile-video-call/?u=pengjun', this)">複製</button>
+            </td>
+            <td><code>smile-axiao-pengjun</code></td>
+          </tr>
+          <tr>
+            <td><strong>🛠️ 後台管理</strong><br><span class="badge-pill amber">家屬專用</span></td>
+            <td>管理控制台（LINE Webhook 測試、參數覆寫、即時推播測試）</td>
+            <td>
+              <span class="code-pill">https://78vince.github.io/smile-video-call/admin.html</span>
+              <button class="btn-copy" onclick="copyText('https://78vince.github.io/smile-video-call/admin.html', this)">複製</button>
+            </td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 區塊 3：AnyDesk 遠端控制完整設定手冊（重中之重） -->
+    <section id="section-anydesk" class="doc-section" style="border: 2px solid #f87171; box-shadow: 0 4px 20px rgba(239,68,68,0.1);">
+      <div class="section-header">
+        <div class="section-icon" style="background:#fee2e2; color:#dc2626;">🔴</div>
+        <div>
+          <h2 class="section-title">三、AnyDesk 遠端控制完整設定手冊（長照關鍵防護）</h2>
+          <p class="section-subtitle">子女隨時從 Mac / iPhone 穿透連線客廳平板，無人值守排解故障、調音量、更新快取</p>
+        </div>
+      </div>
+
+      <div class="alert-box danger">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>長輩平板遠端遙控的核心痛點：</strong><br>
+          Android 14 具備極強的隱私與省電限制，若未做好以下設定，會出現<strong>「在 Mac 上看得見畫面但滑鼠點擊無反應（純觀看模式）」</strong>或<strong>「平板必須手動打開 AnyDesk 晚輩才能連進去」</strong>的情況。<br>
+          請務必依照下列 <strong>4 大步驟</strong> 逐一確認平板權限：
+        </div>
+      </div>
+
+      <ol class="step-list">
+        <li class="step-item">
+          <div class="step-title">步驟 1：平板必須安裝官方控制插件「AnyDesk 插件 ad1」</div>
+          <div class="step-desc">
+            僅安裝 AnyDesk 主程式在 Android 上只能「觀看畫面」。要能在 Mac 或 iPhone 上模擬手指點擊與滑動，<strong>必須至 Google Play 商店補裝專屬插件</strong>：<br>
+            • 在 Google Play 搜尋：<code>AnyDesk 插件 ad1</code>（英文：<code>AnyDesk plugin ad1</code>，套件代碼：<code>com.anydesk.ad1</code>，開發者為 AnyDesk Software GmbH）。<br>
+            • 安裝後它不會在桌面產生圖示，這是正常的背景服務插件。
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-title">步驟 2：開啟 Android 系統「無障礙服務 (Accessibility Service)」【關鍵】</div>
+          <div class="step-desc">
+            插件安裝完成後，必須手動賦予系統級觸控模擬權限：<br>
+            1. 打開平板的 <strong>「系統設定」 ➜ 找到「無障礙 (Accessibility)」</strong>。<br>
+            2. 點入 <strong>「已安裝的服務 (Installed services)」</strong>。<br>
+            3. 找到 <strong>「AnyDesk 插件 ad1」</strong>（或 AnyDesk Control Service）。<br>
+            4. 將開關切換為 <strong>【開啟 (ON)】</strong>，並在系統安全彈窗中點選「允許」。<br>
+            <em>💡 驗證方式：在 Mac 連入平板時，頂部工具列會亮起「滑鼠與鍵盤 🖱️」控制圖示，而非只有聊天或上傳下載圖示。</em>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-title">步驟 3：設定「無人值守存取 (Unattended Access)」與完全存取權限</div>
+          <div class="step-desc">
+            讓晚輩連線時<strong>完全不需要長輩在平板端點擊「同意」或「輸入驗證碼」</strong>：<br>
+            1. 在平板打開 AnyDesk 主程式 ➜ 點擊選單 <code>☰</code> ➜ 進入 <strong>「設定 (Settings)」 ➜ 「安全性 (Security)」</strong>。<br>
+            2. 點擊頂部 <strong>「解除鎖定安全性設定」</strong>（需驗證平板 PIN 碼或圖形鎖）。<br>
+            3. 勾選 <strong>「啟用無人值守存取 (Enable unattended access)」</strong>。<br>
+            4. 設定一組專屬固定密碼（例如：<code>Smile2026</code>）。<br>
+            5. 將「權限設定檔」選擇為 <strong>【完全存取 (Full Access)】</strong>（確認滑鼠、鍵盤、剪貼簿、音訊均已勾選允許）。
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-title">步驟 4：關閉 Android 電池最佳化與鎖定後台常駐（杜絕休眠被殺）</div>
+          <div class="step-desc">
+            避免 Android 系統在平板待機時自動將 AnyDesk 背景處理程序關閉：<br>
+            1. 進入平板 <strong>「系統設定」 ➜ 「應用程式」 ➜ 點入「AnyDesk」</strong>。<br>
+            2. 點選 <strong>「電池 (Battery)」 ➜ 選擇【不受限制 (Unrestricted)】</strong>。<br>
+            3. 將 <strong>「若未使用應用程式，即暫停活動 / 移除權限」</strong> 的開關**關閉**。<br>
+            4. <strong>多工鎖定：</strong>在平板畫面下方滑出最近應用程式清單（Overview），在 AnyDesk 卡片右上角點選 <strong>「鎖定 🔒」</strong> 圖示。
+          </div>
+        </li>
+      </ol>
+
+      <div class="grid-2">
+        <div class="info-box" style="border-left: 4px solid #2563eb;">
+          <h4>💻 子女從 Mac 端連線方式</h4>
+          <ul>
+            <li>下載安裝 Mac 版 AnyDesk。</li>
+            <li>輸入長輩平板的 <strong>9 位數 AnyDesk ID</strong>。</li>
+            <li>輸入先前設定的無人值守固定密碼，勾選「記住密碼」。</li>
+            <li><strong>滑鼠操作體驗：</strong>可直接點選家人頭像撥號、點右上角 🔄 重新整理快取、拖曳滑動瀏覽聯絡人。</li>
+          </ul>
+        </div>
+        <div class="info-box" style="border-left: 4px solid #16a34a;">
+          <h4>🛠️ 應急終極備援：ADB + `scrcpy` (Mac 插線/區網)</h4>
+          <ul>
+            <li>Mac 本機已備有 ADB 工具：<code>~/platform-tools/adb</code>。</li>
+            <li>平板開啟「開發人員選項」➜「USB 偵錯 / 無線除錯」。</li>
+            <li>Mac 插上傳輸線或同網段 WiFi，終端機執行 <code>scrcpy</code>，Mac 螢幕即刻彈出 1:1 低延遲平板投影。</li>
+            <li><strong>特點：</strong>完全不依賴任何 Android 無障礙服務或第三方軟體，具備 100% 絕對控制權。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊 4：平板硬體、系統與雙軌音量機制 -->
+    <section id="section-tablet" class="doc-section">
+      <div class="section-header">
+        <div class="section-icon">📱</div>
+        <div>
+          <h2 class="section-title">四、平板端硬體設置與 Android「雙軌音量」機制</h2>
+          <p class="section-subtitle">解決通話音量小聲、螢幕休眠防烙印與全螢幕 PWA 運作細節</p>
+        </div>
+      </div>
+
+      <div class="alert-box warning">
+        <div class="alert-icon">🔊</div>
+        <div>
+          <strong>重要排查：為什麼明明平板音量按鍵調到最大，通話還是很小聲？</strong><br>
+          Android 系統將音量分為 <strong>「媒體音量 (Media)」</strong> 與 <strong>「通話音量 (Voice Call)」</strong> 兩套獨立軌道：<br>
+          • <strong>平時沒通話時</strong>按平板側邊音量鍵，調整的只有「媒體音量」。<br>
+          • <strong>一旦視訊通話接通</strong>，系統音訊通道會瞬間切換成「通話音量」。若平板的通話音量先前停在 30%，通話就會非常小聲！<br>
+          • <strong>一勞永逸解決方法：</strong>在通話接通狀態中，直接按平板側邊的「音量 +」鍵調至 100%；或進入 Android「設定」➜「音效與震動」➜ 將「通話音量」拉桿調到最大。
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="info-box">
+          <h4>⚡ 電源與螢幕常亮配置</h4>
+          <ul>
+            <li><strong>客廳固定插電座充</strong>：客廳平板建議固定擺放於客廳電視櫃或茶几立架上，保持常時插電。</li>
+            <li><strong>開發人員選項設定</strong>：至 Android「設定」➜「系統」➜「開發人員選項」➜ 開啟 <strong>「充電時保持喚醒 (Stay awake)」</strong>。</li>
+            <li><strong>微光時鐘防烙印保護</strong>：閒置 3 分鐘網頁自動覆蓋純黑防烙印時鐘遮罩，螢幕像素維持極低功耗運作，保護 AMOLED / LCD 面板。</li>
+            <li><strong>喚醒防呆機制</strong>：輕觸微光時鐘喚醒時，系統自動啟動 <strong>800ms 防誤觸冷卻期</strong>，喚醒當下的觸碰絕對不會誤觸底下的撥號卡片。</li>
+          </ul>
+        </div>
+        <div class="info-box">
+          <h4>📲 PWA 全螢幕與快取更新</h4>
+          <ul>
+            <li><strong>新增至主螢幕</strong>：在 Chrome 開啟網址 ➜ 點右上角「⋮」➜ 選擇「新增至主螢幕」或「安裝應用程式」。</li>
+            <li><strong>原生全螢幕體驗</strong>：啟動後無任何網址列，且程式內建「首觸全螢幕（First Touch Fullscreen）」自動隱藏系統虛擬鍵與通知列。</li>
+            <li><strong>一鍵快取刷新按鈕</strong>：若網頁原始碼有更新，只要在平板頂部點擊 <strong>「🔄 重新整理」按鈕</strong>，Service Worker 會自動清除舊快取並重新載入最新版本（目前為 <code>smile-call-v32</code>）。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊 5：雲端通訊與 LINE 中繼站架構 -->
+    <section id="section-cloud" class="doc-section">
+      <div class="section-header">
+        <div class="section-icon">☁️</div>
+        <div>
+          <h2 class="section-title">五、雲端通訊與 LINE 中繼站配置細節</h2>
+          <p class="section-subtitle">Google Apps Script (GAS) 轉發中繼站、LINE 官方帳號與 ntfy.sh 即時通道</p>
+        </div>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>通訊元件</th>
+            <th>服務架構 / 端點</th>
+            <th>關鍵配置與注意事項</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>視訊通話核心</strong></td>
+            <td><code>jitsi.riot.im</code> (WebRTC External API)</td>
+            <td>
+              • 免費開源、免註冊、無主持人驗證限制。<br>
+              • <strong>音質與音量強化 (Phase 24)</strong>：啟用 WebRTC AGC（自動增益補償）放大輕微細語，成員加入時自動鎖定遠端音量為 100% (<code>setParticipantVolume=1</code>)，Opus 頻寬設為 64kbps。
+            </td>
+          </tr>
+          <tr>
+            <td><strong>即時信號通道</strong></td>
+            <td><code>ntfy.sh/smile-axiao-call-78vince</code> (SSE)</td>
+            <td>
+              • 輕量級 Server-Sent Events 即時通道，延遲低於 300ms。<br>
+              • 負責晚輩呼叫時觸發長輩平板響鈴、啟動 5 秒自動接聽、雙向同步掛斷與通話忙線提示。
+            </td>
+          </tr>
+          <tr>
+            <td><strong>LINE 推播機器人</strong></td>
+            <td>LINE 官方帳號：<code>阿笑的視訊機</code> (ID: <code>@355pvwuh</code>)</td>
+            <td>
+              • 已綁定家庭 LINE 群組 ID：<code>Cbaa9407dcce090399acdf70d6b344200</code>。<br>
+              • <strong>防干擾設定：</strong>至 LINE Developers Console 將 <strong>「Use webhook」切換為【關閉 (OFF)】</strong>，機器人平時在群組聊天絕不插嘴回覆，僅在長輩於平板撥號時主動推播來電。
+            </td>
+          </tr>
+          <tr>
+            <td><strong>雲端中繼腳本</strong></td>
+            <td>Google Apps Script (GAS) Web App<br>
+              <span class="code-pill">google-apps-script-line.js</span>
+            </td>
+            <td>
+              • <strong>執行網址：</strong> <code>https://script.google.com/macros/s/AKfycbwFd5_E2nJ14Dmf6ZNuqTgaxWrVtJRNeQLL8wPcYyaEC3ZGa8X9Xs8j_gMfDeO-V9ZZAQ/exec</code><br>
+              • <strong>GET 診斷：</strong> 瀏覽器直接開啟可檢查 LINE 連線與群組 ID 綁定狀態。<br>
+              • <strong>相簿代理：</strong> 支援 <code>?action=photos</code> 跨域爬取公開 Google 相簿最新圖片清單。
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 區塊 6：介面視覺與互動規格 -->
+    <section id="section-ui" class="doc-section">
+      <div class="section-header">
+        <div class="section-icon">🎨</div>
+        <div>
+          <h2 class="section-title">六、介面視覺與排版技術規格 (Phase 25 最新版)</h2>
+          <p class="section-subtitle">低彩度 Slate 質感配色、雙欄自適應與極致簡潔的「純頭像點擊」互動</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="info-box">
+          <h4>📐 阿笑長輩主畫面版型（兩欄式）</h4>
+          <ul>
+            <li><strong>左欄（生活功能 Dock，固定 120px）：</strong>
+              <ul>
+                <li>家庭相簿封面（大圓形 120px，無字）。</li>
+                <li>微光時鐘封面（大圓形 120px，無字）。</li>
+                <li>垂直排列，常駐左側不隨右側聯絡人捲動。</li>
+              </ul>
+            </li>
+            <li><strong>中間分隔線：</strong> 1.5px 淡灰柔和線條 (<code>#e2e8f0</code>)。</li>
+            <li><strong>右欄（家人聯絡人清單）：</strong>
+              <ul>
+                <li><strong>頭像直徑 200px</strong>（<code>clamp(140px, 26vh, 200px)</code>），3px 柔白立體邊框。</li>
+                <li>家人姓名（加粗 Slate-800，字體 <code>clamp(1.4rem, 2.8vh, 1.95rem)</code>）。</li>
+                <li><strong>移除電話與視訊按鈕（Phase 25）</strong>：整張卡片皆具備 <code>cursor: pointer</code> 點擊撥號功能。</li>
+                <li><strong>垂直滾動架構：</strong> 目前 4 人自動居中；未來新增聯絡人自動排入第二列，支援平滑上下滑動。</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="info-box">
+          <h4>🔊 聲學音訊增益架構 (Web Audio API)</h4>
+          <ul>
+            <li><strong>全新高穿透 Ding-Dong 電話和弦鈴聲</strong>：
+              <ul>
+                <li>第一聲 Ding：784Hz [G5] + 1046.5Hz [C6]（三角波）。</li>
+                <li>第二聲 Dong：659Hz [E5] + 880Hz [A5] + 1318.5Hz [E6]。</li>
+                <li>大幅提升長輩高頻衰退聽力的感知響度。</li>
+              </ul>
+            </li>
+            <li><strong>專業動態壓縮器 (DynamicsCompressorNode)</strong>：
+              <ul>
+                <li>主增益拉升至 <strong>0.95</strong>（原本為 0.2，響度提升近 5 倍）。</li>
+                <li>動態壓縮器自動抑止瞬間破音，兼具震撼音量與通透清晰度。</li>
+              </ul>
+            </li>
+            <li><strong>觸控反饋音效</strong>：點擊音量拉升至 0.7（三角波）。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊 7：歷次開發演進總覽 -->
+    <section id="section-timeline" class="doc-section">
+      <div class="section-header">
+        <div class="section-icon">📅</div>
+        <div>
+          <h2 class="section-title">七、歷次開發演進完整歷程總表 (Phase 1～25)</h2>
+          <p class="section-subtitle">從專案雛形初始化到高齡無障礙極致優化的完整開發軌跡</p>
+        </div>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th style="width: 110px;">階段</th>
+            <th style="width: 140px;">時間</th>
+            <th>核心更新與重要功能</th>
+            <th style="width: 100px;">快取版本</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Phase 1-4</strong></td>
+            <td>2026-10-28</td>
+            <td>專案初始化、Jitsi WebRTC 串接、高對比大按鈕、防呆響鈴音效。</td>
+            <td><code>v1~v4</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 5-8</strong></td>
+            <td>2026-10-29</td>
+            <td>雙向同步掛斷、ntfy 信號通道、GAS LINE 機器人推播、微光待機時鐘。</td>
+            <td><code>v5~v8</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 9-12</strong></td>
+            <td>2026-10-29</td>
+            <td>Google 相簿 5 秒自動輪播、觸控手勢滑動、防誤觸喚醒冷卻 (800ms)。</td>
+            <td><code>v9~v14</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 13-17</strong></td>
+            <td>2026-10-29</td>
+            <td>新增宜靜與芃君、純語音通話模式、後台管理頁面 <code>admin.html</code>、四欄佈局。</td>
+            <td><code>v15~v24</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 18</strong></td>
+            <td>2026-10-30</td>
+            <td>主畫面兩欄式重構（左生活相簿、右通話清單）、頂部一列收納、低彩度 Slate 配色。</td>
+            <td><code>v25</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 19-21</strong></td>
+            <td>2026-10-30</td>
+            <td>長輩頭像尺寸放大驗證 (180px ➜ 220px ➜ 320px) 與生活功能 180px 調適。</td>
+            <td><code>v26~v28</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 22</strong></td>
+            <td>2026-10-30</td>
+            <td>生活功能縮小鎖定為 120px、頭像 240px、水平滾動架構實作。</td>
+            <td><code>v29</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 23</strong></td>
+            <td>2026-10-30</td>
+            <td>依需求定調：<strong>垂直上下滾動</strong>、<strong>頭像直徑 200px</strong>、<strong>間距縮小緊湊</strong>、生活功能 120px。</td>
+            <td><code>v30</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 24</strong></td>
+            <td>2026-11-05</td>
+            <td>通知鈴聲放大近 5 倍（增益 0.95、動態壓縮防破音、雙音清脆和弦）、WebRTC AGC 自動增益補償、參與者音量 100% 滿載輸出。</td>
+            <td><code>v31</code></td>
+          </tr>
+          <tr>
+            <td><strong>Phase 25</strong></td>
+            <td>2026-11-05</td>
+            <td>移除電話與視訊按鈕，回歸純淨「點選頭像即刻撥號」，全卡觸控縮放回饋，視覺完美垂直置中。</td>
+            <td><code>v32</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 區塊 8：常見問題與故障排除 FAQ -->
+    <section id="section-faq" class="doc-section">
+      <div class="section-header">
+        <div class="section-icon">❓</div>
+        <div>
+          <h2 class="section-title">八、常見問題與故障排除速查 (FAQ)</h2>
+          <p class="section-subtitle">平時維護或長輩反饋異常時的一鍵排查處方</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="info-box">
+          <h4>Q1：AnyDesk 連進平板後，滑鼠點擊完全沒反應？</h4>
+          <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">
+            <strong>原因：</strong> Android 14 把無障礙服務自動關閉了，或是缺少控制插件。<br>
+            <strong>解法：</strong> 拿起平板，到「系統設定」➜「無障礙」➜「已安裝的服務」，檢查「AnyDesk 插件 ad1」是否處於「開啟」。確認開啟後，Mac 工具列便會出現滑鼠圖示，即可恢復正常操控。
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Q2：視訊通話對方的聲音聽起來很小聲？</h4>
+          <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">
+            <strong>原因：</strong> 平板調整的是「媒體音量」，通話接通後 Android 切換為「通話音量」。<br>
+            <strong>解法：</strong> 在「通話中」直接按平板側邊的音量增加鍵拉到最滿；或者到 Android 設定 ➜ 音效 ➜ 將「通話音量」拉桿調至 100%。
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Q3：代碼推上 GitHub 後，平板畫面還是舊的？</h4>
+          <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">
+            <strong>原因：</strong> PWA Service Worker 快取了舊版本。<br>
+            <strong>解法：</strong> 點擊平板頂部右上角單色的 <strong>「🔄 重新整理按鈕」</strong>，網頁會自動註銷舊快取並立即載入最新版 <code>smile-call-v32</code>。
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>Q4：家庭群組平時聊天，LINE 機器人一直插嘴回覆？</h4>
+          <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">
+            <strong>原因：</strong> LINE 開發者後台開啟了 Webhook。<br>
+            <strong>解法：</strong> 登入 <a href="https://developers.line.biz/console/" target="_blank" style="color:var(--primary);">LINE Developers Console</a> ➜ 進入 Channel ➜ Messaging API 分頁 ➜ 將 <strong>「Use webhook」切換為【關閉 (OFF)】</strong> 即可徹底安靜，完全不影響長輩撥號時的主動推播。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer class="page-footer">
+      <p>👵 微笑視訊 (Smile Video Call) 系統技術交接手冊 ｜ 最後修訂：2026-11-16 ｜ 專案負責：Vincent (vkimac)</p>
+      <p style="margin-top: 4px; font-size: 0.78rem; color: var(--slate-400);">Designed with Care for Family Eldercare & Zero-Friction Connectivity</p>
+    </footer>
+
+  </main>
+
+  <script>
+    // 一鍵複製文字到剪貼簿小函式
+    function copyText(text, btnElement) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showCopySuccess(btnElement);
+        });
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand("copy");
+          showCopySuccess(btnElement);
+        } catch (err) {}
+        document.body.removeChild(textArea);
+      }
+    }
+
+    function showCopySuccess(btn) {
+      const originalText = btn.textContent;
+      btn.textContent = "已複製 ✓";
+      btn.style.color = "#16a34a";
+      btn.style.borderColor = "#16a34a";
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.color = "";
+        btn.style.borderColor = "";
+      }, 1800);
+    }
+  </script>
+</body>
+</html>
