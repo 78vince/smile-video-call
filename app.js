@@ -1475,9 +1475,20 @@ class SmileVideoCallApp {
       window.location.reload(true);
     });
 
-    // 身分切換 Modal
+    // 身分切換 Modal（防長輩誤觸：需於 2 秒內連續點擊 5 次才開啟切換選單）
+    let roleBadgeClicks = 0;
+    let roleBadgeTimer = null;
     this.dom.btnSwitchRole.addEventListener("click", () => {
-      this.openRoleModal();
+      roleBadgeClicks++;
+      clearTimeout(roleBadgeTimer);
+      roleBadgeTimer = setTimeout(() => {
+        roleBadgeClicks = 0;
+      }, 2000);
+      if (roleBadgeClicks >= 5) {
+        roleBadgeClicks = 0;
+        this.playTapSound();
+        this.openRoleModal();
+      }
     });
     this.dom.btnCloseRoleModal.addEventListener("click", () => {
       this.closeRoleModal();

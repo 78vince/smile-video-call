@@ -360,6 +360,17 @@ flowchart TD
   - 移除按鈕後，右欄四位家人卡片總高度（約 240px）與左欄生活功能（約 260px）達到完美視覺對稱平衡。
 - **快取升級**：Service Worker 快取版本升至 `smile-call-v32`。
 
+### 階段 26：頂部身分標籤防誤觸鎖定（連點 5 下切換）與平板系統層級防誤觸／AnyDesk 免授權加固
+- **時間**：`2026-11-23 11:00 ~ 11:55`
+- **「微笑視訊」頂部身分標籤防誤觸 (`#btn-switch-role`)**：
+  - 移除 `🟢 阿笑` 右側的下拉小箭頭 `▾` 與按鈕點擊縮放效果，視覺上化為純粹沉穩的在線狀態指示燈與姓名標籤，不再誘使長輩點擊。
+  - 點擊邏輯改為**需在 2 秒內連續快速點擊 5 次**才會開啟「選擇目前使用者身分」Modal，長輩日常單次誤觸完全不會跳出切換視窗。
+- **Android 平板 (`SM_X133`) 系統層級防誤觸與 AnyDesk 免授權加固 (ADB)**：
+  - **封鎖系統多使用者／訪客切換**：設定 `user_switcher_enabled = 0`、`guest_user_enabled = 0`、`add_users_when_locked = 0`，徹底隱藏下拉快速設定面板中的「👤 切換系統使用者」圖示，防止長輩誤觸切入訪客或非管理員帳戶。
+  - **AnyDesk 永久免彈窗與遠端喚醒**：透過 `appops` 鎖定 `PROJECT_MEDIA: allow`、`TURN_SCREEN_ON: allow`、`SYSTEM_ALERT_WINDOW: allow` 與 `ACCESS_RESTRICTED_SETTINGS: allow`。
+  - **插電常亮與省電白名單**：開啟 `stay_on_while_plugged_in = 7`、延長未插電休眠至 10 分鐘 (`screen_off_timeout = 600000`)，並將 `com.android.chrome` 加入 `deviceidle whitelist`。
+- **快取升級**：Service Worker 快取版本升至 `smile-call-v34`。
+
 ---
 
 ## 四、關鍵技術規格一覽表

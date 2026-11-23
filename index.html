@@ -26,11 +26,10 @@
     <header class="app-header">
       <div class="header-left">
         <h1 id="app-title" class="title">阿笑的視訊機</h1>
-        <!-- 整合連線狀態燈號與身分切換標籤 -->
-        <button id="btn-switch-role" class="btn-role-badge" title="連線正常（點擊切換家庭身分）">
+        <!-- 整合連線狀態燈號與身分標籤（防長輩誤觸：連點 5 下才開啟切換選單） -->
+        <button id="btn-switch-role" class="btn-role-badge" title="連線正常（連續點擊 5 下切換家庭身分）">
           <span id="status-dot" class="status-dot online"></span>
           <span id="current-role-name">阿笑</span>
-          <span class="role-arrow">▾</span>
         </button>
       </div>
 

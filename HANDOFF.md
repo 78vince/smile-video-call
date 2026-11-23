@@ -1,7 +1,7 @@
 # 微笑視訊 (Smile Video Call) — 專案工作交接文件 (HANDOFF)
 
-> **最後更新**：2026-11-16 21:10（台北時間）  
-> **目前版本**：`smile-call-v32` (Phase 1～25 全部完成並正式上線)  
+> **最後更新**：2026-11-23 11:55（台北時間）  
+> **目前版本**：`smile-call-v34` (Phase 1～26 全部完成並正式上線)  
 > **線上站點**：<https://78vince.github.io/smile-video-call/>  
 > **交接查詢網頁**：<https://78vince.github.io/smile-video-call/handoff.html>  
 > **GitHub 倉庫**：`git@github.com:78vince/smile-video-call.git`（分支：`main`）  
@@ -69,7 +69,7 @@ flowchart TD
 
 ---
 
-## 三、現行主畫面介面規格 (Phase 18～23)
+## 三、現行主畫面介面規格 (Phase 18～26)
 
 ### 1. 兩欄式格局（阿笑平板端）
 - **左欄（生活功能 Dock）**：
@@ -85,7 +85,7 @@ flowchart TD
   - **點選頭像即刻撥號 (Phase 25)**：全面移除電話與攝影機按鈕列，整張卡片與 200px 圓形大頭貼皆具備觸控直通功能，長輩點選家人臉孔即刻發起視訊撥號。
 
 ### 2. 頂部一列式功能列
-- **連線狀態整合**：移除底部冗餘狀態列，將連線指示燈號（在線鮮綠燈）直接整合進身分按鈕（`身分：阿笑 ▾`）。
+- **連線狀態與身分防誤觸整合 (Phase 26)**：移除底部冗餘狀態列，將連線指示燈號（在線鮮綠燈）整合進身分標籤（`🟢 阿笑`）。移除下拉箭頭 `▾` 並改為**需於 2 秒內連續點擊 5 次才會開啟身分切換選單**，徹底防止長輩誤觸切換角色。
 - **無雜訊**：移除原先「點一下照片...」副標題。
 - **單色 SVG 按鈕**：
   - 🌙 微光模式（快速進入待機時鐘）
@@ -106,7 +106,7 @@ flowchart TD
 - **綁定家庭群組 ID**：`Cbaa9407dcce090399acdf70d6b344200`
 - **GAS 中繼站網址**：  
   `https://script.google.com/macros/s/AKfycbwFd5_E2nJ14Dmf6ZNuqTgaxWrVtJRNeQLL8wPcYyaEC3ZGa8X9Xs8j_gMfDeO-V9ZZAQ/exec`
-- **中繼站原始碼**：[`google-apps-script-line.js`](file:///Users/vkimac/Documents/VK%20Agent/Jitsi%20Meet/Smile%20Video%20Call/google-apps-script-line.js)
+- **中繼站原始碼**：[`google-apps-script-line.js`](file:///Users/vk-macbook/Documents/VK%20Agent/Jitsi%20Meet/Smile%20Video%20Call/google-apps-script-line.js)
 
 ### 2. 關鍵注意事項（防插嘴設定）
 - 群組 ID 已固定鎖定在程式碼中。
@@ -118,18 +118,21 @@ flowchart TD
 
 ## 五、Android 平板端維護與遠端控制
 
-1. **AnyDesk 遠端控制**：
-   - 平板端已安裝 AnyDesk 與控制插件（ad1）。
-   - Android 設定中已開啟「無障礙功能」之 AnyDesk Control Service，Mac 端可直接點擊與滑動操控平板。
-2. **Android ADB 偵錯工具**：
-   - 位於 Mac 本機 `~/platform-tools/adb`，已設定環境變數至 `~/.zshrc`。
-   - 可隨時透過 USB 或區網 WiFi 進行 ADB 深度調控。
+1. **AnyDesk 無人值守與 ADB 免授權控制**：
+   - 平板端（`SM_X133`）已安裝 AnyDesk 與控制插件（`ad1`），開啟無人值守存取密碼與「無障礙功能」之 AnyDesk Control Service。
+   - 已透過 ADB 寫入免彈窗與遠端喚醒權限：
+     - `appops set com.anydesk.anydeskandroid PROJECT_MEDIA allow`（免除「要使用 AnyDesk 分享畫面嗎？」系統彈窗）
+     - `appops set com.anydesk.anydeskandroid TURN_SCREEN_ON allow`（允許遠端喚醒螢幕）
+     - `appops set com.anydesk.anydeskandroid SYSTEM_ALERT_WINDOW allow` & `ACCESS_RESTRICTED_SETTINGS allow`
+2. **系統級防誤觸與防休眠加固（ADB 寫入）**：
+   - **關閉多使用者／訪客切換**：`user_switcher_enabled = 0`、`guest_user_enabled = 0`、`add_users_when_locked = 0`（下拉控制面板已徹底隱藏「👤 切換系統使用者」圖示）。
+   - **插電常亮與省電白名單**：`stay_on_while_plugged_in = 7`、`screen_off_timeout = 600000`（10 分鐘），並將 `com.anydesk.anydeskandroid`、`com.anydesk.adcontrol.ad1`、`com.android.chrome` 加入 `deviceidle whitelist`。
 3. **PWA 更新方式**：
    - 當程式庫有代碼更新並推至 GitHub 後，在平板點擊頂部功能列右側的 **「🔄 重新整理單色按鈕」**，Service Worker 會自動註銷舊快取並下載最新版本。
 
 ---
 
-## 六、歷次開發演進紀錄摘要 (Phase 1～23)
+## 六、歷次開發演進紀錄摘要 (Phase 1～26)
 
 | 階段 | 時間 | 主要內容 | 快取版本 |
 |---|---|---|---|
@@ -143,6 +146,7 @@ flowchart TD
 | **Phase 23** | 2026-10-30 | 依需求定調：**垂直上下滾動**、**頭像直徑 200px**、**間距縮小緊湊**、生活功能 120px | `v30` |
 | **Phase 24** | 2026-11-05 | 通知鈴聲放大近 5 倍（增益 0.95、動態壓縮防破音、雙音清脆和弦）、WebRTC AGC 自動增益補償、參與者音量 100% 滿載輸出 | `v31` |
 | **Phase 25** | 2026-11-05 | 移除電話與視訊按鈕，回歸純淨「點選頭像即刻撥號」，全卡觸控縮放回饋，視覺完美垂直置中 | `v32` |
+| **Phase 26** | 2026-11-23 | 頂部身分標籤移除下拉箭頭並改為「連點 5 下防誤觸切換」；平板 ADB 徹底關閉多使用者/訪客切換並加固 AnyDesk 免授權與插電常亮 | `v34` |
 
 ---
 

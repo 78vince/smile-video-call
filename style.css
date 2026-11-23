@@ -823,26 +823,10 @@ body {
   border-radius: 999px;
   font-size: 0.95rem;
   font-weight: 700;
-  cursor: pointer;
+  cursor: default;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s ease;
-}
-
-.btn-role-badge:hover {
-  background: #e2e8f0;
-}
-
-.btn-role-badge:active {
-  background: #cbd5e1;
-  transform: scale(0.96);
-}
-
-.btn-role-badge .role-arrow {
-  font-size: 0.85rem;
-  color: #64748b;
-  margin-left: 2px;
 }
 
 .status-dot {
