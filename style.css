@@ -1515,3 +1515,65 @@ body {
     height: 44px;
   }
 }
+
+/* ============================================================
+   晚輩端專屬：一鍵安裝到手機桌面浮動橫幅
+   ============================================================ */
+.pwa-install-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px auto 4px;
+  padding: 6px 8px 6px 16px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+  max-width: 96%;
+  flex-shrink: 0;
+  animation: installBannerPulse 2.4s infinite ease-in-out;
+}
+
+.pwa-install-banner.hidden {
+  display: none !important;
+}
+
+@keyframes installBannerPulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.btn-install-pwa {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 4px;
+  text-align: left;
+}
+
+.install-icon {
+  font-size: 1.25rem;
+}
+
+.btn-dismiss-install {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #ffffff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+

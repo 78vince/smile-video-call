@@ -88,8 +88,20 @@ class SmileVideoCallApp {
       audioCallStage: document.getElementById("audio-call-stage"),
       audioCallAvatar: document.getElementById("audio-call-avatar"),
       audioCallPeerName: document.getElementById("audio-call-peer-name"),
-      audioCallStatus: document.getElementById("audio-call-status")
+      audioCallStatus: document.getElementById("audio-call-status"),
+      // 晚輩端一鍵安裝至手機桌面元件
+      pwaInstallBanner: document.getElementById("pwa-install-banner"),
+      btnInstallPwa: document.getElementById("btn-install-pwa"),
+      installBtnText: document.getElementById("install-btn-text"),
+      btnDismissInstall: document.getElementById("btn-dismiss-install"),
+      pwaInstallModal: document.getElementById("pwa-install-modal"),
+      pwaInstallGuideBody: document.getElementById("pwa-install-guide-body"),
+      btnCloseInstallModal: document.getElementById("btn-close-install-modal"),
+      btnGotItInstall: document.getElementById("btn-got-it-install")
     };
+
+    this.deferredInstallPrompt = null;
+    this.installBannerDismissed = false;
 
     this.init();
   }
@@ -100,6 +112,7 @@ class SmileVideoCallApp {
   init() {
     this.initViewportHeight();
     this.initFullscreenHandler();
+    this.initPwaInstallHandler();
     this.initClock();
     this.renderCurrentRoleView();
     this.bindEvents();
@@ -111,6 +124,147 @@ class SmileVideoCallApp {
     this.startIncomingCallListener();
     this.checkAutoJoin();
     this.syncAlbumPhotosFromCloud(); // 雲端自動同步 Google 相簿最新相片
+  }
+
+  // 晚輩端專屬：一鍵安裝至手機桌面 (Android 原生彈窗 + iOS/LINE 智慧指引)
+  initPwaInstallHandler() {
+    // 1. 若在 LINE 內建瀏覽器中開啟且網址未帶 openExternalBrowser=1，自動補上以跳轉系統瀏覽器
+    const ua = navigator.userAgent || "";
+    const isLineApp = /Line\//i.test(ua);
+    if (isLineApp && !window.location.search.includes("openExternalBrowser=1")) {
+      const extUrl = new URL(window.location.href);
+      extUrl.searchParams.set("openExternalBrowser", "1");
+      window.location.replace(extUrl.toString());
+      return;
+    }
+
+    // 2. 攔截 Android Chrome 的原生安裝事件 (beforeinstallprompt)
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      this.deferredInstallPrompt = e;
+      this.updatePwaInstallBannerVisibility();
+    });
+
+    // 安裝成功後自動隱藏橫幅
+    window.addEventListener("appinstalled", () => {
+      this.deferredInstallPrompt = null;
+      if (this.dom.pwaInstallBanner) {
+        this.dom.pwaInstallBanner.classList.add("hidden");
+      }
+    });
+
+    // 點擊「點此將微笑視訊安裝到手機桌面」
+    if (this.dom.btnInstallPwa) {
+      this.dom.btnInstallPwa.addEventListener("click", async () => {
+        this.playTapSound();
+        // Android Chrome 支援一鍵原生安裝彈窗
+        if (this.deferredInstallPrompt) {
+          this.deferredInstallPrompt.prompt();
+          const { outcome } = await this.deferredInstallPrompt.userChoice;
+          if (outcome === "accepted") {
+            this.deferredInstallPrompt = null;
+            this.dom.pwaInstallBanner.classList.add("hidden");
+          }
+          return;
+        }
+        // iPhone (iOS Safari) 或其他瀏覽器：彈出對應的圖文步驟指引
+        this.openPwaInstallGuideModal();
+      });
+    }
+
+    if (this.dom.btnDismissInstall) {
+      this.dom.btnDismissInstall.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.installBannerDismissed = true;
+        this.dom.pwaInstallBanner.classList.add("hidden");
+      });
+    }
+
+    const closeInstallModal = () => {
+      if (this.dom.pwaInstallModal) {
+        this.dom.pwaInstallModal.classList.add("hidden");
+      }
+    };
+    if (this.dom.btnCloseInstallModal) {
+      this.dom.btnCloseInstallModal.addEventListener("click", closeInstallModal);
+    }
+    if (this.dom.btnGotItInstall) {
+      this.dom.btnGotItInstall.addEventListener("click", closeInstallModal);
+    }
+    if (this.dom.pwaInstallModal) {
+      this.dom.pwaInstallModal.addEventListener("click", (e) => {
+        if (e.target === this.dom.pwaInstallModal) closeInstallModal();
+      });
+    }
+
+    this.updatePwaInstallBannerVisibility();
+  }
+
+  // 檢查是否為已安裝的桌面獨立模式
+  isRunningStandalone() {
+    return (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.matchMedia("(display-mode: fullscreen)").matches ||
+      window.navigator.standalone === true
+    );
+  }
+
+  // 更新晚輩端「一鍵安裝到手機桌面」橫幅顯示狀態（長輩平板端或已安裝時永遠隱藏）
+  updatePwaInstallBannerVisibility() {
+    if (!this.dom.pwaInstallBanner) return;
+    if (this.currentRole === "axiao" || this.isRunningStandalone() || this.installBannerDismissed) {
+      this.dom.pwaInstallBanner.classList.add("hidden");
+      return;
+    }
+
+    const roleData = this.config.roles[this.currentRole];
+    const roleName = roleData ? roleData.name : "";
+    const targetLabel = this.currentRole === "pengjun" ? "阿笑奶奶" : "阿笑媽媽";
+    if (this.dom.installBtnText) {
+      this.dom.installBtnText.textContent = `點此將「${roleName}直通${targetLabel}」加到手機桌面`;
+    }
+    this.dom.pwaInstallBanner.classList.remove("hidden");
+  }
+
+  // 顯示 iPhone / Android 專屬安裝教學 Modal
+  openPwaInstallGuideModal() {
+    if (!this.dom.pwaInstallModal || !this.dom.pwaInstallGuideBody) return;
+    const ua = navigator.userAgent || "";
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isLine = /Line\//i.test(ua);
+    const roleData = this.config.roles[this.currentRole];
+    const roleName = roleData ? roleData.name : "專屬";
+
+    if (isLine) {
+      this.dom.pwaInstallGuideBody.innerHTML = `
+        <div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:12px;padding:14px;margin-bottom:12px;color:#9a3412;">
+          <strong>⚠️ 您目前在 LINE 內建視窗中</strong><br>
+          請先點選畫面右下角的 <strong>「以預設瀏覽器開啟」</strong>（Safari 或 Chrome），即可將【${roleName}】專屬視訊鈕加到手機桌面！
+        </div>
+      `;
+    } else if (isIOS) {
+      this.dom.pwaInstallGuideBody.innerHTML = `
+        <p style="margin-bottom:12px;color:#334155;">只要 2 步，即可在 iPhone 桌面建立<strong>【${roleName}】專屬一鍵視訊按鈕</strong>：</p>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px;">
+          <strong>第一步：</strong> 點擊 Safari 螢幕最下方的 <strong>「分享圖示 📤」</strong>（方框向上箭頭）。
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;">
+          <strong>第二步：</strong> 選單往下滑，點選 <strong>「加入主畫面 ➕」</strong>，再點右上角 <strong>「新增」</strong> 就完成了！
+        </div>
+      `;
+    } else {
+      this.dom.pwaInstallGuideBody.innerHTML = `
+        <p style="margin-bottom:12px;color:#334155;">只要 2 步，即可在手機桌面建立<strong>【${roleName}】專屬一鍵視訊按鈕</strong>：</p>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px;">
+          <strong>第一步：</strong> 點擊瀏覽器右上角的 <strong>「⋮」選單圖示</strong>。
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;">
+          <strong>第二步：</strong> 點選 <strong>「安裝應用程式」</strong>（或 <strong>「加到主畫面」</strong>）即可完成！
+        </div>
+      `;
+    }
+
+    this.dom.pwaInstallModal.classList.remove("hidden");
   }
 
   // 自動全螢幕與手動全螢幕切換（首觸自動全螢幕，徹底隱藏 Android 系統狀態列）
@@ -1082,6 +1236,16 @@ class SmileVideoCallApp {
 
       this.dom.contactsGrid.appendChild(card);
     }
+
+    // 同步更新對應角色的 Manifest 與桌面安裝橫幅顯示狀態
+    const manifestLink = document.getElementById("dynamic-manifest");
+    if (manifestLink) {
+      const juniorRoles = ["ali", "along", "yijing", "pengjun"];
+      manifestLink.href = juniorRoles.includes(this.currentRole)
+        ? `manifest-${this.currentRole}.json`
+        : "manifest.json";
+    }
+    this.updatePwaInstallBannerVisibility();
   }
 
   // ==========================================
@@ -1335,8 +1499,8 @@ class SmileVideoCallApp {
     const typeLabel = isAudio ? "語音通話" : "視訊通話";
     const iconLabel = isAudio ? "📞" : "📹";
 
-    // 一鍵直通連結（帶入 callType）
-    const webJoinUrl = `https://78vince.github.io/smile-video-call/?u=${contact.id}&join=${callerRole.id}&callType=${callType}`;
+    // 一鍵直通連結（帶入 callType 與 openExternalBrowser=1 讓 LINE 自動跳轉外部瀏覽器）
+    const webJoinUrl = `https://78vince.github.io/smile-video-call/?u=${contact.id}&join=${callerRole.id}&callType=${callType}&openExternalBrowser=1`;
     const directRoomUrl = `https://${this.config.jitsiDomain}/${contact.roomName}`;
 
     const msg = `📢 **【微笑視訊通知】**\n${iconLabel} **${callerName}** 正在發起 **${typeLabel}**，呼叫 **${targetName}**！\n👉 **點此立即加入：** ${webJoinUrl}\n（直接連線，免按鈕）\n備用連結：${directRoomUrl}`;

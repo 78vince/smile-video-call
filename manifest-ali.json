@@ -1,0 +1,25 @@
+{
+  "name": "微笑視訊 - 阿禮專屬",
+  "short_name": "微笑視訊",
+  "description": "一鍵直通阿笑媽媽視訊通話",
+  "start_url": "./?u=ali",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#2563EB",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

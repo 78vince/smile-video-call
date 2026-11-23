@@ -6,7 +6,16 @@
   <meta name="theme-color" content="#2563EB">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="manifest.json">
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var role = params.get("u") || localStorage.getItem("smile_call_current_role");
+      if (role === "xiaojun") role = "pengjun";
+      var juniorRoles = ["ali", "along", "yijing", "pengjun"];
+      var manifestFile = juniorRoles.indexOf(role) !== -1 ? "manifest-" + role + ".json" : "manifest.json";
+      document.write('<link id="dynamic-manifest" rel="manifest" href="' + manifestFile + '">');
+    })();
+  </script>
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
@@ -67,7 +76,32 @@
         <!-- 由 JavaScript 動態產生：左欄生活功能、右欄聯絡人 -->
       </div>
     </section>
+
+    <!-- 晚輩端專屬：一鍵安裝到手機桌面浮動橫幅（已安裝或長輩端自動隱藏） -->
+    <div id="pwa-install-banner" class="pwa-install-banner hidden">
+      <button id="btn-install-pwa" class="btn-install-pwa">
+        <span class="install-icon">📲</span>
+        <span id="install-btn-text">點此將「微笑視訊」安裝到手機桌面</span>
+      </button>
+      <button id="btn-dismiss-install" class="btn-dismiss-install" title="暫時隱藏" aria-label="關閉安裝提示">✕</button>
+    </div>
   </main>
+
+  <!-- 晚輩端手機桌面安裝指引 Modal (iOS / Android 自動適配) -->
+  <div id="pwa-install-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h2>📲 加入手機主畫面捷徑</h2>
+        <button id="btn-close-install-modal" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body" id="pwa-install-guide-body" style="line-height: 1.65; font-size: 1.05rem;">
+        <!-- 由 JavaScript 依 iPhone / Android 動態填入對應教學步驟 -->
+      </div>
+      <div class="modal-footer">
+        <button id="btn-got-it-install" class="btn-primary" style="width: 100%; border-radius: 999px;">我知道了</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 長輩專屬微光待機時鐘遮罩（防烙印防誤觸喚醒遮罩） -->
   <div id="screensaver-overlay" class="screensaver-overlay hidden" aria-hidden="true">
