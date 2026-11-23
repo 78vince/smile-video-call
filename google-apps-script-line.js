@@ -31,7 +31,7 @@ const DEFAULT_GROUP_ID = "Cbaa9407dcce090399acdf70d6b344200";
 
 // （選填）手動固定個人 User ID（通常留空即可，家人私訊機器人輸入名字就會自動綁定並存在雲端屬性中）
 const MANUAL_USER_IDS = {
-  ali: "",     // 阿禮
+  ali: "Ucbc9f630c1473a62fb191a75182690ac", // 阿禮（已綁定）
   along: "",   // 阿龍
   yijing: "",  // 宜靜
   pengjun: ""  // 芃君
