@@ -1350,6 +1350,7 @@ class SmileVideoCallApp {
             content: `📢【微笑視訊】${iconLabel} ${callerName} 正在發起${typeLabel}呼叫 ${targetName}！\n👉 點此立即加入：${webJoinUrl}`,
             caller: callerName,
             target: targetName,
+            targetId: contact.id,
             callType: typeLabel,
             roomUrl: webJoinUrl
           })
