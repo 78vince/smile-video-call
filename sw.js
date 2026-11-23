@@ -1,4 +1,4 @@
-const CACHE_NAME = "smile-call-v35";
+const CACHE_NAME = "smile-call-v36";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -12,6 +12,7 @@ const ASSETS_TO_CACHE = [
   "./manifest-along.json",
   "./manifest-yijing.json",
   "./manifest-pengjun.json",
+  "./manifest-achang.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png",
@@ -19,6 +20,7 @@ const ASSETS_TO_CACHE = [
   "./avatars/along.png",
   "./avatars/yijing.png",
   "./avatars/pengjun.png",
+  "./avatars/achang.png",
   "./avatars/album-cover.png",
   "./avatars/screensaver-cover.png"
 ];

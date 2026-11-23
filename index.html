@@ -11,7 +11,7 @@
       var params = new URLSearchParams(window.location.search);
       var role = params.get("u") || localStorage.getItem("smile_call_current_role");
       if (role === "xiaojun") role = "pengjun";
-      var juniorRoles = ["ali", "along", "yijing", "pengjun"];
+      var juniorRoles = ["ali", "along", "yijing", "pengjun", "achang"];
       var manifestFile = juniorRoles.indexOf(role) !== -1 ? "manifest-" + role + ".json" : "manifest.json";
       document.write('<link id="dynamic-manifest" rel="manifest" href="' + manifestFile + '">');
     })();
@@ -155,7 +155,7 @@
             <span class="role-icon">👵</span>
             <div class="role-text">
               <strong>阿笑（長輩平板）</strong>
-              <small>撥打給 阿禮、阿龍、宜靜、芃君（支援自動接聽）</small>
+              <small>撥打給 阿禮、阿龍、宜靜、芃君、阿昌（支援自動接聽）</small>
             </div>
           </button>
           <button class="role-select-btn" data-role="ali">
@@ -184,6 +184,13 @@
             <div class="role-text">
               <strong>芃君</strong>
               <small>一鍵直通【阿笑奶奶】</small>
+            </div>
+          </button>
+          <button class="role-select-btn" data-role="achang">
+            <span class="role-icon">🧢</span>
+            <div class="role-text">
+              <strong>阿昌</strong>
+              <small>一鍵直通【阿笑媽媽】</small>
             </div>
           </button>
         </div>
@@ -303,10 +310,16 @@
             <button class="btn-secondary btn-test-single" data-target="pengjun" style="margin-top: 6px;">🔔 測試芃君通知</button>
           </div>
 
+          <div class="form-group" style="margin-top: 16px;">
+            <label>🧢 阿昌的通知網址（Discord 或 LINE GAS）：</label>
+            <input type="url" id="cfg-webhook-achang" class="form-control" placeholder="https://discord.com/... 或 https://script.google.com/...">
+            <button class="btn-secondary btn-test-single" data-target="achang" style="margin-top: 6px;">🔔 測試阿昌通知</button>
+          </div>
+
           <div class="notice-box" style="margin-top: 20px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
-            <strong style="color: #166534;">✅ 已全面啟用 LINE 家庭群組通知</strong>
+            <strong style="color: #166534;">✅ 已全面啟用 LINE 一對一精準通知</strong>
             <p style="font-size: 0.9rem; color: #166534; margin-top: 4px;">
-              全體晚輩統一採用 Google Apps Script 中繼站發送！長輩呼叫任一位家人，都會由「阿笑的視訊機」即時推播至家庭 LINE 群組。
+              全體晚輩統一採用 Google Apps Script 中繼站發送！長輩呼叫任一位家人，都會由「阿笑的視訊機」即時一對一私訊推播。
             </p>
           </div>
         </div>
@@ -334,6 +347,10 @@
             <div class="url-share-item">
               <strong>👧 芃君的手機：</strong>
               <code>https://78vince.github.io/smile-video-call/?u=pengjun</code>
+            </div>
+            <div class="url-share-item">
+              <strong>🧢 阿昌的手機：</strong>
+              <code>https://78vince.github.io/smile-video-call/?u=achang</code>
             </div>
           </div>
         </div>

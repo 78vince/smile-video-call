@@ -359,14 +359,14 @@ class SmileVideoCallApp {
     const params = new URLSearchParams(window.location.search);
     let urlRole = params.get("u");
     if (urlRole === "xiaojun") urlRole = "pengjun";
-    if (urlRole && ["axiao", "ali", "along", "yijing", "pengjun"].includes(urlRole)) {
+    if (urlRole && ["axiao", "ali", "along", "yijing", "pengjun", "achang"].includes(urlRole)) {
       localStorage.setItem("smile_call_current_role", urlRole);
       return urlRole;
     }
 
     let savedRole = localStorage.getItem("smile_call_current_role");
     if (savedRole === "xiaojun") savedRole = "pengjun";
-    if (savedRole && ["axiao", "ali", "along", "yijing", "pengjun"].includes(savedRole)) {
+    if (savedRole && ["axiao", "ali", "along", "yijing", "pengjun", "achang"].includes(savedRole)) {
       return savedRole;
     }
 
@@ -386,15 +386,16 @@ class SmileVideoCallApp {
         if (parsed.defaultWebhookUrl && parsed.defaultWebhookUrl.includes("discord.com")) {
           parsed.defaultWebhookUrl = DEFAULT_CONFIG.defaultWebhookUrl;
         }
-        if (!parsed.roles?.axiao?.contacts || parsed.roles.axiao.contacts.length < 6) {
+        if (!parsed.roles?.axiao?.contacts || parsed.roles.axiao.contacts.length < 7) {
           parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
         }
-        // 確保最新真人頭貼、名稱（阿禮、阿龍、宜靜、芃君）與相簿封面更新為最新設定
+        // 確保最新真人頭貼、名稱（阿禮、阿龍、宜靜、芃君、阿昌）與相簿封面更新為最新設定
         parsed.roles.axiao.contacts = DEFAULT_CONFIG.roles.axiao.contacts;
         parsed.roles.ali = DEFAULT_CONFIG.roles.ali;
         parsed.roles.along = DEFAULT_CONFIG.roles.along;
         parsed.roles.yijing = DEFAULT_CONFIG.roles.yijing;
         parsed.roles.pengjun = DEFAULT_CONFIG.roles.pengjun;
+        parsed.roles.achang = DEFAULT_CONFIG.roles.achang;
         parsed.roles.xiaojun = DEFAULT_CONFIG.roles.pengjun;
         // 若儲存的相片數量少於預設設定，優先升級為預設相片
         if (!parsed.albumPhotos || parsed.albumPhotos.length < DEFAULT_CONFIG.albumPhotos.length) {
@@ -1240,7 +1241,7 @@ class SmileVideoCallApp {
     // 同步更新對應角色的 Manifest 與桌面安裝橫幅顯示狀態
     const manifestLink = document.getElementById("dynamic-manifest");
     if (manifestLink) {
-      const juniorRoles = ["ali", "along", "yijing", "pengjun"];
+      const juniorRoles = ["ali", "along", "yijing", "pengjun", "achang"];
       manifestLink.href = juniorRoles.includes(this.currentRole)
         ? `manifest-${this.currentRole}.json`
         : "manifest.json";

@@ -356,6 +356,14 @@
           <button class="btn btn-secondary btn-test-single" data-target="pengjun" style="white-space: nowrap;">測試芃君</button>
         </div>
       </div>
+
+      <div class="form-group">
+        <label>🧢 阿昌的個別 Webhook 覆寫：</label>
+        <div class="input-row">
+          <input type="url" id="cfg-webhook-achang" class="form-control" placeholder="留空套用預設">
+          <button class="btn btn-secondary btn-test-single" data-target="achang" style="white-space: nowrap;">測試阿昌</button>
+        </div>
+      </div>
     </section>
 
     <!-- 區塊 2：視訊伺服器與來電參數 -->
@@ -430,7 +438,7 @@
         <tbody>
           <tr>
             <td>👵 <strong>阿笑</strong></td>
-            <td>客廳長輩平板（6格按鈕：子女通話、家庭相簿、微光待機）</td>
+            <td>客廳長輩平板（子女通話、家庭相簿、微光待機）</td>
             <td><code class="url-code" id="url-axiao"></code></td>
             <td>
               <button class="btn btn-secondary btn-copy" data-target="url-axiao">複製</button>
@@ -471,6 +479,15 @@
             <td>
               <button class="btn btn-secondary btn-copy" data-target="url-pengjun">複製</button>
               <a id="link-pengjun" href="#" target="_blank" class="btn btn-secondary">開啟</a>
+            </td>
+          </tr>
+          <tr>
+            <td>🧢 <strong>阿昌</strong></td>
+            <td>晚輩手機（置中單一聯絡人，直通媽媽）</td>
+            <td><code class="url-code" id="url-achang"></code></td>
+            <td>
+              <button class="btn btn-secondary btn-copy" data-target="url-achang">複製</button>
+              <a id="link-achang" href="#" target="_blank" class="btn btn-secondary">開啟</a>
             </td>
           </tr>
         </tbody>
@@ -572,11 +589,13 @@
       const cAlong = axiaoContacts.find(c => c.id === "along");
       const cYijing = axiaoContacts.find(c => c.id === "yijing");
       const cPengjun = axiaoContacts.find(c => c.id === "pengjun" || c.id === "xiaojun");
+      const cAchang = axiaoContacts.find(c => c.id === "achang");
 
       document.getElementById("cfg-webhook-ali").value = cAli?.webhookUrl || "";
       document.getElementById("cfg-webhook-along").value = cAlong?.webhookUrl || "";
       document.getElementById("cfg-webhook-yijing").value = cYijing?.webhookUrl || "";
       document.getElementById("cfg-webhook-pengjun").value = cPengjun?.webhookUrl || "";
+      document.getElementById("cfg-webhook-achang").value = cAchang?.webhookUrl || "";
 
       // 2. 參數
       document.getElementById("cfg-jitsi-domain").value = currentConfig.jitsiDomain || "jitsi.riot.im";
@@ -584,7 +603,7 @@
       document.getElementById("cfg-auto-answer-seconds").value = currentConfig.autoAnswerDelaySeconds || 5;
 
       // 3. 網址清單
-      const roles = ["axiao", "ali", "along", "yijing", "pengjun"];
+      const roles = ["axiao", "ali", "along", "yijing", "pengjun", "achang"];
       roles.forEach(roleId => {
         const fullUrl = `${baseUrl}?u=${roleId}`;
         const codeEl = document.getElementById(`url-${roleId}`);
@@ -619,6 +638,7 @@
       const alongWebhook = document.getElementById("cfg-webhook-along").value.trim() || defaultWebhook;
       const yijingWebhook = document.getElementById("cfg-webhook-yijing").value.trim() || defaultWebhook;
       const pengjunWebhook = document.getElementById("cfg-webhook-pengjun").value.trim() || defaultWebhook;
+      const achangWebhook = document.getElementById("cfg-webhook-achang").value.trim() || defaultWebhook;
 
       currentConfig.defaultWebhookUrl = defaultWebhook;
       currentConfig.jitsiDomain = document.getElementById("cfg-jitsi-domain").value.trim() || "jitsi.riot.im";
@@ -630,16 +650,19 @@
       const cAlong = axiaoContacts.find(c => c.id === "along");
       const cYijing = axiaoContacts.find(c => c.id === "yijing");
       const cPengjun = axiaoContacts.find(c => c.id === "pengjun" || c.id === "xiaojun");
+      const cAchang = axiaoContacts.find(c => c.id === "achang");
 
       if (cAli) cAli.webhookUrl = aliWebhook;
       if (cAlong) cAlong.webhookUrl = alongWebhook;
       if (cYijing) cYijing.webhookUrl = yijingWebhook;
       if (cPengjun) cPengjun.webhookUrl = pengjunWebhook;
+      if (cAchang) cAchang.webhookUrl = achangWebhook;
 
       if (currentConfig.roles.ali?.contacts[0]) currentConfig.roles.ali.contacts[0].webhookUrl = aliWebhook;
       if (currentConfig.roles.along?.contacts[0]) currentConfig.roles.along.contacts[0].webhookUrl = alongWebhook;
       if (currentConfig.roles.yijing?.contacts[0]) currentConfig.roles.yijing.contacts[0].webhookUrl = yijingWebhook;
       if (currentConfig.roles.pengjun?.contacts[0]) currentConfig.roles.pengjun.contacts[0].webhookUrl = pengjunWebhook;
+      if (currentConfig.roles.achang?.contacts[0]) currentConfig.roles.achang.contacts[0].webhookUrl = achangWebhook;
       if (currentConfig.roles.xiaojun?.contacts[0]) currentConfig.roles.xiaojun.contacts[0].webhookUrl = pengjunWebhook;
 
       saveAdminConfig(currentConfig);

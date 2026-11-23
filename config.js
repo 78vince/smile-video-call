@@ -3,12 +3,13 @@
  */
 const LINE_FAMILY_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwFd5_E2nJ14Dmf6ZNuqTgaxWrVtJRNeQLL8wPcYyaEC3ZGa8X9Xs8j_gMfDeO-V9ZZAQ/exec";
 
-// 統一頭像圖庫（阿禮、阿龍、芃君採用真人專屬相片；家庭相簿採用精緻溫暖封面）
+// 統一頭像圖庫（阿禮、阿龍、宜靜、芃君、阿昌採用真人專屬相片；家庭相簿採用精緻溫暖封面）
 const AVATAR_AXIAO = "https://api.dicebear.com/7.x/bottts/png?seed=axiao&backgroundColor=fef08a";
 const AVATAR_ALI = "./avatars/ali.png";
 const AVATAR_ALONG = "./avatars/along.png";
 const AVATAR_YIJING = "./avatars/yijing.png";
 const AVATAR_PENGJUN = "./avatars/pengjun.png";
+const AVATAR_ACHANG = "./avatars/achang.png";
 const COVER_ALBUM = "./avatars/album-cover.png";
 const COVER_SCREENSAVER = "./avatars/screensaver-cover.png";
 
@@ -45,7 +46,7 @@ const DEFAULT_CONFIG = {
 
   // 角色群組資料
   roles: {
-    // 1. 阿笑（長輩平板）- 預設 6 個功能槽：4 位晚輩、微光模式、家庭相簿
+    // 1. 阿笑（長輩平板）- 5 位晚輩、微光模式、家庭相簿
     axiao: {
       id: "axiao",
       name: "阿笑",
@@ -87,6 +88,15 @@ const DEFAULT_CONFIG = {
           roomName: "smile-axiao-pengjun",
           avatarUrl: AVATAR_PENGJUN,
           accentColor: "#db2777",
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
+        },
+        {
+          id: "achang",
+          name: "阿昌",
+          relation: "晚輩",
+          roomName: "smile-axiao-achang",
+          avatarUrl: AVATAR_ACHANG,
+          accentColor: "#0d9488",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL
         },
         {
@@ -177,6 +187,26 @@ const DEFAULT_CONFIG = {
           name: "阿笑奶奶",
           relation: "奶奶",
           roomName: "smile-axiao-pengjun",
+          avatarUrl: AVATAR_AXIAO,
+          accentColor: "#f59e0b",
+          webhookUrl: LINE_FAMILY_WEBHOOK_URL
+        }
+      ]
+    },
+
+    // 6. 阿昌（晚輩頁面）
+    achang: {
+      id: "achang",
+      name: "阿昌",
+      avatarUrl: AVATAR_ACHANG,
+      appTitle: "阿昌的家庭通話",
+      welcomeSubtitle: "點擊大頭貼，立即連線阿笑媽媽",
+      contacts: [
+        {
+          id: "axiao",
+          name: "阿笑媽媽",
+          relation: "媽媽",
+          roomName: "smile-axiao-achang",
           avatarUrl: AVATAR_AXIAO,
           accentColor: "#f59e0b",
           webhookUrl: LINE_FAMILY_WEBHOOK_URL

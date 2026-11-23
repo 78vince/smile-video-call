@@ -34,7 +34,8 @@ const MANUAL_USER_IDS = {
   ali: "Ucbc9f630c1473a62fb191a75182690ac", // 阿禮（已綁定）
   along: "",   // 阿龍
   yijing: "",  // 宜靜
-  pengjun: ""  // 芃君
+  pengjun: "", // 芃君
+  achang: ""   // 阿昌
 };
 
 // 家庭成員對照表
@@ -42,7 +43,8 @@ const FAMILY_MEMBERS = {
   ali:     { id: "ali",     name: "阿禮", icon: "👦", keywords: ["阿禮", "ali"] },
   along:   { id: "along",   name: "阿龍", icon: "🧑", keywords: ["阿龍", "along"] },
   yijing:  { id: "yijing",  name: "宜靜", icon: "👩", keywords: ["宜靜", "yijing"] },
-  pengjun: { id: "pengjun", name: "芃君", icon: "👧", keywords: ["芃君", "小君", "pengjun", "xiaojun"] }
+  pengjun: { id: "pengjun", name: "芃君", icon: "👧", keywords: ["芃君", "小君", "pengjun", "xiaojun"] },
+  achang:  { id: "achang",  name: "阿昌", icon: "🧢", keywords: ["阿昌", "achang"] }
 };
 
 
@@ -83,7 +85,7 @@ function doPost(e) {
             replyLineMessage(
               event.replyToken,
               "👋 歡迎加入【阿笑的視訊機】一對一通知！\n\n" +
-              "請直接輸入您的名字傳送給我（例如輸入：阿禮、阿龍、宜靜 或 芃君），即可完成個人專屬綁定！"
+              "請直接輸入您的名字傳送給我（例如輸入：阿禮、阿龍、宜靜、芃君 或 阿昌），即可完成個人專屬綁定！"
             );
             continue;
           }
@@ -108,7 +110,7 @@ function doPost(e) {
               replyLineMessage(
                 event.replyToken,
                 "💡 若要綁定【微笑視訊】一對一來電通知，請直接傳送您的名字：\n" +
-                "👉 阿禮\n👉 阿龍\n👉 宜靜\n👉 芃君"
+                "👉 阿禮\n👉 阿龍\n👉 宜靜\n👉 芃君\n👉 阿昌"
               );
             }
           }
@@ -129,7 +131,7 @@ function doPost(e) {
       messageText = "📢【微笑視訊】" + body.caller + " 正在撥打給 " + body.target + "！\n請點擊連結立即進入通話：\n👉 " + (body.callUrl || body.roomUrl || "");
     }
 
-    // 辨識這次長輩是點哪一位家人（例如：阿禮 / 阿龍 / 宜靜 / 芃君）
+    // 辨識這次長輩是點哪一位家人（例如：阿禮 / 阿龍 / 宜靜 / 芃君 / 阿昌）
     const targetSearchText = [body.targetId || "", body.target || "", body.content || "", body.roomUrl || ""].join(" ");
     const targetMember = detectFamilyMember(targetSearchText);
 
@@ -164,7 +166,7 @@ function doPost(e) {
     if (!targetGroupId) {
       return responseJson({
         status: "error",
-        message: "尚未綁定個人私訊或家庭群組！請家人先私訊 LINE 機器人輸入自己的名字（阿禮/阿龍/宜靜/芃君）。"
+        message: "尚未綁定個人私訊或家庭群組！請家人先私訊 LINE 機器人輸入自己的名字（阿禮/阿龍/宜靜/芃君/阿昌）。"
       });
     }
 
@@ -219,12 +221,12 @@ function doGet(e) {
   }
 
   // -------------------------------------------------------------
-  // 情境 B：瀏覽器直接開啟 - 檢視 4 位家人一對一私訊綁定狀態
+  // 情境 B：瀏覽器直接開啟 - 檢視 5 位家人一對一私訊綁定狀態
   // -------------------------------------------------------------
   const tokenSet = LINE_ACCESS_TOKEN && !LINE_ACCESS_TOKEN.includes("請在此貼上");
 
   let memberRowsHtml = "";
-  const keys = ["ali", "along", "yijing", "pengjun"];
+  const keys = ["ali", "along", "yijing", "pengjun", "achang"];
   for (const key of keys) {
     const m = FAMILY_MEMBERS[key];
     const uid = getMemberUserId(key);
@@ -263,9 +265,10 @@ function detectFamilyMember(text) {
   if (lower.includes("u=along")) return FAMILY_MEMBERS.along;
   if (lower.includes("u=yijing")) return FAMILY_MEMBERS.yijing;
   if (lower.includes("u=pengjun") || lower.includes("u=xiaojun")) return FAMILY_MEMBERS.pengjun;
+  if (lower.includes("u=achang")) return FAMILY_MEMBERS.achang;
 
   // 再檢查姓名關鍵字
-  const keys = ["ali", "along", "yijing", "pengjun"];
+  const keys = ["ali", "along", "yijing", "pengjun", "achang"];
   for (const key of keys) {
     const member = FAMILY_MEMBERS[key];
     for (const kw of member.keywords) {
